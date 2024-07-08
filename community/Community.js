@@ -1,5 +1,3 @@
-// components/Community.js
-
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,6 +21,16 @@ function Community({ navigation }) {
   const [selectedFilter, setSelectedFilter] = useState('전체');
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
+
+  const menuItems = [
+    { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety' },
+    { id: '2', title: '전체', navigateTo: '전체' },
+    { id: '3', title: 'HOT', navigateTo: 'HOT' },
+    { id: '4', title: '교통', navigateTo: '교통' },
+    { id: '5', title: '시위', navigateTo: '시위' },
+    { id: '6', title: '재해', navigateTo: '재해' },
+    { id: '7', title: '주의', navigateTo: '주의' }
+  ];
 
   return (
     <View style={styles.container}>
@@ -80,9 +88,16 @@ function Community({ navigation }) {
             <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
               <MaterialIcons name="close" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => { setModalVisible(false); navigation.navigate('NearbySafety'); }}>
-              <Text style={styles.modalText}>내 근처 안전소식</Text>
-            </TouchableOpacity>
+            <ScrollView>
+              {menuItems.map(item => (
+                <TouchableOpacity key={item.id} onPress={() => { 
+                  setModalVisible(false); 
+                  navigation.navigate(item.navigateTo); 
+                }}>
+                  <Text style={styles.modalText}>{item.title}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -157,15 +172,17 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   modalContent: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
     width: '80%',
-    alignItems: 'center',
+    marginTop: 110,  // Adjust as necessary for top margin
+    marginLeft: 0,  // Adjust as necessary for left margin
+    alignItems: 'flex-start',
   },
   modalText: {
     fontSize: 18,
