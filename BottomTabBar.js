@@ -99,6 +99,7 @@ export default function BottomTabBar() {
                         mypage: '#BDC3C7',
                     }));
                     console.log("Talk pressed");
+                    navigation.navigate('Community');
                 }}
             >
                 <MaterialCommunityIcons name="post-outline" size={30} color={iconColors.talk} />

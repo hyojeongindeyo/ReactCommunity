@@ -6,7 +6,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
-import BottomTabBar from './BottomTabBar';
+import BottomTabBar from '../BottomTabBar';
 import Entypo from '@expo/vector-icons/Entypo';
 
 
@@ -60,7 +60,7 @@ const App = () => {
   return (
     <View style={styles.allItems}>
       <View style={styles.logoAndMenuIconContainer}>
-        <Image source={require('./assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
+        <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
         <Entypo name="menu" size={24} color="black" style={styles.menuIcon} />
       </View>
 
@@ -75,7 +75,7 @@ const App = () => {
       <View style={styles.container}>
         {/* 평안팁 부분 */}
         <View style={styles.tips}>
-          <Image source={require('./assets/tips.png')} style={styles.tipImage} resizeMode="contain" />
+          <Image source={require('../assets/tips.png')} style={styles.tipImage} resizeMode="contain" />
           <View style={styles.tipTitles}>
             <Text style={styles.tipstitle}>[오늘의 평안팁]</Text>
             <Text style={styles.condition}>폭염주의보</Text>
@@ -89,8 +89,8 @@ const App = () => {
           <Text style={styles.locationText}>현재 위치: {city}</Text>
           <View style={styles.weatherwrap}>
             <View style={styles.imageContainer}>
-              <Image source={require('./assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
-              <Image source={require('./assets/bag.png')} style={styles.bag} resizeMode="contain" />
+              <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
+              <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
             </View>
             {/* Weather part */}
             {location && (
@@ -153,13 +153,13 @@ const App = () => {
           autoplayDirection={true}
         >
           <View style={[styles.slide, styles.slide1]}>
-            <Image source={require('./assets/community.png')} style={styles.bannerImage} />
+            <Image source={require('../assets/community.png')} style={styles.bannerImage} />
           </View>
           <View style={[styles.slide, styles.slide2]}>
-            <Image source={require('./assets/crack.png')} style={styles.bannerImage} />
+            <Image source={require('../assets/crack.png')} style={styles.bannerImage} />
           </View>
           <View style={[styles.slide, styles.slide3]}>
-            <Image source={require('./assets/shelter.png')} style={styles.bannerImage} />
+            <Image source={require('../assets/shelter.png')} style={styles.bannerImage} />
           </View>
         </Swiper>
       </View>
