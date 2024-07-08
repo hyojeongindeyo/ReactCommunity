@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 
-export default function NearbySafety({ navigation }) {
-  const [selectedCategory, setSelectedCategory] = useState('전체');
+export default function NearbySafety({ navigation, route }) {
+  const { filter } = route.params || { filter: '전체' };  // Community.js에서 전달된 필터 값
+  const [selectedCategory, setSelectedCategory] = useState(filter);
   const [draftPost, setDraftPost] = useState('');
 
   const posts = [
@@ -17,8 +18,7 @@ export default function NearbySafety({ navigation }) {
 
   const categories = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
 
-  // HOT 관련 글 필터링
-  const hotPosts = posts.filter(post => post.category === 'HOT');
+
 
   // 선택된 카테고리에 따라 필터링된 글 목록 반환
   const filteredPosts = selectedCategory === '전체' ? posts : posts.filter(post => post.category === selectedCategory);
@@ -71,6 +71,12 @@ export default function NearbySafety({ navigation }) {
     }
   };
 
+  useEffect(() => {
+    if (filter) {
+      setSelectedCategory(filter);
+    }
+  }, [filter]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -99,14 +105,7 @@ export default function NearbySafety({ navigation }) {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* HOT 관련 글 */}
-        {hotPosts.map((post, index) => (
-          <View key={index} style={styles.alertBox}>
-            <Text style={styles.hotLabel}>[{post.category}]</Text>
-            <Text style={styles.message}>{post.message}</Text>
-            <Text style={styles.timestamp}>{post.timestamp}</Text>
-          </View>
-        ))}
+
 
         {/* 선택된 카테고리에 따른 글 목록 */}
         {filteredPosts.map((post, index) => (
@@ -191,11 +190,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  hotLabel: {
-    color: 'red',
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
+
   message: {
     fontSize: 16,
     color: '#333',
@@ -206,27 +201,10 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'right',
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 10,
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    left: 0,
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
-  },
-  pageNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginRight: 20,
-  },
+  
   addButton: {
     position: 'absolute',
-    bottom: 100,  // 페이지 하단 바 위에 위치하도록 수정
+    bottom: 100,
     right: 20,
     backgroundColor: 'lightblue',
     width: 60,
