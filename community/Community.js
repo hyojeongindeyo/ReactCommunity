@@ -23,17 +23,18 @@ function Community({ navigation }) {
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
 
   const menuItems = [
-    { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety', filter: '전체' },
+    { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety', filter: null },
     { id: '2', title: '전체', navigateTo: 'NearbySafety', filter: '전체' },
     { id: '3', title: 'HOT', navigateTo: 'NearbySafety', filter: 'HOT' },
     { id: '4', title: '교통', navigateTo: 'NearbySafety', filter: '교통' },
     { id: '5', title: '시위', navigateTo: 'NearbySafety', filter: '시위' },
     { id: '6', title: '재해', navigateTo: 'NearbySafety', filter: '재해' },
     { id: '7', title: '주의', navigateTo: 'NearbySafety', filter: '주의' },
-    { id: '8', title: '안전 정보', navigateTo: 'SafetyInfo', filter: '전체' },
-    { id: '9', title: '자연', navigateTo: 'NearbySafety', filter: '자연' },
-    { id: '10', title: '사회', navigateTo: 'NearbySafety', filter: '사회' },
-    { id: '11', title: '생활', navigateTo: 'NearbySafety', filter: '생활' }
+    { id: '8', title: '안전 정보', navigateTo: 'SafetyInfo', filter: null },
+    { id: '9', title: '전체', navigateTo: 'SafetyInfo', filter: '전체' },
+    { id: '10', title: '자연', navigateTo: 'SafetyInfo', filter: '자연' },
+    { id: '11', title: '사회', navigateTo: 'SafetyInfo', filter: '사회' },
+    { id: '12', title: '생활', navigateTo: 'SafetyInfo', filter: '생활' }
   ];
 
   return (
@@ -95,7 +96,11 @@ function Community({ navigation }) {
                   key={item.id} 
                   onPress={() => { 
                     setModalVisible(false); 
-                    navigation.navigate(item.navigateTo, { filter: item.filter }); 
+                    if (item.filter === null) {
+                      navigation.navigate(item.navigateTo);
+                    } else {
+                      navigation.navigate(item.navigateTo, { filter: item.filter });
+                    }
                   }}
                 >
                   <Text style={[styles.modalText, (item.title === '내 근처 안전소식' || item.title === '안전 정보') && styles.boldText]}>
