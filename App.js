@@ -10,6 +10,7 @@ import Mypage from './mypage/Mypage.js'; // Mypage 컴포넌트 import
 import Camera from './camera/Camera.js';
 import Community from './community/Community.js';
 import NearbySafety from './community/NearbySafety.js';
+import SafetyInfo from './community/SafetyInfo';
 import WritePost from './community/WritePost.js';
 
 import { createStackNavigator } from '@react-navigation/stack';
@@ -42,6 +43,7 @@ const CommunityStack = () => {
       <Stack.Screen name="CommunityHome" component={Community} />
       <Stack.Screen name="NearbySafety" component={NearbySafety} />
       <Stack.Screen name="WritePost" component={WritePost} />
+      <Stack.Screen name="SafetyInfo" component={SafetyInfo} />
     </Stack.Navigator>
   );
 };
