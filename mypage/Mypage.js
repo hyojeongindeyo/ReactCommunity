@@ -4,17 +4,38 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ThemeProvider, ThemeContext } from './ThemeContext';
-import BottomTabBar from '../BottomTabBar';
+// import BottomTabBar from '../BottomTabBar';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
 
+//테마
+const getThemedStyle = (isDarkMode) => ({
+  nameStyle : isDarkMode ? styles.darkText : styles.name,
+  titleStyle : isDarkMode ? styles.darkText : styles.title,
+  modeButtonTextStyle : isDarkMode ? styles.darkText : styles.modeButtonText,
+  messageStyle : isDarkMode ? styles.darkText : styles.message,
+  containerStyle : isDarkMode ? styles.darkContainer : styles.container,
+  inputStyle : isDarkMode ? styles.darkInput : styles.input,
+  inquiryContainerStyle : isDarkMode ? styles.darkContainer : styles.inquiryContainer,
+  inquiryInputStyle : isDarkMode ? styles.darkInput : styles.inquiryInput,
+  profileContainerStyle : isDarkMode ? styles.darkInput : styles.profileContainer,
+  passwordContainerStyle : isDarkMode ? styles.darkInput : styles.passwordContainer,
+  
+
+  // isDarkMode && styles.darkText
+  
+});
+
+
 function MainScreen({ navigation }) {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
+
+  const themedStyle = getThemedStyle(isDarkMode);
 
   const handleLogout = () => {
     setLogoutModalVisible(false);
@@ -24,10 +45,12 @@ function MainScreen({ navigation }) {
     setDeleteAccountModalVisible(false);
   };
 
+   
+
   return (
-    <View style={[styles.container, isDarkMode && styles.darkContainer]}>
+    <View style={[styles.container, themedStyle.containerStyle]}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={[styles.name, isDarkMode && styles.darkText]}>000님의 평안이</Text>
+        <Text style={[styles.name, themedStyle.nameStyle]}>000님의 평안이</Text>
 
         <View style={styles.imgContainer}>
           <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode='contain' />
@@ -35,17 +58,17 @@ function MainScreen({ navigation }) {
         </View>
 
         <View style={styles.separator} />
-        <Text style={[styles.title, isDarkMode && styles.darkText]}>내 정보</Text>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => navigation.navigate('Profile')}>프로필</Text>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => navigation.navigate('ChangePassword')}>비밀번호 변경</Text>
+        <Text style={[styles.title, themedStyle.titleStyle]}>내 정보</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => navigation.navigate('Profile')}>프로필</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => navigation.navigate('ChangePassword')}>비밀번호 변경</Text>
         <View style={styles.separator} />
-        <Text style={[styles.title, isDarkMode && styles.darkText]}>커뮤니티</Text>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => navigation.navigate('MyPosts')}>내가 작성한 글</Text>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => navigation.navigate('ScrappedPosts')}>스크랩한 글</Text>
+        <Text style={[styles.title, themedStyle.titleStyle]}>커뮤니티</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => navigation.navigate('MyPosts')}>내가 작성한 글</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => navigation.navigate('ScrappedPosts')}>스크랩한 글</Text>
         <View style={styles.separator} />
-        <Text style={[styles.title, isDarkMode && styles.darkText]}>설정</Text>
+        <Text style={[styles.title, themedStyle.titleStyle]}>설정</Text>
         <View style={styles.modeContainer}>
-          <Text style={[styles.modeButtonText, isDarkMode && styles.darkText]}>{isDarkMode ? '다크 모드' : '라이트 모드'}</Text>
+          <Text style={[styles.modeButtonText, themedStyle.modeButtonTextStyle]}>{isDarkMode ? '다크 모드' : '라이트 모드'}</Text>
           <Switch
             trackColor={{ false: "#767577", true: "#92B2AE" }}
             thumbColor={isDarkMode ? "#f4f3f4" : "#f4f3f4"}
@@ -53,24 +76,24 @@ function MainScreen({ navigation }) {
             value={isDarkMode}
           />
         </View>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
         <View style={styles.separator} />
-        <Text style={[styles.title, isDarkMode && styles.darkText]}>기타</Text>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => navigation.navigate('Inquiry')}>문의사항</Text>
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => setLogoutModalVisible(true)}>로그아웃</Text>
+        <Text style={[styles.title, themedStyle.titleStyle]}>기타</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => navigation.navigate('Inquiry')}>문의사항</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => setLogoutModalVisible(true)}>로그아웃</Text>
         <LogoutModal
           visible={logoutModalVisible}
           onClose={() => setLogoutModalVisible(false)}
           onLogout={handleLogout}
         />
-        <Text style={[styles.message, isDarkMode && styles.darkText]} onPress={() => setDeleteAccountModalVisible(true)}>회원 탈퇴</Text>
+        <Text style={[styles.message, themedStyle.messageStyle]} onPress={() => setDeleteAccountModalVisible(true)}>회원 탈퇴</Text>
         <DeleteAccountModal
           visible={deleteAccountModalVisible}
           onClose={() => setDeleteAccountModalVisible(false)}
           onDelete={handleDeleteAccount}
         />
       </ScrollView>
-      <BottomTabBar navigation={navigation} />
+      {/* <BottomTabBar navigation={navigation} /> */}
       <StatusBar style={isDarkMode ? "light" : "dark"} />
     </View>
   );
@@ -82,6 +105,8 @@ function ProfileScreen({ navigation }) {
   const [id, setId] = useState('**********');
   const [phone, setPhone] = useState('**********');
 
+  const themedStyle = getThemedStyle(isDarkMode);
+
   const handleSave = () => {
     console.log('이름:', name);
     console.log('아이디:', id);
@@ -90,23 +115,23 @@ function ProfileScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.profileContainer, isDarkMode && styles.darkContainer]}>
+    <View style={[styles.profileContainer, themedStyle.profileContainerStyle]}>
       <TextInput
-        style={[styles.input, isDarkMode && styles.darkInput]}
+        style={[styles.input, themedStyle.inputStyle]}
         placeholder="이름"
         value={name}
         onChangeText={setName}
         placeholderTextColor={isDarkMode ? '#fff' : '#000'}
       />
       <TextInput
-        style={[styles.input, isDarkMode && styles.darkInput]}
+        style={[styles.input, themedStyle.inputStyle]}
         placeholder="아이디"
         value={id}
         onChangeText={setId}
         placeholderTextColor={isDarkMode ? '#fff' : '#000'}
       />
       <TextInput
-        style={[styles.input, isDarkMode && styles.darkInput]}
+        style={[styles.input, themedStyle.inputStyle]}
         placeholder="전화번호"
         value={phone}
         onChangeText={setPhone}
@@ -126,6 +151,8 @@ function ChangePasswordScreen({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
+  const themedStyle = getThemedStyle(isDarkMode);
+
   const handlePasswordChange = () => {
     console.log('현재 비밀번호:', currentPassword);
     console.log('새 비밀번호:', newPassword);
@@ -133,9 +160,9 @@ function ChangePasswordScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.passwordContainer, isDarkMode && styles.darkContainer]}>
+    <View style={[styles.passwordContainer, themedStyle.passwordContainerStyle]}>
       <TextInput
-        style={[styles.input, isDarkMode && styles.darkInput]}
+        style={[styles.input, themedStyle.inputStyle]}
         placeholder="현재 비밀번호"
         secureTextEntry
         value={currentPassword}
@@ -143,7 +170,7 @@ function ChangePasswordScreen({ navigation }) {
         placeholderTextColor={isDarkMode ? '#fff' : '#000'}
       />
       <TextInput
-        style={[styles.input, isDarkMode && styles.darkInput]}
+        style={[styles.input, themedStyle.inputStyle]}
         placeholder="새 비밀번호"
         secureTextEntry
         value={newPassword}
@@ -160,9 +187,10 @@ function ChangePasswordScreen({ navigation }) {
 
 function MyPostsScreen() {
   const { isDarkMode } = useContext(ThemeContext);
+  const themedStyle = getThemedStyle(isDarkMode);
   return (
-    <View style={[styles.container, isDarkMode && styles.darkContainer]}>
-      <Text style={isDarkMode ? styles.darkText : styles.text}>내가 작성한 글 목록</Text>
+    <View style={[styles.container, themedStyle.containerStyle]}>
+      <Text style={themedStyle.textStyle}>내가 작성한 글 목록</Text>
       {/* 여기에 내가 작성한 글 목록을 보여주는 컴포넌트를 추가할 수 있습니다. */}
     </View>
   );
@@ -170,9 +198,10 @@ function MyPostsScreen() {
 
 function ScrappedPostsScreen() {
   const { isDarkMode } = useContext(ThemeContext);
+  const themedStyle = getThemedStyle(isDarkMode);
   return (
-    <View style={[styles.container, isDarkMode && styles.darkContainer]}>
-      <Text style={isDarkMode ? styles.darkText : styles.text}>내가 스크랩한 글 목록</Text>
+    <View style={[styles.container, themedStyle.containerStyle]}>
+      <Text style={themedStyle.textStyle}>내가 스크랩한 글 목록</Text>
       {/* 스크랩한 글을 표시하는 컴포넌트 추가 */}
     </View>
   );
@@ -182,11 +211,12 @@ function NotificationSettingsScreen() {
   const { isDarkMode } = useContext(ThemeContext);
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const themedStyle = getThemedStyle(isDarkMode);
 
   return (
-    <View style={[styles.container, isDarkMode && styles.darkContainer]}>
+    <View style={[styles.container, themedStyle.containerStyle]}>
       <View style={styles.notificationContainer}>
-        <Text style={isDarkMode ? styles.darkText : styles.text}>푸시 알림</Text>
+        <Text style={themedStyle.textStyle}>푸시 알림</Text>
         <Switch
           trackColor={{ false: "#98A7AF", true: "#92B2AE" }}
           thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
@@ -207,11 +237,12 @@ function InquiryScreen({ navigation }) {
     console.log('문의 내용:', inquiry);
     navigation.goBack();
   };
+  const themedStyle = getThemedStyle(isDarkMode);
 
   return (
-    <View style={[styles.inquiryContainer, isDarkMode && styles.darkContainer]}>
+    <View style={[styles.inquiryContainer, themedStyle.inquiryContainerStyle]}>
       <TextInput
-        style={[styles.inquiryInput, isDarkMode && styles.darkInput]}
+        style={[themedStyle.inquiryInputStyle]}
         placeholder="문의 내용을 입력하세요"
         value={inquiry}
         onChangeText={setInquiry}
@@ -446,4 +477,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-
