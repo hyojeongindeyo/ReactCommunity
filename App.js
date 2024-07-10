@@ -28,7 +28,7 @@ const App = () => {
           headerShown: false // 이 부분을 추가하여 화면 제목을 숨김
         }}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Home" component={HomeStack} />
         <Tab.Screen name="Mypage" component={Mypage} />
         <Tab.Screen name="Camera" component={Camera} />
         <Tab.Screen name="Community" component={CommunityStack} />
@@ -48,6 +48,13 @@ const CommunityStack = () => {
   );
 };
 
-
+const HomeStack = () => {
+  return (
+    <Stack.Navigator initialRouteName="HomeScreen">
+      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="NearbySafety" component={NearbySafety} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+};
 
 export default App;
