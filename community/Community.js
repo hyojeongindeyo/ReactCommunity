@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 function Community({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const [selectedFilter, setSelectedFilter] = useState('전체');
 
+  const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  
   const today = new Date();
   const todayIndex = today.getDay();
-  const todayDate = today.getDate();
+
 
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay());
@@ -18,9 +20,22 @@ function Community({ navigation }) {
     return date.getDate();
   });
 
-  const [selectedFilter, setSelectedFilter] = useState('전체');
+
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
+  const categories = ['전체', '자연', '사회', '생활'];
+  
+  const safetyInfos = [
+    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연' },
+    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연' },
+    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회' },
+    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활' },
+    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연' },
+    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회' },
+    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활' },
+  ];
+
+  const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
 
   const menuItems = [
     { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety', filter: null },
@@ -59,58 +74,114 @@ function Community({ navigation }) {
         </View>
       </View>
       <ScrollView style={styles.content}>
-        <View style={styles.filterContainer}>
-          {filters.map((filter) => (
-            <TouchableOpacity key={filter} onPress={() => setSelectedFilter(filter)}>
-              <Text style={[styles.filterText, filter === selectedFilter && styles.selectedFilterText]}>
-                {filter}
+        <Text style={styles.safetyHeaderText}>
+          내 근처 안전소식
+          <View style={styles.icons}>
+            <AntDesign name="right" size={16} color="black" />
+          </View>
+        </Text>
+
+        <View style={styles.postContainer}>
+          <TouchableOpacity style={styles.postHeader} onPress={() => navigation.navigate('NearbySafety', { filter: 'HOT' })}>
+            <Text style={styles.hotText}>[HOT]</Text>
+            </TouchableOpacity>
+            <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
+          <Text style={styles.postTime}>2분 전</Text>
+        </View>
+
+        <View style={styles.safe}>
+          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
+            <Text style={styles.safeText}>[교통] 지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
+          </TouchableOpacity>
+          <View style={styles.horizontalLine}></View>
+          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
+            <Text style={styles.safeText}>[시위] 내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
+          </TouchableOpacity>
+          <View style={styles.horizontalLine}></View>
+          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
+            <Text style={styles.safeText}>[주의] 00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.boldLine}></View>
+
+        <Text style={styles.infoHeader}>
+          안전 정보
+          <View style={styles.icons}>
+            <AntDesign name="right" size={16} color="black" />
+          </View>
+        </Text>
+        <View style={styles.categoryContainer}>
+          {categories.map((category, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setSelectedFilter(category)}
+              style={[
+                styles.categoryButton,
+                selectedFilter === category && styles.selectedCategoryButton
+              ]}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedFilter === category && styles.selectedCategoryText
+                ]}
+              >
+                {category}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
-        <View style={styles.postContainer}>
-          <View style={styles.postHeader}>
-            <Text style={styles.hotText}>[HOT]</Text>
-            <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
-          </View>
-          <Text style={styles.postTime}>2분 전</Text>
-        </View>
-        <View style={styles.paginationContainer}>
-          <Text style={styles.pageNumber}>1</Text>
-          <TouchableOpacity style={styles.writeButton} onPress={() => navigation.navigate('WritePost')}>
-            <MaterialIcons name="add" size={24} color="black" />
-          </TouchableOpacity>
+        <View style={styles.infoCardsContainer}>
+          {filteredInfos.map((info) => (
+            <View key={info.id} style={styles.infoCardContainer}>
+              <View style={styles.infoCard}>
+                <Text style={styles.infoCardTitle}>{info.title}</Text>
+              </View>
+              <View style={styles.infoCardFooter}>
+                <Text style={styles.infoCardDate}>{info.date}</Text>
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryBadgeText}>{info.category}</Text>
+                </View>
+              </View>
+            </View>
+          ))}
         </View>
       </ScrollView>
+
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <ScrollView contentContainerStyle={styles.menuItemsContainer}>
-              {menuItems.map(item => (
-                <TouchableOpacity 
-                  key={item.id} 
-                  onPress={() => { 
-                    setModalVisible(false); 
-                    if (item.filter === null) {
-                      navigation.navigate(item.navigateTo);
-                    } else {
-                      navigation.navigate(item.navigateTo, { filter: item.filter });
-                    }
-                  }}
-                >
-                  <Text style={[styles.modalText, (item.title === '내 근처 안전소식' || item.title === '안전 정보') && styles.boldText]}>
-                    {item.title}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <ScrollView contentContainerStyle={styles.menuItemsContainer}>
+                  {menuItems.map(item => (
+                    <TouchableOpacity 
+                      key={item.id} 
+                      onPress={() => { 
+                        setModalVisible(false); 
+                        if (item.filter === null) {
+                          navigation.navigate(item.navigateTo);
+                        } else {
+                          navigation.navigate(item.navigateTo, { filter: item.filter });
+                        }
+                      }}
+                    >
+                      <Text style={[styles.modalText, (item.title === '내 근처 안전소식' || item.title === '안전 정보') && styles.boldText]}>
+                        {item.title}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -120,8 +191,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: '10%',
-    paddingBottom: '5%',
+    paddingTop: '7%',
   },
   header: {
     flexDirection: 'row',
@@ -129,22 +199,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: '5%',
     paddingVertical: '3%',
-    backgroundColor: '#f8f8f8',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   iconButton: {
     padding: 10,
   },
   calendarContainer: {
-    marginTop: '5%',
+    marginTop: '3%',
     padding: '1%',
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 15,
     marginHorizontal: '5%',
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },
@@ -160,18 +228,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
   today: {
-    backgroundColor: '#d3d3d3',
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d3d3d3',
   },
   dayText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   weekendText: {
-    color: 'red',
+    color: '#A51919',
   },
   weekdayText: {
     color: 'black',
@@ -179,6 +254,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 14,
     color: 'gray',
+    fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
@@ -223,8 +299,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'blue',
   },
+  horizontalLine: {
+    height: 1,
+    backgroundColor: '#ddd',
+    marginVertical: 10,
+  },
+  safetyHeaderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  safe: {
+    marginBottom: 10,
+  },
+  safeItem: {
+    marginVertical: 5,
+  },
+  safeText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   postContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#f3f3f3',
     padding: 10,
     borderRadius: 10,
     marginVertical: 5,
@@ -239,7 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   hotText: {
-    color: 'red',
+    color: '#A51919',
     fontWeight: 'bold',
     marginRight: 5,
   },
@@ -266,6 +363,85 @@ const styles = StyleSheet.create({
   writeButton: {
     position: 'absolute',
     right: 0,
+  },
+  boldLine: {
+    height: 2,
+    backgroundColor: '#333',
+    marginVertical: 20,
+  },
+  infoHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingVertical: 10,
+  },
+  categoryButton: {
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    paddingVertical: 5,
+    marginRight: 5,
+    backgroundColor: '#F3F3F3',
+  },
+  categoryText: {
+    fontSize: 16,
+    color: '#9E9E9E',
+  },
+  selectedCategoryButton: {
+    backgroundColor: '#556D6A',
+  },
+  selectedCategoryText: {
+    color: '#fff',
+  },
+  infoCardsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  infoCardContainer: {
+    width: '48%',
+    marginBottom: 30,
+  },
+  infoCard: {
+    backgroundColor: '#f3f3f3',
+    padding: 10,
+    borderRadius: 10,
+    height: 110,
+    elevation: 5,
+    justifyContent: 'flex-end',
+  },
+  infoCardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#969696',
+    textAlign: 'left',
+  },
+  infoCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    position: 'absolute',
+    bottom: -20,
+    right: 10,
+  },
+  infoCardDate: {
+    fontSize: 12,
+    color: '#999',
+    marginRight: 5,
+  },
+  categoryBadge: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  categoryBadgeText: {
+    fontSize: 12,
+    color: '#999',
   },
 });
 

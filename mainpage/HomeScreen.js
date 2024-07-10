@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, Image, StyleSheet, Dimensions, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Weather from './Weather'; // Weather 컴포넌트 import
@@ -12,7 +12,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const App = () => {
+const App = ( { navigation }) => {
 
   const [city, setCity] = useState('Loading...');
   const [location, setLocation] = useState(null);
@@ -104,33 +104,34 @@ const App = () => {
 
 
         <View style={styles.horizontalLine}></View>
-        <View style={styles.iconContainer}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
           <View style={styles.icons}>
             <MaterialIcons name="health-and-safety" size={25} color="rgb(146, 171, 168)" />
           </View>
-          <Text style={styles.safetyText}>내 주변 안전소식  </Text>
+          <Text style={styles.safetyText}>내 주변 안전소식</Text>
           <View style={styles.icons}>
             <AntDesign name="right" size={16} color="black" />
           </View>
+          
+        </TouchableOpacity>
 
-        </View>
 
         <View style={styles.safe}>
-          <View style={styles.safebox}>
+          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
             <Text style={styles.safetitle}>교통</Text>
             <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
             <Text style={styles.safetime}>지금</Text>
-          </View>
-          <View style={styles.safebox}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
             <Text style={styles.safetitle}>시위</Text>
             <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
             <Text style={styles.safetime}>10분 전</Text>
-          </View>
-          <View style={styles.safebox}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
             <Text style={styles.safetitle}>주의</Text>
             <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
             <Text style={styles.safetime}>1일 전</Text>
-          </View>
+          </TouchableOpacity>
         </View>
         <StatusBar style="auto" />
 
