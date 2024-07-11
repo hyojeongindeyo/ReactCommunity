@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
+// import AntDesign from '@expo/vector-icons/AntDesign';
 import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
 import BottomTabBar from '../BottomTabBar';
 import Entypo from '@expo/vector-icons/Entypo';
+// import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -59,14 +60,21 @@ const App = ( { navigation }) => {
 
   return (
     <View style={styles.allItems}>
-      <View style={styles.logoAndMenuIconContainer}>
+      {/* <View style={styles.header}>
         <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
         <Entypo name="menu" size={24} color="black" style={styles.menuIcon} />
+      </View> */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+          <MaterialIcons name="menu" size={24} color="black" />
+        </TouchableOpacity>
+        <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
+        <MaterialIcons name="search" size={24} style={styles.logohidden} color="black" />
+
       </View>
 
 
-
-      <View style={styles.topline}></View>
+      {/* <View style={styles.topline}></View> */}
 
 
 
@@ -176,42 +184,27 @@ const App = ( { navigation }) => {
 
 const styles = StyleSheet.create({
   allItems: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    backgroundColor: "white",
+    flex: 1,
+    paddingTop: '7%',
+    backgroundColor: 'white',
   },
-  logoAndMenuIconContainer: {
+  header : {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: '5%', // 화면 양쪽의 여백 조절
-    marginTop: '10%', // 로고와 메뉴 아이콘 간격 조절
+    alignItems: 'center',
+    paddingHorizontal: '5%',
+    paddingVertical: '3%',
+    backgroundColor: '#fff',
   },
+
   logoImage: {
-    marginLeft: 'auto',
-    marginRight: '36%',
-    // position: 'absolute',
-
-    
-    width: '13%', // 픽셀 단위로 설정
     aspectRatio: 1,
-
-    // marginRight: 10, // 로고와 메뉴 아이콘 간격 조절
+    width: '14%', // 픽셀 단위로 설정
   },
-  menuIcon: {
-    // marginRight: 0, // 로고와 메뉴 아이콘 간격 조절
+  logohidden: {
+    opacity: 0,
   },
 
-
-
-  topline: {
-    marginTop: 0,
-    marginBottom: 20,
-    borderBottomWidth: 2,
-    borderColor: '#E7E7E7',
-    width: '100%',
-
-  },
 
   container: {
     paddingLeft: '3%',
