@@ -27,7 +27,7 @@ function MainScreen({ navigation }) {
     setDeleteAccountModalVisible(false);
   };
 
-   
+
 
   return (
     <View style={styles.container}>
@@ -51,7 +51,7 @@ function MainScreen({ navigation }) {
         <Text style={styles.message} onPress={() => navigation.navigate('ScrappedPosts')}>스크랩한 글</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>설정</Text>
-        
+
         <Text style={styles.message} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>기타</Text>
@@ -80,7 +80,7 @@ function ProfileScreen({ navigation }) {
   const [id, setId] = useState('**********');
   const [phone, setPhone] = useState('**********');
 
-  
+
 
   const handleSave = () => {
     console.log('이름:', name);
@@ -96,21 +96,21 @@ function ProfileScreen({ navigation }) {
         placeholder="이름"
         value={name}
         onChangeText={setName}
-       
+
       />
       <TextInput
         style={styles.input}
         placeholder="아이디"
         value={id}
         onChangeText={setId}
-        
+
       />
       <TextInput
         style={styles.input}
         placeholder="전화번호"
         value={phone}
         onChangeText={setPhone}
-       
+
       />
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>수정</Text>
@@ -122,7 +122,7 @@ function ProfileScreen({ navigation }) {
 
 // 나머지 화면 컴포넌트 생략
 function ChangePasswordScreen({ navigation }) {
-  
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -140,7 +140,7 @@ function ChangePasswordScreen({ navigation }) {
         secureTextEntry
         value={currentPassword}
         onChangeText={setCurrentPassword}
-        
+
       />
       <TextInput
         style={styles.input}
@@ -148,7 +148,7 @@ function ChangePasswordScreen({ navigation }) {
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
-        
+
       />
       <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
         <Text style={styles.buttonText}>확인</Text>
@@ -159,7 +159,7 @@ function ChangePasswordScreen({ navigation }) {
 
 
 function MyPostsScreen() {
-  
+
   return (
     <View style={styles.container}>
       <Text>내가 작성한 글 목록</Text>
@@ -229,68 +229,116 @@ function InquiryScreen({ navigation }) {
 
 export default function Mypage() {
   return (
-      <Stack.Navigator initialRouteName="Main">
-        <Stack.Screen
-          name="Main"
-          component={MainScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{
-            title: '프로필',
-            headerBackTitleVisible: false,
-            headerTintColor: '#000',
-          }}
-        />
-        {/* 나머지 Stack.Screen 추가 */}
-        <Stack.Screen 
-            name="ChangePassword" 
-            component={ChangePasswordScreen} 
-            options={{ 
-              title: '비밀번호 변경',
-              headerBackTitleVisible: false,
-              headerTintColor: '#000', 
-            }} 
-          />
-        <Stack.Screen
-          name="MyPosts"
-          component={MyPostsScreen}
-          options={{
-            title: '내가 작성한 글',
-            headerBackTitleVisible: false,
-            headerTintColor: '#000',
-          }}
-        />
-        <Stack.Screen
-          name="ScrappedPosts"
-          component={ScrappedPostsScreen}
-          options={{
-            title: '내가 스크랩한 글',
-            headerBackTitleVisible: false,
-            headerTintColor: '#000',
-          }}
-        />
-        <Stack.Screen
-          name="NotificationSettings"
-          component={NotificationSettingsScreen}
-          options={{
-            title: '알림 설정',
-            headerBackTitleVisible: false,
-            headerTintColor: '#000',
-          }}
-        />
-        <Stack.Screen
-          name="Inquiry"
-          component={InquiryScreen}
-          options={{
-            title: '문의사항',
-            headerBackTitleVisible: false,
-            headerTintColor: '#000',
-          }}
-        />
-      </Stack.Navigator>
+    <Stack.Navigator initialRouteName="Main">
+      <Stack.Screen
+        name="Main"
+        component={MainScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: '프로필',
+          headerStyle: {
+            shadowOpacity: 0, // iOS에서 선 제거
+            elevation: 0, // 안드로이드에서 선 제거
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+        }}
+      />
+      {/* 나머지 Stack.Screen 추가 */}
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: '비밀번호 변경',
+          headerStyle: {
+            shadowOpacity: 0, // iOS에서 선 제거
+            elevation: 0, // 안드로이드에서 선 제거
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+        }}
+      />
+      <Stack.Screen
+        name="MyPosts"
+        component={MyPostsScreen}
+        options={{
+          title: '내가 작성한 글',
+          headerStyle: {
+            shadowOpacity: 0, // iOS에서 선 제거
+            elevation: 0, // 안드로이드에서 선 제거
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+        }}
+      />
+      <Stack.Screen
+        name="ScrappedPosts"
+        component={ScrappedPostsScreen}
+        options={{
+          title: '내가 스크랩한 글',
+          headerStyle: {
+            shadowOpacity: 0, // iOS에서 선 제거
+            elevation: 0, // 안드로이드에서 선 제거
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+        }}
+      />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+        options={{
+          title: '알림 설정',
+          headerStyle: {
+            shadowOpacity: 0, // iOS에서 선 제거
+            elevation: 0, // 안드로이드에서 선 제거
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+        }}
+      />
+      <Stack.Screen
+        name="Inquiry"
+        component={InquiryScreen}
+        options={{
+          title: '문의사항',
+          headerStyle: {
+            shadowOpacity: 0, // iOS에서 선 제거
+            elevation: 0, // 안드로이드에서 선 제거
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+        }}
+      />
+    </Stack.Navigator>
   );
 }
 
@@ -304,9 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  darkContainer: {
-    backgroundColor: '#000',
-  },
+
   scrollViewContent: {
     paddingTop: 50,
     paddingBottom: 50,
@@ -362,9 +408,7 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     marginTop: 5,
   },
-  darkText: {
-    color: '#fff',
-  },
+
   passwordContainer: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -384,11 +428,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
   },
-  darkInput: {
-    backgroundColor: '#333',
-    color: '#fff',
-    borderColor: '#555',
-  },
+
   button: {
     width: 60,
     height: 35,
