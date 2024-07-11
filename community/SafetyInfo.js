@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 
@@ -8,17 +8,20 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SafetyInfo = ({ navigation, route }) => {
   const { filter } = route.params || { filter: '전체' };
   const [selectedCategory, setSelectedCategory] = useState(filter);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedInfo, setSelectedInfo] = useState(null);
 
   const categories = ['전체', '자연', '사회', '생활'];
 
   const safetyInfos = [
-    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연' },
-    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연' },
-    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회' },
-    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활' },
-    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연' },
-    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회' },
-    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활' },
+    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연', banner: '화재 시 행동요령' },
+    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연', banner: '태풍 시 대피요령' },
+    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회', banner: '교통사고 예방수칙' },
+    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활', banner: '심폐소생술 방법' },
+    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연', banner: '침수 시 예방수칙' },
+    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회', banner: '뺑소니 대처법' },
+    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
+    { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },
   ];
 
   const filteredInfos = selectedCategory === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedCategory);
@@ -28,6 +31,19 @@ const SafetyInfo = ({ navigation, route }) => {
       setSelectedCategory(filter);
     }
   }, [filter]);
+
+  const handleInfoPress = (info) => {
+    setSelectedInfo(info);
+    setModalVisible(true);
+  };
+
+  const handleBannerPress = (banner) => {
+    const info = safetyInfos.find(info => info.banner === banner);
+    if (info) {
+      setSelectedInfo(info);
+      setModalVisible(true);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -43,14 +59,14 @@ const SafetyInfo = ({ navigation, route }) => {
 
       <View style={styles.bannerContainer}>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.banner}>
-          <View style={[styles.bannerItem, styles.firstBanner]}>
+          <TouchableOpacity style={[styles.bannerItem, styles.firstBanner]} onPress={() => handleBannerPress('폭우 시 예방수칙')}>
             <Text style={styles.bannerSubtitle}>여름철 빈번하게 발생하는</Text>
             <Text style={styles.bannerText}>폭우 시 예방수칙</Text>
-          </View>
-          <View style={[styles.bannerItem, styles.secondBanner]}>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.bannerItem, styles.secondBanner]} onPress={() => handleBannerPress('화재 시 행동요령')}>
             <Text style={styles.bannerSubtitle}>화재 발생 시</Text>
-            <Text style={styles.bannerText}>대피요령</Text>
-          </View>
+            <Text style={styles.bannerText}>화재 시 행동요령</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
 
@@ -71,7 +87,7 @@ const SafetyInfo = ({ navigation, route }) => {
       <ScrollView contentContainerStyle={styles.infoContainer}>
         <View style={styles.infoRow}>
           {filteredInfos.map((info) => (
-            <View key={info.id} style={styles.infoCardContainer}>
+            <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
               <View style={styles.infoCard}>
                 <Text style={styles.infoTitle}>{info.title}</Text>
               </View>
@@ -81,12 +97,28 @@ const SafetyInfo = ({ navigation, route }) => {
                   <Text style={styles.categoryBadgeText}>{info.category}</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
       <BottomTabBar navigation={navigation} />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedInfo?.banner}</Text>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalCloseText}>X</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -214,6 +246,35 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 12,
     color: '#999',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    height: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalCloseText: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

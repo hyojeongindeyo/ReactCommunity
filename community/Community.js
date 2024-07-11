@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, TextInput, Keyboard } from 'react-native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 function Community({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('전체');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedInfo, setSelectedInfo] = useState(null);
 
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   
@@ -21,18 +25,19 @@ function Community({ navigation }) {
   });
 
 
-
+  
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
   const categories = ['전체', '자연', '사회', '생활'];
   
   const safetyInfos = [
-    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연' },
-    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연' },
-    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회' },
-    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활' },
-    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연' },
-    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회' },
-    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활' },
+    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연', banner: '화재 시 행동요령' },
+    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연', banner: '태풍 시 대피요령' },
+    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회', banner: '교통사고 예방수칙' },
+    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활', banner: '심폐소생술 방법' },
+    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연', banner: '침수 시 예방수칙' },
+    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회', banner: '뺑소니 대처법' },
+    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
+    { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },  
   ];
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
@@ -52,6 +57,16 @@ function Community({ navigation }) {
     { id: '12', title: '생활', navigateTo: 'SafetyInfo', filter: '생활' }
   ];
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    // 검색 로직을 추가하세요.
+  };
+
+  const handleInfoPress = (info) => {
+    setSelectedInfo(info);
+    setInfoModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -59,7 +74,7 @@ function Community({ navigation }) {
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>커뮤니티</Text>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => setSearchModalVisible(true)}>
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -81,13 +96,13 @@ function Community({ navigation }) {
           </View>
         </Text>
 
-        <View style={styles.postContainer}>
-          <TouchableOpacity style={styles.postHeader} onPress={() => navigation.navigate('NearbySafety', { filter: 'HOT' })}>
+        <TouchableOpacity style={styles.postContainer} onPress={() => navigation.navigate('NearbySafety', { filter: 'HOT' })}>
+          <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
-            </TouchableOpacity>
-            <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
+          </View>
+          <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
           <Text style={styles.postTime}>2분 전</Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.safe}>
           <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
@@ -134,7 +149,7 @@ function Community({ navigation }) {
         </View>
         <View style={styles.infoCardsContainer}>
           {filteredInfos.map((info) => (
-            <View key={info.id} style={styles.infoCardContainer}>
+            <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
               <View style={styles.infoCard}>
                 <Text style={styles.infoCardTitle}>{info.title}</Text>
               </View>
@@ -144,7 +159,7 @@ function Community({ navigation }) {
                   <Text style={styles.categoryBadgeText}>{info.category}</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -182,6 +197,48 @@ function Community({ navigation }) {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={searchModalVisible}
+        onRequestClose={() => setSearchModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.searchModalContent}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="검색어를 입력하세요"
+                  value={searchQuery}
+                  onChangeText={handleSearch}
+                  autoFocus
+                />
+                <TouchableOpacity style={styles.searchButton} onPress={() => setSearchModalVisible(false)}>
+                  <Text style={styles.searchButtonText}>검색</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={infoModalVisible}
+        onRequestClose={() => setInfoModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedInfo?.banner}</Text>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
+              <Text style={styles.modalCloseText}>X</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -269,6 +326,17 @@ const styles = StyleSheet.create({
     height: '85%',
     alignItems: 'flex-start',
     marginTop: 60,
+  },
+  searchModalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    width: '80%',
+    height: '20%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginTop: '40%',
+    marginBottom: 'auto',
   },
   menuItemsContainer: {
     alignItems: 'center',
@@ -365,8 +433,8 @@ const styles = StyleSheet.create({
     right: 0,
   },
   boldLine: {
-    height: 2,
-    backgroundColor: '#333',
+    height: 3,
+    backgroundColor: '#E7E7E7',
     marginVertical: 20,
   },
   infoHeader: {
@@ -442,6 +510,52 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 12,
     color: '#999',
+  },
+  searchInput: {
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    width: '100%',
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  searchButton: {
+    backgroundColor: '#556D6A',
+    padding: 10,
+    borderRadius: 5,
+  },
+  searchButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    height: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalCloseText: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
