@@ -196,10 +196,13 @@ const styles = StyleSheet.create({
     paddingVertical: '3%',
     backgroundColor: '#fff',
   },
+  iconButton: {
+    padding: 10,
+  },
 
   logoImage: {
     aspectRatio: 1,
-    width: '14%', // 픽셀 단위로 설정
+    width: '12%', // 픽셀 단위로 설정
   },
   logohidden: {
     opacity: 0,
