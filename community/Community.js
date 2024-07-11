@@ -21,6 +21,7 @@ function Community({ navigation }) {
   const [selectedFilter, setSelectedFilter] = useState('전체');
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
+  const infoFilters = ['전체', '자연', '사회', '생활'];
 
   const menuItems = [
     { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety', filter: null },
@@ -59,21 +60,24 @@ function Community({ navigation }) {
         </View>
       </View>
       <ScrollView style={styles.content}>
-        <View style={styles.filterContainer}>
-          {filters.map((filter) => (
-            <TouchableOpacity key={filter} onPress={() => setSelectedFilter(filter)}>
-              <Text style={[styles.filterText, filter === selectedFilter && styles.selectedFilterText]}>
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <Text style={styles.sectionTitle}>내 근처 안전 소식 ></Text>
         <View style={styles.postContainer}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
             <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
           </View>
           <Text style={styles.postTime}>2분 전</Text>
+        </View>
+        <View style={styles.horizontalLine} />
+        <Text style={styles.sectionTitle}>안전 정보 ></Text>
+        <View style={styles.infoFilterContainer}>
+          {infoFilters.map((filter) => (
+            <TouchableOpacity key={filter} onPress={() => setSelectedFilter(filter)}>
+              <Text style={[styles.filterText, filter === selectedFilter && styles.selectedFilterText]}>
+                {filter}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
         <View style={styles.paginationContainer}>
           <Text style={styles.pageNumber}>1</Text>
@@ -210,7 +214,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: '5%',
   },
-  filterContainer: {
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  horizontalLine: {
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    marginVertical: 10,
+  },
+  infoFilterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 10,
