@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 
 // JSON 파일을 불러옵니다
 import shelterData from './Shelter.json';
+import { BottomTabBar } from '@react-navigation/bottom-tabs';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -14,7 +15,7 @@ export default function ShelterScreen({ navigation }) {
   const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [shelters, setShelters] = useState([]);
-  const scrollViewHeight = useRef(new Animated.Value(SCREEN_HEIGHT / 3)).current;
+  const scrollViewHeight = useRef(new Animated.Value(SCREEN_HEIGHT / 5)).current;
 
   // Haversine 공식을 사용하여 두 지점 간의 거리를 계산하는 함수
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -71,16 +72,16 @@ export default function ShelterScreen({ navigation }) {
           parseFloat(shelter["경도(EPSG4326)"])
         ),
       }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 10)
-      .map((shelter, index) => ({
-        id: shelter.번호,
-        name: shelter.시설명,
-        address : shelter["도로명전체주소"],
-        people : parseInt(shelter["최대수용인원"]),
-        latitude: parseFloat(shelter["위도(EPSG4326)"]),
-        longitude: parseFloat(shelter["경도(EPSG4326)"]),
-      }));
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 10)
+        .map((shelter, index) => ({
+          id: shelter.번호,
+          name: shelter.시설명,
+          address: shelter["도로명전체주소"],
+          people: parseInt(shelter["최대수용인원"]),
+          latitude: parseFloat(shelter["위도(EPSG4326)"]),
+          longitude: parseFloat(shelter["경도(EPSG4326)"]),
+        }));
 
       setShelters(sortedShelters);
     })();
@@ -92,13 +93,13 @@ export default function ShelterScreen({ navigation }) {
       onPanResponderMove: (event, gestureState) => {
         if (gestureState.dy < 0) {
           Animated.timing(scrollViewHeight, {
-            toValue: SCREEN_HEIGHT / 2,
+            toValue: SCREEN_HEIGHT / 2.5,
             duration: 300,
             useNativeDriver: false,
           }).start();
         } else {
           Animated.timing(scrollViewHeight, {
-            toValue: SCREEN_HEIGHT / 3,
+            toValue: SCREEN_HEIGHT / 5,
             duration: 300,
             useNativeDriver: false,
           }).start();
@@ -107,13 +108,13 @@ export default function ShelterScreen({ navigation }) {
       onPanResponderRelease: (event, gestureState) => {
         if (gestureState.dy < 0) {
           Animated.timing(scrollViewHeight, {
-            toValue: SCREEN_HEIGHT / 2,
+            toValue: SCREEN_HEIGHT / 2.5,
             duration: 300,
             useNativeDriver: false,
           }).start();
         } else {
           Animated.timing(scrollViewHeight, {
-            toValue: SCREEN_HEIGHT / 3,
+            toValue: SCREEN_HEIGHT / 5,
             duration: 300,
             useNativeDriver: false,
           }).start();
@@ -159,8 +160,11 @@ export default function ShelterScreen({ navigation }) {
           <View style={styles.dragHandle}></View>
           {shelters.map(shelter => (
             <View key={shelter.id} style={styles.shelterInfo}>
-              <Text style={styles.shelterName}>{shelter.name}</Text>
-              <Text style={styles.shelterLocation}>{shelter.address}, 수용인원 : {shelter.people}</Text>
+              <View style={styles.shelterNamePeople}>
+                <Text style={styles.shelterName}>{shelter.name}</Text>
+                <Text>수용인원 : {shelter.people}</Text>
+              </View>
+              <Text style={styles.shelterLocation}>{shelter.address}</Text>
             </View>
           ))}
         </ScrollView>
@@ -175,6 +179,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 80,
+
   },
   map: {
     ...StyleSheet.absoluteFillObject,
@@ -188,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 1,
@@ -200,20 +206,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowColor: '#333',
+    shadowOffset: { width: 0, height: -0.8 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 1,
   },
   scrollViewContent: {
-    paddingTop: 20,
+    paddingTop: 8,
     paddingHorizontal: 20,
+    
   },
   shelterInfo: {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    marginBottom: 6,
+    marginTop: 8,
+  },
+  shelterNamePeople : {
+    flexDirection: 'row', // 요소를 수평으로 나란히 정렬
+    justifyContent: 'space-between'
   },
   shelterName: {
     fontSize: 16,
@@ -235,6 +248,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     borderRadius: 2.5,
     alignSelf: 'center',
-    marginVertical: 10,
+    marginVertical: 8,
   },
 });
