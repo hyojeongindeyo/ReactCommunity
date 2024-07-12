@@ -154,20 +154,15 @@ export default function ShelterScreen({ navigation }) {
           {locationText}
         </Text>
       </View>
-      <Animated.View
-        style={[styles.scrollView, { height: scrollViewHeight }]}
-        {...panResponder.panHandlers}
-      >
-        <View style={styles.dragHandle}></View>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <View style={styles.additionalInfo}>
-            {shelters.map(shelter => (
-              <View key={shelter.id} style={styles.shelterInfo}>
-                <Text style={styles.shelterName}>{shelter.name}</Text>
-                <Text style={styles.shelterLocation}>{shelter.address}, 수용인원 : {shelter.people}</Text>
-              </View>
-            ))}
-          </View>
+      <Animated.View style={[styles.scrollViewContainer, { height: scrollViewHeight }]}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent} {...panResponder.panHandlers}>
+          <View style={styles.dragHandle}></View>
+          {shelters.map(shelter => (
+            <View key={shelter.id} style={styles.shelterInfo}>
+              <Text style={styles.shelterName}>{shelter.name}</Text>
+              <Text style={styles.shelterLocation}>{shelter.address}, 수용인원 : {shelter.people}</Text>
+            </View>
+          ))}
         </ScrollView>
       </Animated.View>
     </View>
@@ -198,7 +193,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  scrollView: {
+  scrollViewContainer: {
     position: 'absolute',
     bottom: 0,
     width: '100%',
@@ -215,17 +210,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 20,
   },
-  additionalInfo: {
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 1,
-  },
   shelterInfo: {
     paddingVertical: 10,
     borderBottomWidth: 1,
@@ -236,6 +220,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   shelterLocation: {
+    marginTop: 7,
     fontSize: 14,
     color: '#666',
   },
