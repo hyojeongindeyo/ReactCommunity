@@ -50,6 +50,7 @@ export default function BottomTabBar() {
                         mypage: '#BDC3C7',
                     }));
                     console.log("Shelter pressed");
+                    navigation.navigate('Shelter');
                 }}
             >
                 <FontAwesome6 name="map-location-dot" size={30} color={iconColors.shelter} />

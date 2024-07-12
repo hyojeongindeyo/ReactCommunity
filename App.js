@@ -12,6 +12,7 @@ import Community from './community/Community.js';
 import NearbySafety from './community/NearbySafety.js';
 import SafetyInfo from './community/SafetyInfo';
 import WritePost from './community/WritePost.js';
+import Shelter from './shelter/Shelter.js';
 
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -32,6 +33,7 @@ const App = () => {
         <Tab.Screen name="Mypage" component={Mypage} />
         <Tab.Screen name="Camera" component={Camera} />
         <Tab.Screen name="Community" component={CommunityStack} />
+        <Tab.Screen name="Shelter" component={Shelter} />
         {/* 다른 탭 화면을 여기에 추가할 수 있습니다 */}
       </Tab.Navigator>
     </NavigationContainer>
