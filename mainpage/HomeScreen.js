@@ -3,12 +3,8 @@ import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
-// import AntDesign from '@expo/vector-icons/AntDesign';
 import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
-import BottomTabBar from '../BottomTabBar';
-import Entypo from '@expo/vector-icons/Entypo';
-// import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -21,8 +17,6 @@ const App = ( { navigation }) => {
   const scrollViewRef = useRef(null)
   const bannerWidth = SCREEN_WIDTH
 
-
-  // 배너
 
 
   // 위치 가져오기
@@ -172,10 +166,6 @@ const App = ( { navigation }) => {
           </View>
         </Swiper>
       </View>
-      <BottomTabBar />
-
-
-
     </View >
   );
 };
