@@ -245,8 +245,10 @@ export default function Mypage() {
             elevation: 0, // 안드로이드에서 선 제거
           },
           headerTitleStyle: {
+            fontSize: 18,
             fontWeight: 'bold',
-            fontSize: 20,
+            alignSelf: 'flex-start',
+            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
@@ -263,8 +265,10 @@ export default function Mypage() {
             elevation: 0, // 안드로이드에서 선 제거
           },
           headerTitleStyle: {
+            fontSize: 18,
             fontWeight: 'bold',
-            fontSize: 20,
+            alignSelf: 'flex-start',
+            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
@@ -280,8 +284,10 @@ export default function Mypage() {
             elevation: 0, // 안드로이드에서 선 제거
           },
           headerTitleStyle: {
+            fontSize: 18,
             fontWeight: 'bold',
-            fontSize: 20,
+            alignSelf: 'flex-start',
+            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
@@ -297,8 +303,10 @@ export default function Mypage() {
             elevation: 0, // 안드로이드에서 선 제거
           },
           headerTitleStyle: {
+            fontSize: 18,
             fontWeight: 'bold',
-            fontSize: 20,
+            alignSelf: 'flex-start',
+            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
@@ -314,8 +322,10 @@ export default function Mypage() {
             elevation: 0, // 안드로이드에서 선 제거
           },
           headerTitleStyle: {
+            fontSize: 18,
             fontWeight: 'bold',
-            fontSize: 20,
+            alignSelf: 'flex-start',
+            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
