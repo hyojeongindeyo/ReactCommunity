@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, Image, StyleSheet, Dimensions, ActivityIndicator, ScrollView } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
-import BottomTabBar from '../BottomTabBar';
-import Entypo from '@expo/vector-icons/Entypo';
 
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const App = () => {
+const App = ( { navigation }) => {
 
   const [city, setCity] = useState('Loading...');
   const [location, setLocation] = useState(null);
@@ -20,8 +17,6 @@ const App = () => {
   const scrollViewRef = useRef(null)
   const bannerWidth = SCREEN_WIDTH
 
-
-  // 배너
 
 
   // 위치 가져오기
@@ -59,14 +54,21 @@ const App = () => {
 
   return (
     <View style={styles.allItems}>
-      <View style={styles.logoAndMenuIconContainer}>
+      {/* <View style={styles.header}>
         <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
         <Entypo name="menu" size={24} color="black" style={styles.menuIcon} />
+      </View> */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+          <MaterialIcons name="menu" size={24} color="black" />
+        </TouchableOpacity>
+        <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
+        <MaterialIcons name="search" size={24} style={styles.logohidden} color="black" />
+
       </View>
 
 
-
-      <View style={styles.topline}></View>
+      {/* <View style={styles.topline}></View> */}
 
 
 
@@ -104,33 +106,34 @@ const App = () => {
 
 
         <View style={styles.horizontalLine}></View>
-        <View style={styles.iconContainer}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
           <View style={styles.icons}>
             <MaterialIcons name="health-and-safety" size={25} color="rgb(146, 171, 168)" />
           </View>
-          <Text style={styles.safetyText}>내 주변 안전소식  </Text>
+          <Text style={styles.safetyText}>내 주변 안전소식</Text>
           <View style={styles.icons}>
             <AntDesign name="right" size={16} color="black" />
           </View>
+          
+        </TouchableOpacity>
 
-        </View>
 
         <View style={styles.safe}>
-          <View style={styles.safebox}>
+          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
             <Text style={styles.safetitle}>교통</Text>
             <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
             <Text style={styles.safetime}>지금</Text>
-          </View>
-          <View style={styles.safebox}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
             <Text style={styles.safetitle}>시위</Text>
             <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
             <Text style={styles.safetime}>10분 전</Text>
-          </View>
-          <View style={styles.safebox}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
             <Text style={styles.safetitle}>주의</Text>
             <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
             <Text style={styles.safetime}>1일 전</Text>
-          </View>
+          </TouchableOpacity>
         </View>
         <StatusBar style="auto" />
 
@@ -163,10 +166,6 @@ const App = () => {
           </View>
         </Swiper>
       </View>
-      <BottomTabBar />
-
-
-
     </View >
   );
 };
@@ -175,42 +174,30 @@ const App = () => {
 
 const styles = StyleSheet.create({
   allItems: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    backgroundColor: "white",
+    flex: 1,
+    paddingTop: '7%',
+    backgroundColor: 'white',
   },
-  logoAndMenuIconContainer: {
+  header : {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: '5%', // 화면 양쪽의 여백 조절
-    marginTop: '10%', // 로고와 메뉴 아이콘 간격 조절
+    alignItems: 'center',
+    paddingHorizontal: '5%',
+    paddingVertical: '3%',
+    backgroundColor: '#fff',
   },
+  iconButton: {
+    padding: 10,
+  },
+
   logoImage: {
-    marginLeft: 'auto',
-    marginRight: '36%',
-    // position: 'absolute',
-
-    
-    width: '13%', // 픽셀 단위로 설정
     aspectRatio: 1,
-
-    // marginRight: 10, // 로고와 메뉴 아이콘 간격 조절
+    width: '12%', // 픽셀 단위로 설정
   },
-  menuIcon: {
-    // marginRight: 0, // 로고와 메뉴 아이콘 간격 조절
+  logohidden: {
+    opacity: 0,
   },
 
-
-
-  topline: {
-    marginTop: 0,
-    marginBottom: 20,
-    borderBottomWidth: 2,
-    borderColor: '#E7E7E7',
-    width: '100%',
-
-  },
 
   container: {
     paddingLeft: '3%',

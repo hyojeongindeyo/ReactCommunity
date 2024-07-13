@@ -15,19 +15,7 @@ export default function BottomTabBar() {
         mypage: '#BDC3C7',
     });
 
-    // "내 평안"을 누르면 색상이 변경되도록 하는 이벤트 핸들러
-    const handleMypagePress = () => {
-        navigation.navigate('Mypage');
-        // "내 평안" 아이콘과 텍스트의 색상을 원래대로 돌림
-        setIconColors(prevColors => ({
-            ...prevColors,
-            home: '#BDC3C7',
-            shelter: '#BDC3C7',
-            camera: '#BDC3C7',
-            talk: '#BDC3C7',
-            mypage: '#92B2AE', // "내 평안" 아이콘 색상 변경
-        }));
-    };
+
 
     return (
         <View style={styles.bottomBar}>
@@ -62,6 +50,7 @@ export default function BottomTabBar() {
                         mypage: '#BDC3C7',
                     }));
                     console.log("Shelter pressed");
+                    navigation.navigate('Shelter');
                 }}
             >
                 <FontAwesome6 name="map-location-dot" size={30} color={iconColors.shelter} />
@@ -109,11 +98,24 @@ export default function BottomTabBar() {
             
             <TouchableOpacity 
                 style={styles.iconContainer} 
-                onPress={handleMypagePress}
+                onPress={() => {
+                    setIconColors(prevColors => ({
+                        ...prevColors,
+                        home: '#BDC3C7',
+                        shelter: '#BDC3C7',
+                        camera: '#BDC3C7',
+                        talk: '#BDC3C7',
+                        mypage: '#92B2AE',
+                    }));
+                    console.log("Mypage pressed");
+                    navigation.navigate('Mypage');
+                }}
             >
                 <Ionicons name="person" size={30} color={iconColors.mypage} />
                 <Text style={[styles.iconText, { color: iconColors.mypage }]}>내 평안</Text>
             </TouchableOpacity>
+
+            
         </View>
     );
 }

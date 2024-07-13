@@ -12,6 +12,7 @@ import Community from './community/Community.js';
 import NearbySafety from './community/NearbySafety.js';
 import SafetyInfo from './community/SafetyInfo';
 import WritePost from './community/WritePost.js';
+import Shelter from './shelter/Shelter.js';
 
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -28,10 +29,11 @@ const App = () => {
           headerShown: false // 이 부분을 추가하여 화면 제목을 숨김
         }}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Home" component={HomeStack} />
         <Tab.Screen name="Mypage" component={Mypage} />
         <Tab.Screen name="Camera" component={Camera} />
         <Tab.Screen name="Community" component={CommunityStack} />
+        <Tab.Screen name="Shelter" component={Shelter} />
         {/* 다른 탭 화면을 여기에 추가할 수 있습니다 */}
       </Tab.Navigator>
     </NavigationContainer>
@@ -48,6 +50,13 @@ const CommunityStack = () => {
   );
 };
 
-
+const HomeStack = () => {
+  return (
+    <Stack.Navigator initialRouteName="HomeScreen">
+      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="NearbySafety" component={NearbySafety} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+};
 
 export default App;
