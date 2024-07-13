@@ -1,8 +1,9 @@
 import 'react-native-gesture-handler';
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
 
@@ -51,7 +52,7 @@ function MainScreen({ navigation }) {
         <Text style={styles.message} onPress={() => navigation.navigate('ScrappedPosts')}>스크랩한 글</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>설정</Text>
-
+        
         <Text style={styles.message} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>기타</Text>
@@ -69,7 +70,7 @@ function MainScreen({ navigation }) {
           onDelete={handleDeleteAccount}
         />
       </ScrollView>
-      {/* <BottomTabBar navigation={navigation} /> */}
+
       <StatusBar />
     </View>
   );
@@ -120,7 +121,7 @@ function ProfileScreen({ navigation }) {
 }
 
 
-// 나머지 화면 컴포넌트 생략
+
 function ChangePasswordScreen({ navigation }) {
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -162,8 +163,31 @@ function MyPostsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text>내가 작성한 글 목록</Text>
-      {/* 여기에 내가 작성한 글 목록을 보여주는 컴포넌트를 추가할 수 있습니다. */}
+      <View style={styles.header}>
+      </View>
+      <ScrollView style={styles.postsContainer}>
+        <View style={styles.postItem}>
+          <Text style={styles.postTitle}>00사거리에 교통사고 났대요 그래서...</Text>
+          <View style={styles.commentContainer}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
+            <Text style={styles.postCommentCount}>6</Text>
+          </View>
+        </View>
+        <View style={styles.postItem}>
+          <Text style={styles.postTitle}>역 앞에서 시위 중이에요 조심하세요!</Text>
+          <View style={styles.commentContainer}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
+            <Text style={styles.postCommentCount}>2</Text>
+          </View>
+        </View>
+        <View style={styles.postItem}>
+          <Text style={styles.postTitle}>역 주위에 정차된 차들이 많아서 차가 많이...</Text>
+          <View style={styles.commentContainer}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
+            <Text style={styles.postCommentCount}>5</Text>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -172,8 +196,22 @@ function ScrappedPostsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text>내가 스크랩한 글 목록</Text>
-      {/* 스크랩한 글을 표시하는 컴포넌트 추가 */}
+      <View style={styles.header}>
+      </View>
+      <ScrollView style={styles.postsContainer}>
+        <View style={styles.postItem}>
+          <Text style={styles.postTitle}>00사거리에 교통사고 났대요 그래서...</Text>
+          <Ionicons name="star" size={16} color="#FFF500" />
+        </View>
+        <View style={styles.postItem}>
+          <Text style={styles.postTitle}>역 앞에서 시위 중이에요 조심하세요!</Text>
+          <Ionicons name="star" size={16} color="#FFF500" />
+        </View>
+        <View style={styles.postItem}>
+          <Text style={styles.postTitle}>역 주위에 정차된 차들이 많아서 차가 많이...</Text>
+          <Ionicons name="star" size={16} color="#FFF500" />
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -194,7 +232,7 @@ function NotificationSettingsScreen() {
           value={isEnabled}
         />
       </View>
-      {/* 추가적인 알림 설정 옵션을 여기에 추가할 수 있습니다. */}
+   
     </View>
   );
 }
@@ -241,8 +279,8 @@ export default function Mypage() {
         options={{
           title: '프로필',
           headerStyle: {
-            shadowOpacity: 0, // iOS에서 선 제거
-            elevation: 0, // 안드로이드에서 선 제거
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -254,15 +292,15 @@ export default function Mypage() {
           headerTintColor: '#000',
         }}
       />
-      {/* 나머지 Stack.Screen 추가 */}
+
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
         options={{
           title: '비밀번호 변경',
           headerStyle: {
-            shadowOpacity: 0, // iOS에서 선 제거
-            elevation: 0, // 안드로이드에서 선 제거
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -280,8 +318,8 @@ export default function Mypage() {
         options={{
           title: '내가 작성한 글',
           headerStyle: {
-            shadowOpacity: 0, // iOS에서 선 제거
-            elevation: 0, // 안드로이드에서 선 제거
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -297,10 +335,10 @@ export default function Mypage() {
         name="ScrappedPosts"
         component={ScrappedPostsScreen}
         options={{
-          title: '내가 스크랩한 글',
+          title: '스크랩한 글',
           headerStyle: {
-            shadowOpacity: 0, // iOS에서 선 제거
-            elevation: 0, // 안드로이드에서 선 제거
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -318,8 +356,8 @@ export default function Mypage() {
         options={{
           title: '알림 설정',
           headerStyle: {
-            shadowOpacity: 0, // iOS에서 선 제거
-            elevation: 0, // 안드로이드에서 선 제거
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -337,12 +375,14 @@ export default function Mypage() {
         options={{
           title: '문의사항',
           headerStyle: {
-            shadowOpacity: 0, // iOS에서 선 제거
-            elevation: 0, // 안드로이드에서 선 제거
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontWeight: 'bold',
-            fontSize: 20,
+            fontSize: 18,
+            alignSelf: 'flex-start',
+            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
@@ -357,7 +397,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  iconButton: {
+    marginRight: 10,
+  },
+  backText: {
+    fontSize: 18,
+    color: '#000',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  postsContainer: {
+    paddingHorizontal: 20,
+  },
+  postItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  postTitle: {
+    fontSize: 16,
+    color: '#000',
+    flex: 1,
+  },
+  postCommentCount: {
+    fontSize: 16,
+    color: '#999',
+    marginLeft: 5,
+  },
+  postStar: {
+    fontSize: 16,
+    color: 'yellow',
+  },
   nametitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -386,7 +471,7 @@ const styles = StyleSheet.create({
     top: 70,
   },
   modeContainer: {
-    width: SCREEN_WIDTH * 1,
+    width: SCREEN_WIDTH,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
