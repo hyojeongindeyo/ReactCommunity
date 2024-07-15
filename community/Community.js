@@ -9,12 +9,12 @@ function Community({ navigation }) {
   const [selectedFilter, setSelectedFilter] = useState('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInfo, setSelectedInfo] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('전체');
 
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   
   const today = new Date();
   const todayIndex = today.getDay();
-
 
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay());
@@ -24,23 +24,26 @@ function Community({ navigation }) {
     return date.getDate();
   });
 
+  const categories = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
 
-  
-  const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
-  const categories = ['전체', '자연', '사회', '생활'];
-  
-  const safetyInfos = [
-    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연', banner: '화재 시 행동요령' },
-    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연', banner: '태풍 시 대피요령' },
-    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회', banner: '교통사고 예방수칙' },
-    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활', banner: '심폐소생술 방법' },
-    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연', banner: '침수 시 예방수칙' },
-    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회', banner: '뺑소니 대처법' },
-    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
-    { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },  
+  const infoFilters = ['전체', '자연', '사회', '생활'];
+
+  const nearbySafetyPosts = [
+    { category: 'HOT', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2분전' },
+    { category: '교통', message: '3호선 서울역에서 승객 수가 많아서 혼잡할 수 있습니다.', timestamp: '5분전' },
+    { category: '시위', message: '시민들이 시위를 벌이고 있습니다. 주의하시기 바랍니다.', timestamp: '10분전' },
+    { category: '재해', message: '비가 오고 있어서 길이 미끄럽습니다. 운전에 주의하세요.', timestamp: '15분전' },
+    { category: '주의', message: '해수욕장에서 물때가 높습니다. 안전을 위해 신호를 따르세요.', timestamp: '20분전' },
   ];
 
-  const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
+  const safetyInfos = [
+    { id: 1, title: '화재 시 행동요령', date: '2024.07.01', category: '자연' },
+    { id: 2, title: '태풍 시 행동요령', date: '2024.07.02', category: '자연' },
+    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회' },
+    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활' },
+  ];
+
+  const filteredInfos = selectedCategory === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedCategory);
 
   const menuItems = [
     { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety', filter: null },
@@ -67,6 +70,8 @@ function Community({ navigation }) {
     setInfoModalVisible(true);
   };
 
+  const filteredNearbySafetyPosts = selectedCategory === '전체' ? nearbySafetyPosts : nearbySafetyPosts.filter(post => post.category === selectedCategory);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -89,45 +94,73 @@ function Community({ navigation }) {
         </View>
       </View>
       <ScrollView style={styles.content}>
-        <Text style={styles.safetyHeaderText}>
-          내 근처 안전소식
-          <View style={styles.icons}>
-            <AntDesign name="right" size={16} color="black" />
-          </View>
-        </Text>
-
-        <TouchableOpacity style={styles.postContainer} onPress={() => navigation.navigate('NearbySafety', { filter: 'HOT' })}>
+        <TouchableOpacity style={styles.nearbySafetyContainer} onPress={() => setSelectedCategory('전체')}>
+          <Text style={styles.infoHeader}>
+            내 근처 안전 소식
+            <View style={styles.icons}>
+              <AntDesign name="right" size={16} color="black" />
+            </View>
+          </Text>
+        </TouchableOpacity>
+        <View style={styles.postContainer}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
           </View>
           <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
           <Text style={styles.postTime}>2분 전</Text>
-        </TouchableOpacity>
+        </View>
+        
+        <View style={styles.categoryContainer}>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category}
+              onPress={() => setSelectedCategory(category)}
+              style={[
+                styles.categoryButton,
+                selectedCategory === category && styles.selectedCategoryButton
+              ]}
+            >
+              <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
+                {category}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <View style={styles.safe}>
-          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
-            <Text style={styles.safeText}>[교통] 지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
-          </TouchableOpacity>
-          <View style={styles.horizontalLine}></View>
-          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
-            <Text style={styles.safeText}>[시위] 내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
-          </TouchableOpacity>
-          <View style={styles.horizontalLine}></View>
-          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
-            <Text style={styles.safeText}>[주의] 00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
+        <View style={styles.filteredPostsContainer}>
+          {filteredNearbySafetyPosts.map((post, index) => (
+            <View key={index} style={styles.postContainer}>
+              <Text style={styles.postCategory}>[{post.category}]</Text>
+              <Text style={styles.postMessage}>{post.message}</Text>
+              <Text style={styles.postTimestamp}>{post.timestamp}</Text>
+            </View>
+          ))}
+          {filteredNearbySafetyPosts.length === 0 && (
+            <View style={styles.noPostsContainer}>
+              <Text style={styles.noPostsText}>해당 카테고리에 대한 소식이 없습니다.</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.paginationContainer}>
+          <Text style={styles.pageNumber}>1</Text>
+          <TouchableOpacity style={styles.writeButton} onPress={() => navigation.navigate('WritePost')}>
+            <MaterialIcons name="add" size={24} color="black" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.boldLine}></View>
 
-        <Text style={styles.infoHeader}>
-          안전 정보
-          <View style={styles.icons}>
-            <AntDesign name="right" size={16} color="black" />
-          </View>
-        </Text>
-        <View style={styles.categoryContainer}>
-          {categories.map((category, index) => (
+        <TouchableOpacity style={styles.infoHeaderContainer} onPress={() => navigation.navigate('SafetyInfo')}>
+          <Text style={styles.infoHeader}>
+            안전 정보
+            <View style={styles.icons}>
+              <AntDesign name="right" size={16} color="black" />
+            </View>
+          </Text>
+        </TouchableOpacity>
+        <View style={styles.infoFiltersContainer}>
+          {infoFilters.map((category, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => setSelectedFilter(category)}
@@ -354,7 +387,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: '5%',
   },
-  filterContainer: {
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  horizontalLine: {
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    marginVertical: 10,
+  },
+  infoFilterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 10,
@@ -442,24 +485,37 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 10,
   },
+  infoHeaderContainer: {
+    paddingHorizontal: '5%',
+    marginVertical: 10,
+  },
   categoryContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    paddingVertical: 10,
+    justifyContent: 'space-around',
+    marginVertical: 10,
   },
   categoryButton: {
     paddingHorizontal: 10,
-    borderRadius: 15,
-    paddingVertical: 5,
-    marginRight: 5,
-    backgroundColor: '#F3F3F3',
   },
   categoryText: {
     fontSize: 16,
-    color: '#9E9E9E',
+    color: '#999',
+  },
+  selectedCategoryText: {
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  infoFiltersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingVertical: 10,
+    backgroundColor: '#f0f0f0',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    paddingLeft: 10,
   },
   selectedCategoryButton: {
-    backgroundColor: '#556D6A',
+    backgroundColor: '#000',
   },
   selectedCategoryText: {
     color: '#fff',
@@ -556,6 +612,43 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  nearbySafetyContainer: {
+    paddingHorizontal: '5%',
+    marginVertical: 10,
+  },
+  nearbySafetyText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  filteredPostsContainer: {
+    marginVertical: 10,
+  },
+  postCategory: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#A51919',
+    marginBottom: 5,
+  },
+  postMessage: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 5,
+  },
+  postTimestamp: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'right',
+  },
+  noPostsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  noPostsText: {
+    fontSize: 14,
+    color: '#999',
   },
 });
 
