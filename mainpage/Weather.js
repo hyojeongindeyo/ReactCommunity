@@ -34,7 +34,7 @@ const Weather = ({ latitude, longitude, city }) => {
   }, [latitude, longitude]);
 
   if (loading) {
-    return ;
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   if (error) {
@@ -45,9 +45,22 @@ const Weather = ({ latitude, longitude, city }) => {
     return <Text>No weather data available</Text>;
   }
 
+  // 날씨 상태에 따라 이모지를 추가하는 조건
+  let emoji = '';
+  if (weather.weather[0].description.includes('비')) {
+    emoji = '☔️';
+  } else if (weather.weather[0].description.includes('맑음')) {
+    emoji = '☀️';
+  } else if (weather.weather[0].description.includes('흐림')) {
+    emoji = '☁️';
+  } else if (weather.weather[0].description.includes('눈')) {
+    emoji = '❄️';
+  }
+  
+
   return (
     <View style={styles.container}>
-      <Text>{weather.main.temp}°C, {weather.weather[0].description}</Text>
+      <Text>{emoji} {weather.main.temp}°C, {weather.weather[0].description}</Text>
     </View>
   );
 };
