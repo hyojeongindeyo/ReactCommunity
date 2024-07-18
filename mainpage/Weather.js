@@ -55,6 +55,8 @@ const Weather = ({ latitude, longitude, city }) => {
     emoji = '☁️';
   } else if (weather.weather[0].description.includes('눈')) {
     emoji = '❄️';
+  } else if (weather.weather[0].description.includes('박무')) {
+    emoji = '🌫️';
   }
   
 
