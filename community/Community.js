@@ -235,6 +235,9 @@ function Community({ navigation }) {
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
               <Text style={styles.modalCloseText}>X</Text>
             </TouchableOpacity>
+            <View style={styles.grayRectangle}>
+              <Text style={styles.rectangleX}>X</Text>
+            </View>
           </View>
         </View>
       </Modal>
@@ -596,6 +599,19 @@ const styles = StyleSheet.create({
   noPostsText: {
     fontSize: 14,
     color: '#999',
+  },
+  grayRectangle: {
+    backgroundColor: '#e0e0e0',
+    width: '90%',
+    height: 320,
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rectangleX: {
+    color: 'black',
+    fontSize: 250,
+    fontWeight: '100',
   },
 });
 

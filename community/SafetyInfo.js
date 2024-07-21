@@ -122,6 +122,9 @@ const SafetyInfo = ({ navigation, route }) => {
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}>
               <Text style={styles.modalCloseText}>X</Text>
             </TouchableOpacity>
+            <View style={styles.grayRectangle}>
+              <Text style={styles.rectangleX}>X</Text>
+            </View>
           </View>
         </View>
       </Modal>
@@ -284,6 +287,19 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  grayRectangle: {
+    backgroundColor: '#e0e0e0',
+    width: '90%',
+    height: 320,
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rectangleX: {
+    color: 'black',
+    fontSize: 250,
+    fontWeight: '100',
   },
 });
 
