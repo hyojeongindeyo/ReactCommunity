@@ -94,7 +94,7 @@ function Community({ navigation }) {
         </View>
       </View>
       <ScrollView style={styles.content}>
-        <TouchableOpacity style={styles.nearbySafetyContainer} onPress={() => setSelectedCategory('전체')}>
+        <TouchableOpacity style={styles.nearbySafetyContainer} onPress={() => navigation.navigate('NearbySafety')}>
           <Text style={styles.infoHeader}>
             내 근처 안전 소식
             <View style={styles.icons}>
@@ -102,7 +102,7 @@ function Community({ navigation }) {
             </View>
           </Text>
         </TouchableOpacity>
-        <View style={styles.postContainer}>
+        <View style={styles.hotPostContainer}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
           </View>
@@ -129,7 +129,7 @@ function Community({ navigation }) {
 
         <View style={styles.filteredPostsContainer}>
           {filteredNearbySafetyPosts.map((post, index) => (
-            <View key={index} style={styles.postContainer}>
+            <View key={index} style={styles.nearbyPostContainer}>
               <Text style={styles.postCategory}>[{post.category}]</Text>
               <Text style={styles.postMessage}>{post.message}</Text>
               <Text style={styles.postTimestamp}>{post.timestamp}</Text>
@@ -432,6 +432,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   postContainer: {
+    backgroundColor: 'transparent', // 배경색을 투명하게 설정
+    padding: 10,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  hotPostContainer: {
     backgroundColor: '#f3f3f3',
     padding: 10,
     borderRadius: 10,
@@ -624,6 +630,11 @@ const styles = StyleSheet.create({
   },
   filteredPostsContainer: {
     marginVertical: 10,
+  },
+  nearbyPostContainer: {
+    backgroundColor: 'transparent', // 배경색을 투명하게 설정
+    borderRadius: 10,
+    marginVertical: 5,
   },
   postCategory: {
     fontSize: 14,
