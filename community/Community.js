@@ -35,11 +35,13 @@ function Community({ navigation }) {
     { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회', banner: '뺑소니 대처법' },
     { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
     { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },
+    { id: 9, title: '산불 예방\n수칙', date: '2024.07.08', category: '자연', banner: '산불 예방수칙' },
+    { id: 10, title: '오물풍선 발견 시\n행동요령', date: '2024.07.10', category: '생활', banner: '오물풍선 발견 시 행동요령' },  
   ];
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
   const menuItems = [
-    { id: '1', title: '내 근처 안전소식', navigateTo: 'NearbySafety', filter: null },
+    { id: '1', title: '내 주변 안전소식', navigateTo: 'NearbySafety', filter: null },
     { id: '2', title: '전체', navigateTo: 'NearbySafety', filter: '전체' },
     { id: '3', title: 'HOT', navigateTo: 'NearbySafety', filter: 'HOT' },
     { id: '4', title: '교통', navigateTo: 'NearbySafety', filter: '교통' },
@@ -87,7 +89,7 @@ function Community({ navigation }) {
       <ScrollView style={styles.content}>
         <TouchableOpacity onPress={() => navigation.navigate('NearbySafety')}>
           <Text style={styles.safetyHeaderText}>
-            내 근처 안전소식
+            내 주변 안전소식
             <View style={styles.icons}>
               <AntDesign name="right" size={16} color="black" />
             </View>
