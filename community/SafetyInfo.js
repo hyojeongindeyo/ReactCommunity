@@ -22,6 +22,7 @@ const SafetyInfo = ({ navigation, route }) => {
     { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회', banner: '뺑소니 대처법' },
     { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
     { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },
+    { id: 9, title: '산불 예방\n수칙', date: '2024.07.08', category: '자연', banner: '산불 예방수칙' }, // New Banner
   ];
 
   const filteredInfos = selectedCategory === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedCategory);
@@ -66,6 +67,10 @@ const SafetyInfo = ({ navigation, route }) => {
           <TouchableOpacity style={[styles.bannerItem, styles.secondBanner]} onPress={() => handleBannerPress('화재 시 행동요령')}>
             <Text style={styles.bannerSubtitle}>화재 발생 시</Text>
             <Text style={styles.bannerText}>화재 시 행동요령</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.bannerItem, styles.thirdBanner]} onPress={() => handleBannerPress('산불 예방수칙')}>
+            <Text style={styles.bannerSubtitle}>봄철 산불 예방</Text>
+            <Text style={styles.bannerText}>산불 예방수칙</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -165,6 +170,9 @@ const styles = StyleSheet.create({
   },
   secondBanner: {
     backgroundColor: '#5E6377',
+  },
+  thirdBanner: {
+    backgroundColor: '#006400', // Deep green color
   },
   bannerText: {
     color: 'white',
