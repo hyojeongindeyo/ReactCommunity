@@ -8,6 +8,7 @@ function Community({ navigation }) {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('전체');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchHistory, setSearchHistory] = useState([]);
   const [selectedInfo, setSelectedInfo] = useState(null);
 
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -55,9 +56,15 @@ function Community({ navigation }) {
     { id: '12', title: '생활', navigateTo: 'SafetyInfo', filter: '생활' }
   ];
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    // 검색 로직을 추가하세요.
+  const handleSearch = () => {
+    if (searchQuery.trim() !== '') {
+      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
+      setSearchQuery('');
+    }
+  };
+
+  const deleteSearchHistoryItem = (index) => {
+    setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
   };
 
   const handleInfoPress = (info) => {
@@ -210,16 +217,28 @@ function Community({ navigation }) {
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.searchModalContent}>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="검색어를 입력하세요"
-                  value={searchQuery}
-                  onChangeText={handleSearch}
-                  autoFocus
-                />
-                <TouchableOpacity style={styles.searchButton} onPress={() => setSearchModalVisible(false)}>
-                  <Text style={styles.searchButtonText}>검색</Text>
-                </TouchableOpacity>
+                <View style={styles.searchContainer}>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="검색어를 입력하세요"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoFocus
+                  />
+                  <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                    <Text style={styles.searchButtonText}>검색</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.historyContainer}>
+                  {searchHistory.map((item, index) => (
+                    <View key={index} style={styles.historyItem}>
+                      <Text style={styles.historyText}>{item}</Text>
+                      <TouchableOpacity onPress={() => deleteSearchHistoryItem(index)}>
+                        <Text style={styles.deleteText}>X</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -320,8 +339,8 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    justifyContent: 'flex-start', // Search Modal을 상단으로 위치
+    alignItems: 'center',
   },
   modalContent: {
     backgroundColor: 'white',
@@ -335,9 +354,34 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     width: '100%',
-    height: '100%',
-    justifyContent: 'center',
+    height: '100%', // 전체 높이를 차지하도록 설정
+    justifyContent: 'flex-start', // 상단 정렬
     alignItems: 'center',
+    paddingTop: 60, // 상단 여백 추가
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%', // 전체 너비를 차지하도록 설정
+    marginTop: 20, // 상단 여백 추가
+  },
+  searchInput: {
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    flex: 1, // 남은 공간을 차지하도록 설정
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  searchButton: {
+    backgroundColor: '#556D6A',
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10, // 검색창과 버튼 사이 여백 추가
+  },
+  searchButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   menuItemsContainer: {
     alignItems: 'center',
@@ -520,22 +564,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
   },
-  searchInput: {
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
+  historyContainer: {
     width: '100%',
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    marginTop: 20, // History list spacing from the search bar
   },
-  searchButton: {
-    backgroundColor: '#556D6A',
+  historyItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 5,
+    marginVertical: 5,
   },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  historyText: {
+    fontSize: 16,
+  },
+  deleteText: {
+    fontSize: 16,
+    color: '#ff0000',
   },
   modalOverlay: {
     flex: 1,
