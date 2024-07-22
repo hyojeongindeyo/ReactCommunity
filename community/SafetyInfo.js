@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   iconButton: {
