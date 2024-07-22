@@ -100,19 +100,22 @@ function Community({ navigation }) {
             <Text style={styles.hotText}>[HOT]</Text>
           </View>
           <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
-          <Text style={styles.postTime}>2분 전</Text>
+          <Text style={styles.hotTime}>2분 전</Text>
         </TouchableOpacity>
         <View style={styles.safe}>
           <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
-            <Text style={styles.safeText}>[교통] 지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
+            <Text style={styles.safeText}>[교통] 000사거리에서 교통사고가 났어요, 조심 ...</Text>
+            <Text style={styles.postTime}>2024.07.22 pm 14:21</Text>
           </TouchableOpacity>
           <View style={styles.horizontalLine}></View>
           <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
-            <Text style={styles.safeText}>[시위] 내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
+            <Text style={styles.safeText}>[시위] 00근처에서 시위 중인데 소음 어우,,다 ...</Text>
+            <Text style={styles.postTime}>2024.07.22 pm 12:15</Text>
           </TouchableOpacity>
           <View style={styles.horizontalLine}></View>
           <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
-            <Text style={styles.safeText}>[주의] 00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
+            <Text style={styles.safeText}>[주의] 갑자기 폭우가 쏟아져요 다들 우산챙기세 ...</Text>
+            <Text style={styles.postTime}>2024.07.22 am 11:19</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.boldLine}></View>
@@ -331,13 +334,10 @@ const styles = StyleSheet.create({
   searchModalContent: {
     backgroundColor: 'white',
     padding: 20,
-    width: '80%',
-    height: '20%',
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: '40%',
-    marginBottom: 'auto',
   },
   menuItemsContainer: {
     alignItems: 'center',
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   safe: {
-    marginBottom: 10,
+    marginBottom: 5,
   },
   safeItem: {
     marginVertical: 5,
@@ -388,12 +388,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 5,
+    marginLeft: 10,
   },
   postContainer: {
     backgroundColor: '#f3f3f3',
     padding: 10,
     borderRadius: 10,
-    marginVertical: 5,
+    marginVertical: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -409,6 +410,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 5,
   },
+  hotTime: {
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'right',
+    marginLeft: 10,
+  },
   postTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -417,7 +424,8 @@ const styles = StyleSheet.create({
   postTime: {
     fontSize: 12,
     color: 'gray',
-    textAlign: 'right',
+    textAlign: 'left',
+    marginLeft: 10,
   },
   paginationContainer: {
     flexDirection: 'row',
