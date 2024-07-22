@@ -217,10 +217,14 @@ function Community({ navigation }) {
           <View style={styles.searchModalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.searchModalContent}>
-                <View style={styles.searchContainer}>
+                <View style={styles.searchHeader}>
+                  <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>&lt;</Text>
+                  </TouchableOpacity>
                   <TextInput
                     style={styles.searchInput}
                     placeholder="검색어를 입력하세요"
+                    placeholderTextColor="#888888" 
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     autoFocus
@@ -345,10 +349,10 @@ const styles = StyleSheet.create({
   menuModalContent: {
     backgroundColor: 'white',
     padding: 30,
+    paddingTop: 60,
     width: '50%',
-    height: '79%', // 상단바와 하단바를 가리지 않도록 설정
+    height: '90.5%',
     alignItems: 'flex-start',
-    marginTop: '25%',
   },
   searchModalOverlay: {
     flex: 1,
@@ -365,11 +369,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60, // 상단 여백 추가
   },
-  searchContainer: {
+  searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%', // 전체 너비를 차지하도록 설정
     marginTop: 20, // 상단 여백 추가
+  },
+  backButton: {
+    marginRight: 10, // 검색창과 버튼 사이 여백 추가
+  },
+  backButtonText: {
+    fontSize: 24,
   },
   searchInput: {
     borderBottomWidth: 1,
