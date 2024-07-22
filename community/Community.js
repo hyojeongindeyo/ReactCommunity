@@ -179,9 +179,9 @@ function Community({ navigation }) {
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay}>
+          <View style={styles.menuModalOverlay}>
             <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
+              <View style={styles.menuModalContent}>
                 <ScrollView contentContainerStyle={styles.menuItemsContainer}>
                   {menuItems.map(item => (
                     <TouchableOpacity 
@@ -214,7 +214,7 @@ function Community({ navigation }) {
         onRequestClose={() => setSearchModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
-          <View style={styles.modalOverlay}>
+          <View style={styles.searchModalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.searchModalContent}>
                 <View style={styles.searchContainer}>
@@ -336,19 +336,25 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontWeight: 'bold',
   },
-  modalOverlay: {
+  menuModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-start', // Search Modal을 상단으로 위치
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    width: '45%',
-    height: '85%',
+    justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    marginTop: 60,
+  },
+  menuModalContent: {
+    backgroundColor: 'white',
+    padding: 30,
+    width: '50%',
+    height: '79%', // 상단바와 하단바를 가리지 않도록 설정
+    alignItems: 'flex-start',
+    marginTop: '25%',
+  },
+  searchModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   searchModalContent: {
     backgroundColor: 'white',
