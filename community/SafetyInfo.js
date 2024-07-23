@@ -65,7 +65,7 @@ const SafetyInfo = ({ navigation, route }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+          <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>안전 정보</Text>
         <TouchableOpacity style={styles.iconButton} onPress={() => setSearchModalVisible(true)}>

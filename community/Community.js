@@ -219,7 +219,7 @@ function Community({ navigation }) {
               <View style={styles.searchModalContent}>
                 <View style={styles.searchHeader}>
                   <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
-                    <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+                    <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
                   </TouchableOpacity>
                   <TextInput
                     style={styles.searchInput}
