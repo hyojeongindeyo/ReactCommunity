@@ -219,7 +219,7 @@ function Community({ navigation }) {
               <View style={styles.searchModalContent}>
                 <View style={styles.searchHeader}>
                   <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>&lt;</Text>
+                    <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
                   </TouchableOpacity>
                   <TextInput
                     style={styles.searchInput}
@@ -377,9 +377,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 10, // 검색창과 버튼 사이 여백 추가
-  },
-  backButtonText: {
-    fontSize: 24,
   },
   searchInput: {
     borderBottomWidth: 1,
