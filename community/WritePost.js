@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { PostContext } from './PostContext'; // PostContext를 통해 글 데이터 관리
 
 export default function WritePost({ navigation }) {
@@ -8,6 +9,7 @@ export default function WritePost({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState(null); // 선택된 카테고리 상태
   const [postTitle, setPostTitle] = useState(''); // 글 제목 상태
   const [postContent, setPostContent] = useState(''); // 글 내용 상태
+  const [selectedImage, setSelectedImage] = useState(null); // 선택된 이미지 상태
 
   // 카테고리 선택 핸들러
   const handleCategorySelect = (category) => {
@@ -18,12 +20,27 @@ export default function WritePost({ navigation }) {
   const handlePostSubmit = () => {
     // 선택된 카테고리에 따라 데이터베이스에 저장
     if (selectedCategory) {
-      addPost(selectedCategory, postTitle, postContent);
+      addPost(selectedCategory, postTitle, postContent, selectedImage);
       // 저장 후 제목과 내용 초기화
       setPostTitle('');
       setPostContent('');
+      setSelectedImage(null);
       // 작성 완료 후 홈 화면으로 이동
       navigation.goBack();
+    }
+  };
+
+  // 이미지 선택 핸들러
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.uri);
     }
   };
 
@@ -77,6 +94,15 @@ export default function WritePost({ navigation }) {
             value={postContent}
             onChangeText={setPostContent}
           />
+        </View>
+
+        {/* 이미지 선택 버튼 */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>사진 첨부</Text>
+          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+            <Text style={styles.imageButtonText}>사진 선택</Text>
+          </TouchableOpacity>
+          {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
         </View>
 
         {/* 작성 완료 버튼 */}
@@ -157,6 +183,24 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     height: 40,
+  },
+  imageButton: {
+    backgroundColor: '#556D6A',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  imageButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  selectedImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginTop: 10,
   },
   addButton: {
     backgroundColor: '#556D6A',
