@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
 
@@ -52,7 +52,6 @@ function MainScreen({ navigation }) {
         <Text style={styles.message} onPress={() => navigation.navigate('ScrappedPosts')}>스크랩한 글</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>설정</Text>
-        
         <Text style={styles.message} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>기타</Text>
@@ -81,8 +80,6 @@ function ProfileScreen({ navigation }) {
   const [id, setId] = useState('**********');
   const [phone, setPhone] = useState('**********');
 
-
-
   const handleSave = () => {
     console.log('이름:', name);
     console.log('아이디:', id);
@@ -97,21 +94,18 @@ function ProfileScreen({ navigation }) {
         placeholder="이름"
         value={name}
         onChangeText={setName}
-
       />
       <TextInput
         style={styles.input}
         placeholder="아이디"
         value={id}
         onChangeText={setId}
-
       />
       <TextInput
         style={styles.input}
         placeholder="전화번호"
         value={phone}
         onChangeText={setPhone}
-
       />
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>수정</Text>
@@ -120,10 +114,7 @@ function ProfileScreen({ navigation }) {
   );
 }
 
-
-
 function ChangePasswordScreen({ navigation }) {
-
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -141,7 +132,6 @@ function ChangePasswordScreen({ navigation }) {
         secureTextEntry
         value={currentPassword}
         onChangeText={setCurrentPassword}
-
       />
       <TextInput
         style={styles.input}
@@ -149,7 +139,6 @@ function ChangePasswordScreen({ navigation }) {
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
-
       />
       <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
         <Text style={styles.buttonText}>확인</Text>
@@ -158,13 +147,10 @@ function ChangePasswordScreen({ navigation }) {
   );
 }
 
-
 function MyPostsScreen() {
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-      </View>
+      <View style={styles.header} />
       <ScrollView style={styles.postsContainer}>
         <View style={styles.postItem}>
           <Text style={styles.postTitle}>00사거리에 교통사고 났대요 그래서...</Text>
@@ -193,11 +179,9 @@ function MyPostsScreen() {
 }
 
 function ScrappedPostsScreen() {
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-      </View>
+      <View style={styles.header} />
       <ScrollView style={styles.postsContainer}>
         <View style={styles.postItem}>
           <Text style={styles.postTitle}>00사거리에 교통사고 났대요 그래서...</Text>
@@ -220,7 +204,6 @@ function NotificationSettingsScreen() {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-
   return (
     <View style={styles.container}>
       <View style={styles.notificationContainer}>
@@ -232,7 +215,6 @@ function NotificationSettingsScreen() {
           value={isEnabled}
         />
       </View>
-   
     </View>
   );
 }
@@ -260,11 +242,6 @@ function InquiryScreen({ navigation }) {
   );
 }
 
-
-
-
-
-
 export default function Mypage() {
   return (
     <Stack.Navigator initialRouteName="Main">
@@ -286,13 +263,16 @@ export default function Mypage() {
             fontSize: 18,
             fontWeight: 'bold',
             alignSelf: 'flex-start',
-            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
-
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
@@ -306,10 +286,14 @@ export default function Mypage() {
             fontSize: 18,
             fontWeight: 'bold',
             alignSelf: 'flex-start',
-            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -325,10 +309,14 @@ export default function Mypage() {
             fontSize: 18,
             fontWeight: 'bold',
             alignSelf: 'flex-start',
-            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -344,10 +332,14 @@ export default function Mypage() {
             fontSize: 18,
             fontWeight: 'bold',
             alignSelf: 'flex-start',
-            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -363,10 +355,14 @@ export default function Mypage() {
             fontSize: 18,
             fontWeight: 'bold',
             alignSelf: 'flex-start',
-            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -382,10 +378,14 @@ export default function Mypage() {
             fontWeight: 'bold',
             fontSize: 18,
             alignSelf: 'flex-start',
-            marginLeft: 20,
           },
           headerBackTitleVisible: false,
           headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Stack.Navigator>
@@ -447,7 +447,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-
   scrollViewContent: {
     paddingTop: 50,
     paddingBottom: 50,
@@ -503,7 +502,6 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     marginTop: 5,
   },
-
   passwordContainer: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -523,7 +521,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
   },
-
   button: {
     width: 60,
     height: 35,
