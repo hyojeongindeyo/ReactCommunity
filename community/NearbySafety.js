@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput, TouchableWithoutFeedback } from 'react-native';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 
@@ -7,6 +7,9 @@ export default function NearbySafety({ navigation, route }) {
   const { filter } = route.params || { filter: '전체' };  // Community.js에서 전달된 필터 값
   const [selectedCategory, setSelectedCategory] = useState(filter);
   const [draftPost, setDraftPost] = useState('');
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchHistory, setSearchHistory] = useState([]);
 
   const posts = [
     { category: 'HOT', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2024.07.24 pm 15:33' },
@@ -73,6 +76,17 @@ export default function NearbySafety({ navigation, route }) {
     }
   }, [filter]);
 
+  const handleSearch = () => {
+    if (searchQuery.trim() !== '') {
+      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
+      setSearchQuery('');
+    }
+  };
+
+  const deleteSearchHistoryItem = (index) => {
+    setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -80,7 +94,7 @@ export default function NearbySafety({ navigation, route }) {
           <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>내 주변 안전 소식</Text>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => setSearchModalVisible(true)}>
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -135,6 +149,48 @@ export default function NearbySafety({ navigation, route }) {
       </TouchableOpacity>
 
       <BottomTabBar navigation={navigation} />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={searchModalVisible}
+        onRequestClose={() => setSearchModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
+          <View style={styles.searchModalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.searchModalContent}>
+                <View style={styles.searchHeader}>
+                  <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
+                    <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="검색어를 입력하세요"
+                    placeholderTextColor="#888888" 
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoFocus
+                  />
+                  <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                    <Text style={styles.searchButtonText}>검색</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.historyContainer}>
+                  {searchHistory.map((item, index) => (
+                    <View key={index} style={styles.historyItem}>
+                      <Text style={styles.historyText}>{item}</Text>
+                      <TouchableOpacity onPress={() => deleteSearchHistoryItem(index)}>
+                        <Text style={styles.deleteText}>X</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
@@ -259,5 +315,67 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     zIndex: 1000, // Ensure button is above other elements
+  },
+  searchModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchModalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    width: '100%',
+    height: '100%', // 전체 높이를 차지하도록 설정
+    justifyContent: 'flex-start', // 상단 정렬
+    alignItems: 'center',
+    paddingTop: 60, // 상단 여백 추가
+  },
+  searchHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%', // 전체 너비를 차지하도록 설정
+    marginTop: 20, // 상단 여백 추가
+  },
+  backButton: {
+    marginRight: 10, // 검색창과 버튼 사이 여백 추가
+  },
+  searchInput: {
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    flex: 1, // 남은 공간을 차지하도록 설정
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  searchButton: {
+    backgroundColor: '#556D6A',
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10, // 검색창과 버튼 사이 여백 추가
+  },
+  searchButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  historyContainer: {
+    width: '100%',
+    marginTop: 20, // History list spacing from the search bar
+  },
+  historyItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  historyText: {
+    fontSize: 16,
+  },
+  deleteText: {
+    fontSize: 16,
+    color: '#ff0000',
   },
 });
