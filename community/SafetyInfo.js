@@ -8,7 +8,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SafetyInfo = ({ navigation, route }) => {
   const { filter } = route.params || { filter: '전체' };
   const [selectedCategory, setSelectedCategory] = useState(filter);
-  const [modalVisible, setModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [selectedInfo, setSelectedInfo] = useState(null);
@@ -128,13 +127,13 @@ const SafetyInfo = ({ navigation, route }) => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={infoModalVisible}
+        onRequestClose={() => setInfoModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{selectedInfo?.banner}</Text>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
               <Text style={styles.modalCloseText}>X</Text>
             </TouchableOpacity>
             <View style={styles.grayRectangle}>
