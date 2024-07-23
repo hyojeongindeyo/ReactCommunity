@@ -1,5 +1,3 @@
-WritePost.js
-
 import React, { useState, useContext } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -35,7 +33,7 @@ export default function WritePost({ navigation }) {
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
           <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>안전 소식 작성</Text>
+        <Text style={styles.title}>글 등록하기</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -44,7 +42,7 @@ export default function WritePost({ navigation }) {
         <View style={styles.categoryContainer}>
           <Text style={styles.label}>카테고리</Text>
           <View style={styles.categories}>
-            {['HOT', '교통', '시위', '재해', '주의'].map((category, index) => (
+            {['교통', '시위', '재해', '주의'].map((category, index) => (
               <TouchableOpacity
                 key={index}
                 style={[styles.categoryButton, selectedCategory === category && styles.selectedCategoryButton]}
@@ -102,11 +100,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
     paddingTop: '15%',
     paddingBottom: '5%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   iconButton: {
@@ -140,14 +136,15 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   selectedCategoryButton: {
-    backgroundColor: 'lightblue',
+    backgroundColor: '#556D6A',
   },
   categoryText: {
     fontSize: 14,
     color: '#666',
+    fontWeight: 'bold',
   },
   selectedCategoryText: {
-    color: '#000',
+    color: '#ddd',
     fontWeight: 'bold',
   },
   inputContainer: {
@@ -162,7 +159,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   addButton: {
-    backgroundColor: 'lightblue',
+    backgroundColor: '#556D6A',
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
@@ -171,5 +168,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#ddd',
   },
 });
