@@ -1,7 +1,8 @@
-// PostDetail.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Swipeable } from 'react-native-gesture-handler';
+import moment from 'moment';
 
 export default function PostDetail({ route, navigation }) {
   const { post } = route.params;
@@ -26,12 +27,26 @@ export default function PostDetail({ route, navigation }) {
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      setComments([...comments, newComment]);
+      const newComments = [
+        ...comments,
+        { text: newComment, timestamp: moment().format('YYYY.MM.DD hh:mm A') } // PM/AM 형식을 포함한 타임스탬프 추가
+      ];
+      setComments(newComments);
       setNewComment('');
     } else {
       Alert.alert("댓글을 입력해주세요.");
     }
   };
+
+  const handleCommentDelete = (index) => {
+    setComments(prevComments => prevComments.filter((_, i) => i !== index));
+  };
+
+  const renderRightActions = (index) => (
+    <TouchableOpacity onPress={() => handleCommentDelete(index)} style={styles.deleteButton}>
+      <MaterialIcons name="delete" size={24} color="white" />
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -49,13 +64,23 @@ export default function PostDetail({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </View>
+      <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
-        <Text style={styles.postText}>{post.message}</Text>
         <Text style={styles.timestamp}>{post.timestamp}</Text>
+        <Text style={styles.postText}>{post.message}</Text>
+        <View style={styles.separator}></View>
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>
           {comments.map((comment, index) => (
-            <Text key={index} style={styles.comment}>{comment}</Text>
+            <Swipeable
+              key={index}
+              renderRightActions={() => renderRightActions(index)}
+            >
+              <View style={styles.commentContainer}>
+                <Text style={styles.comment}>{comment.text}</Text>
+                <Text style={styles.commentTimestamp}>{comment.timestamp}</Text>
+              </View>
+            </Swipeable>
           ))}
           <View style={styles.commentInputContainer}>
             <TextInput
@@ -90,12 +115,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
   iconButton: {
     padding: '2%',
   },
   headerRight: {
     flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerSeparator: {
+    height: 1,
+    backgroundColor: '#ddd',
+    width: '100%',
   },
   content: {
     flex: 1,
@@ -104,12 +137,18 @@ const styles = StyleSheet.create({
   postText: {
     fontSize: 16,
     color: '#333',
+    marginBottom: 20,
   },
   timestamp: {
     fontSize: 12,
     color: '#999',
-    textAlign: 'left',
-    marginBottom: 20,
+    textAlign: 'right',
+    marginVertical: 10,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#ddd',
+    marginVertical: 10,
   },
   commentsSection: {
     marginTop: 20,
@@ -119,10 +158,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
+  commentContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
   comment: {
     fontSize: 16,
     color: '#333',
-    marginBottom: 5,
+  },
+  commentTimestamp: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'right',
+    marginTop: 5,
   },
   commentInputContainer: {
     flexDirection: 'row',
@@ -145,5 +194,12 @@ const styles = StyleSheet.create({
   commentSubmitButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  deleteButton: {
+    backgroundColor: '#ff0000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 60,
+    height: '100%',
   },
 });
