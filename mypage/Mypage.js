@@ -10,15 +10,9 @@ import DeleteAccountModal from './DeleteAccountModal';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
 
-
-
-
 function MainScreen({ navigation }) {
-
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
-
-
 
   const handleLogout = () => {
     setLogoutModalVisible(false);
@@ -27,8 +21,6 @@ function MainScreen({ navigation }) {
   const handleDeleteAccount = () => {
     setDeleteAccountModalVisible(false);
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -258,6 +250,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
+            paddingTop: 20,
+            height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -281,6 +275,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
+            paddingTop: 20,
+            height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -304,6 +300,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
+            paddingTop: 20,
+            height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -327,6 +325,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
+            paddingTop: 20,
+            height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -350,6 +350,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
+            paddingTop: 20,
+            height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -373,6 +375,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
+            paddingTop: 20,
+            height: 80,
           },
           headerTitleStyle: {
             fontWeight: 'bold',
