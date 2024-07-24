@@ -87,6 +87,10 @@ export default function NearbySafety({ navigation, route }) {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
   };
 
+  const navigateToPostDetail = (post) => {
+    navigation.navigate('PostDetail', { post });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -127,12 +131,14 @@ export default function NearbySafety({ navigation, route }) {
       <ScrollView style={styles.content}>
         {/* 선택된 카테고리에 따른 글 목록 */}
         {filteredPosts.map((post, index) => (
-          <View key={index} style={styles.postContainer}>
-            <Text style={styles.postText}>
-              [{post.category}] {post.message} 
-            </Text>
-            <Text style={styles.timestamp}>{post.timestamp}</Text>
-          </View>
+          <TouchableOpacity key={index} onPress={() => navigateToPostDetail(post)}>
+            <View style={styles.postContainer}>
+              <Text style={styles.postText}>
+                [{post.category}] {post.message} 
+              </Text>
+              <Text style={styles.timestamp}>{post.timestamp}</Text>
+            </View>
+          </TouchableOpacity>
         ))}
 
         {/* 카테고리에 해당하는 글이 없는 경우 메시지 표시 */}

@@ -12,6 +12,7 @@ import Community from './community/Community.js';
 import NearbySafety from './community/NearbySafety.js';
 import SafetyInfo from './community/SafetyInfo';
 import WritePost from './community/WritePost.js';
+import PostDetail from './community/PostDetail';
 import Shelter from './shelter/Shelter.js';
 
 import { createStackNavigator } from '@react-navigation/stack';
@@ -46,6 +47,7 @@ const CommunityStack = () => {
       <Stack.Screen name="NearbySafety" component={NearbySafety} />
       <Stack.Screen name="WritePost" component={WritePost} />
       <Stack.Screen name="SafetyInfo" component={SafetyInfo} />
+      <Stack.Screen name="PostDetail" component={PostDetail} />
     </Stack.Navigator>
   );
 };
