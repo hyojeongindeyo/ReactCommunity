@@ -179,9 +179,12 @@ export default function NearbySafety({ navigation, route }) {
                 <ScrollView style={styles.historyContainer}>
                   {searchHistory.map((item, index) => (
                     <View key={index} style={styles.historyItem}>
+                      <View style={styles.historyIconContainer}>
+                        <MaterialIcons name="history" size={24} color="black" />
+                      </View>
                       <Text style={styles.historyText}>{item}</Text>
                       <TouchableOpacity onPress={() => deleteSearchHistoryItem(index)}>
-                        <Text style={styles.deleteText}>X</Text>
+                        <MaterialIcons name="close" size={24} color="black" />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -363,15 +366,18 @@ const styles = StyleSheet.create({
   },
   historyItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 5,
     marginVertical: 5,
+    marginHorizontal: 10,
+  },
+  historyIconContainer: {
+    marginRight: 10,
   },
   historyText: {
     fontSize: 16,
+    flex: 1,
   },
   deleteText: {
     fontSize: 16,

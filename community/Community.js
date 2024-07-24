@@ -37,7 +37,7 @@ function Community({ navigation }) {
     { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
     { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },
     { id: 9, title: '산불 예방\n수칙', date: '2024.07.08', category: '자연', banner: '산불 예방수칙' },
-    { id: 10, title: '오물풍선 발견 시\n행동요령', date: '2024.07.10', category: '생활', banner: '오물풍선 발견 시 행동요령' },  
+    { id: 10, title: '오물풍선 발견 시\n행동요령', date: '2024.07.10', category: '생활', banner: '오물풍선 발견 시 행동요령' },
   ];
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
@@ -236,9 +236,12 @@ function Community({ navigation }) {
                 <ScrollView style={styles.historyContainer}>
                   {searchHistory.map((item, index) => (
                     <View key={index} style={styles.historyItem}>
+                      <View style={styles.historyIconContainer}>
+                        <MaterialIcons name="history" size={24} color="black" />
+                      </View>
                       <Text style={styles.historyText}>{item}</Text>
                       <TouchableOpacity onPress={() => deleteSearchHistoryItem(index)}>
-                        <Text style={styles.deleteText}>X</Text>
+                        <MaterialIcons name="close" size={24} color="black" />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -583,15 +586,18 @@ const styles = StyleSheet.create({
   },
   historyItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 5,
     marginVertical: 5,
+    marginHorizontal: 10,
+  },
+  historyIconContainer: {
+    marginRight: 10,
   },
   historyText: {
     fontSize: 16,
+    flex: 1,
   },
   deleteText: {
     fontSize: 16,

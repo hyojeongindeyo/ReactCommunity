@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     marginTop: 10,
+    width: 120, // 가로 길이 조정
   },
   imageButtonText: {
     color: '#fff',
