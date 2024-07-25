@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { CommentsProvider } from './community/CommentsContext';
+import { PostsProvider } from './community/PostsContext';
 import BottomTabBar from './BottomTabBar.js';
 import HomeScreen from './mainpage/HomeScreen';
 import Mypage from './mypage/Mypage.js';
@@ -37,20 +38,22 @@ const HomeStack = () => (
 
 const App = () => {
   return (
-    <CommentsProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          tabBar={(props) => <BottomTabBar {...props} />}
-          screenOptions={{ headerShown: false }}
-        >
-          <Tab.Screen name="Home" component={HomeStack} />
-          <Tab.Screen name="Mypage" component={Mypage} />
-          <Tab.Screen name="Camera" component={Camera} />
-          <Tab.Screen name="Community" component={CommunityStack} />
-          <Tab.Screen name="Shelter" component={Shelter} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </CommentsProvider>
+    <PostsProvider>
+      <CommentsProvider>
+        <NavigationContainer>
+          <Tab.Navigator
+            tabBar={(props) => <BottomTabBar {...props} />}
+            screenOptions={{ headerShown: false }}
+          >
+            <Tab.Screen name="Home" component={HomeStack} />
+            <Tab.Screen name="Mypage" component={Mypage} />
+            <Tab.Screen name="Camera" component={Camera} />
+            <Tab.Screen name="Community" component={CommunityStack} />
+            <Tab.Screen name="Shelter" component={Shelter} />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </CommentsProvider>
+    </PostsProvider>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
 import moment from 'moment';
@@ -8,7 +8,7 @@ import { CommentsContext } from './CommentsContext';
 export default function PostDetail({ route, navigation }) {
   const { post } = route.params;
   const { comments, setComments } = useContext(CommentsContext);
-  const postId = post.id; // 게시물의 ID를 사용
+  const postId = post.id;
 
   const [newComment, setNewComment] = useState('');
 
@@ -79,6 +79,7 @@ export default function PostDetail({ route, navigation }) {
       <ScrollView style={styles.content}>
         <Text style={styles.timestamp}>{post.timestamp}</Text>
         <Text style={styles.postText}>{post.message}</Text>
+        {post.image && <Image source={{ uri: post.image }} style={styles.postImage} />}
         <View style={styles.separator}></View>
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>
@@ -148,6 +149,12 @@ const styles = StyleSheet.create({
   postText: {
     fontSize: 16,
     color: '#333',
+    marginBottom: 20,
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
     marginBottom: 20,
   },
   timestamp: {

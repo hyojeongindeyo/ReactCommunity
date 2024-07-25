@@ -2,35 +2,39 @@ import React, { useState, useContext } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { PostContext } from './PostContext'; // PostContext를 통해 글 데이터 관리
+import { PostsContext } from './PostsContext';
 
 export default function WritePost({ navigation }) {
-  const { addPost } = useContext(PostContext); // 글 추가 함수
-  const [selectedCategory, setSelectedCategory] = useState(null); // 선택된 카테고리 상태
-  const [postTitle, setPostTitle] = useState(''); // 글 제목 상태
-  const [postContent, setPostContent] = useState(''); // 글 내용 상태
-  const [selectedImage, setSelectedImage] = useState(null); // 선택된 이미지 상태
+  const { addPost } = useContext(PostsContext);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [postTitle, setPostTitle] = useState('');
+  const [postContent, setPostContent] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  // 카테고리 선택 핸들러
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
 
-  // 글 작성 완료 핸들러
   const handlePostSubmit = () => {
-    // 선택된 카테고리에 따라 데이터베이스에 저장
-    if (selectedCategory) {
-      addPost(selectedCategory, postTitle, postContent, selectedImage);
-      // 저장 후 제목과 내용 초기화
+    if (selectedCategory && postTitle.trim() && postContent.trim()) {
+      const newPost = {
+        id: Date.now().toString(),
+        category: selectedCategory,
+        title: postTitle,
+        message: postContent,
+        image: selectedImage,
+        timestamp: new Date().toISOString(),
+      };
+      addPost(newPost);
       setPostTitle('');
       setPostContent('');
       setSelectedImage(null);
-      // 작성 완료 후 홈 화면으로 이동
       navigation.goBack();
+    } else {
+      Alert.alert('모든 필드를 채워주세요.');
     }
   };
 
-  // 이미지 선택 핸들러
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -55,7 +59,6 @@ export default function WritePost({ navigation }) {
       </View>
 
       <View style={styles.content}>
-        {/* 카테고리 선택 */}
         <View style={styles.categoryContainer}>
           <Text style={styles.label}>카테고리</Text>
           <View style={styles.categories}>
@@ -73,7 +76,6 @@ export default function WritePost({ navigation }) {
           </View>
         </View>
 
-        {/* 글 제목 입력란 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>제목</Text>
           <TextInput
@@ -84,7 +86,6 @@ export default function WritePost({ navigation }) {
           />
         </View>
 
-        {/* 글 내용 입력란 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>내용</Text>
           <TextInput
@@ -96,7 +97,6 @@ export default function WritePost({ navigation }) {
           />
         </View>
 
-        {/* 이미지 선택 버튼 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>사진 첨부</Text>
           <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
@@ -105,7 +105,6 @@ export default function WritePost({ navigation }) {
           {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
         </View>
 
-        {/* 작성 완료 버튼 */}
         <TouchableOpacity style={styles.addButton} onPress={handlePostSubmit}>
           <Text style={styles.buttonText}>작성 완료</Text>
         </TouchableOpacity>
@@ -191,7 +190,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     marginTop: 10,
-    width: 120, // 가로 길이 조정
+    width: 120,
   },
   imageButtonText: {
     color: '#fff',
