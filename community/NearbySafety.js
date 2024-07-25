@@ -12,11 +12,11 @@ export default function NearbySafety({ navigation, route }) {
   const [searchHistory, setSearchHistory] = useState([]);
 
   const posts = [
-    { category: 'HOT', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2024.07.24 pm 15:33' },
-    { category: '교통', message: '3호선 서울역에서 승객 수가 많아서 혼잡할 수 있습니다.', timestamp: '2024.07.24 pm 15:30' },
-    { category: '시위', message: '시민들이 시위를 벌이고 있습니다. 주의하시기 바랍니다.', timestamp: '2024.07.24 pm 15:20' },
-    { category: '재해', message: '비가 오고 있어서 길이 미끄럽습니다. 운전에 주의하세요.', timestamp: '2024.07.24 pm 15:10' },
-    { category: '주의', message: '해수욕장에서 물때가 높습니다. 안전을 위해 신호를 따르세요.', timestamp: '2024.07.24 pm 15:00' },
+    { category: 'HOT', title: '2호선 강남역 근처 시위', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2024.07.24 pm 15:33' },
+    { category: '교통', title: '3호선 서울역 혼잡', message: '3호선 서울역에서 승객 수가 많아서 혼잡할 수 있습니다.', timestamp: '2024.07.24 pm 15:30' },
+    { category: '시위', title: '시민 시위', message: '시민들이 시위를 벌이고 있습니다. 주의하시기 바랍니다.', timestamp: '2024.07.24 pm 15:20' },
+    { category: '재해', title: '비로 인한 미끄러움', message: '비가 오고 있어서 길이 미끄럽습니다. 운전에 주의하세요.', timestamp: '2024.07.24 pm 15:10' },
+    { category: '주의', title: '해수욕장 물때', message: '해수욕장에서 물때가 높습니다. 안전을 위해 신호를 따르세요.', timestamp: '2024.07.24 pm 15:00' },
   ];
 
   const categories = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
@@ -87,7 +87,7 @@ export default function NearbySafety({ navigation, route }) {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
   };
 
-  const navigateToPostDetail = (post) => {
+  const handlePostPress = (post) => {
     navigation.navigate('PostDetail', { post });
   };
 
@@ -104,11 +104,11 @@ export default function NearbySafety({ navigation, route }) {
       </View>
 
       {/* [HOT] 박스 */}
-      <View style={styles.hotBox}>
+      <TouchableOpacity style={styles.hotBox} onPress={() => handlePostPress(posts[0])}>
         <Text style={styles.hotTitle}>[HOT]</Text>
         <Text style={styles.hotMessage}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
         <Text style={styles.hotTimestamp}>2분 전</Text>
-      </View>
+      </TouchableOpacity>
 
       {/* 카테고리 버튼들 */}
       <View style={styles.categoryContainer}>
@@ -131,13 +131,11 @@ export default function NearbySafety({ navigation, route }) {
       <ScrollView style={styles.content}>
         {/* 선택된 카테고리에 따른 글 목록 */}
         {filteredPosts.map((post, index) => (
-          <TouchableOpacity key={index} onPress={() => navigateToPostDetail(post)}>
-            <View style={styles.postContainer}>
-              <Text style={styles.postText}>
-                [{post.category}] {post.message} 
-              </Text>
-              <Text style={styles.timestamp}>{post.timestamp}</Text>
-            </View>
+          <TouchableOpacity key={index} style={styles.postContainer} onPress={() => handlePostPress(post)}>
+            <Text style={styles.postText}>
+              [{post.category}] {post.title} 
+            </Text>
+            <Text style={styles.timestamp}>{post.timestamp}</Text>
           </TouchableOpacity>
         ))}
 

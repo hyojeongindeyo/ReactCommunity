@@ -40,6 +40,14 @@ function Community({ navigation }) {
     { id: 10, title: '오물풍선 발견 시\n행동요령', date: '2024.07.10', category: '생활', banner: '오물풍선 발견 시 행동요령' },
   ];
 
+  const posts = [
+    { category: 'HOT', title: '2호선 강남역 근처 시위', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2분전' },
+    { category: '교통', title: '3호선 서울역 혼잡', message: '3호선 서울역에서 승객 수가 많아서 혼잡할 수 있습니다.', timestamp: '2024.07.24 pm 15:30' },
+    { category: '시위', title: '시민 시위', message: '시민들이 시위를 벌이고 있습니다. 주의하시기 바랍니다.', timestamp: '2024.07.24 pm 15:20' },
+    { category: '재해', title: '비로 인한 미끄러움', message: '비가 오고 있어서 길이 미끄럽습니다. 운전에 주의하세요.', timestamp: '2024.07.24 pm 15:10' },
+    { category: '주의', title: '해수욕장 물때', message: '해수욕장에서 물때가 높습니다. 안전을 위해 신호를 따르세요.', timestamp: '2024.07.24 pm 15:00' },
+  ];
+
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
   const menuItems = [
     { id: '1', title: '내 주변 안전소식', navigateTo: 'NearbySafety', filter: null },
@@ -72,6 +80,10 @@ function Community({ navigation }) {
     setInfoModalVisible(true);
   };
 
+  const handlePostPress = (post) => {
+    navigation.navigate('PostDetail', { post });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -102,27 +114,27 @@ function Community({ navigation }) {
             </View>
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.postContainer} onPress={() => navigation.navigate('NearbySafety', { filter: 'HOT' })}>
+        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(posts[0])}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
           </View>
-          <Text style={styles.postTitle}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
-          <Text style={styles.hotTime}>2분 전</Text>
+          <Text style={styles.postTitle}>{posts[0].message}</Text>
+          <Text style={styles.hotTime}>{posts[0].timestamp}</Text>
         </TouchableOpacity>
         <View style={styles.safe}>
-          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
-            <Text style={styles.safeText}>[교통] 000사거리에서 교통사고가 났어요, 조심 ...</Text>
-            <Text style={styles.postTime}>2024.07.22 pm 14:21</Text>
+          <TouchableOpacity onPress={() => handlePostPress(posts[1])}>
+            <Text style={styles.safeText}>[교통] 3호선 서울역에서 승객 수가 많아서 ...</Text>
+            <Text style={styles.postTime}>{posts[1].timestamp}</Text>
           </TouchableOpacity>
           <View style={styles.horizontalLine}></View>
-          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
-            <Text style={styles.safeText}>[시위] 00근처에서 시위 중인데 소음 어우,,다 ...</Text>
-            <Text style={styles.postTime}>2024.07.22 pm 12:15</Text>
+          <TouchableOpacity onPress={() => handlePostPress(posts[2])}>
+            <Text style={styles.safeText}>[시위] 시민들이 시위를 벌이고 있습니다 ...</Text>
+            <Text style={styles.postTime}>{posts[2].timestamp}</Text>
           </TouchableOpacity>
           <View style={styles.horizontalLine}></View>
-          <TouchableOpacity onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
-            <Text style={styles.safeText}>[주의] 갑자기 폭우가 쏟아져요 다들 우산챙기세 ...</Text>
-            <Text style={styles.postTime}>2024.07.22 am 11:19</Text>
+          <TouchableOpacity onPress={() => handlePostPress(posts[4])}>
+            <Text style={styles.safeText}>[주의] 해수욕장에서 물때가 높습니다. 안전 ...</Text>
+            <Text style={styles.postTime}>{posts[4].timestamp}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.boldLine}></View>

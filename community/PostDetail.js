@@ -54,7 +54,7 @@ export default function PostDetail({ route, navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>{post.category} 글 상세보기</Text>
+        <Text style={styles.title}>{post.title}</Text>
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={() => {/* 글 수정 로직 추가 */}} style={styles.iconButton}>
             <MaterialIcons name="edit" size={24} color="black" />
