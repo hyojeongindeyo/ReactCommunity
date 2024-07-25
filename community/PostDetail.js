@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
 import moment from 'moment';
+import { CommentsContext } from './CommentsContext';
 
 export default function PostDetail({ route, navigation }) {
   const { post } = route.params;
+  const { comments, setComments } = useContext(CommentsContext);
+  const postId = post.id; // 게시물의 ID를 사용
 
-  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+
+  const postComments = comments[postId] || [];
 
   const handleDelete = () => {
     Alert.alert(
@@ -27,10 +31,13 @@ export default function PostDetail({ route, navigation }) {
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      const newComments = [
+      const newComments = {
         ...comments,
-        { text: newComment, timestamp: moment().format('YYYY.MM.DD hh:mm A') } // PM/AM 형식을 포함한 타임스탬프 추가
-      ];
+        [postId]: [
+          ...postComments,
+          { text: newComment, timestamp: moment().format('YYYY.MM.DD hh:mm A') }
+        ]
+      };
       setComments(newComments);
       setNewComment('');
     } else {
@@ -39,7 +46,11 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleCommentDelete = (index) => {
-    setComments(prevComments => prevComments.filter((_, i) => i !== index));
+    const newComments = postComments.filter((_, i) => i !== index);
+    setComments({
+      ...comments,
+      [postId]: newComments
+    });
   };
 
   const renderRightActions = (index) => (
@@ -71,7 +82,7 @@ export default function PostDetail({ route, navigation }) {
         <View style={styles.separator}></View>
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>
-          {comments.map((comment, index) => (
+          {postComments.map((comment, index) => (
             <Swipeable
               key={index}
               renderRightActions={() => renderRightActions(index)}

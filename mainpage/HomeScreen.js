@@ -119,21 +119,22 @@ const App = ( { navigation }) => {
 
 
         <View style={styles.safe}>
-          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '교통' })}>
-            <Text style={styles.safetitle}>교통</Text>
-            <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
-            <Text style={styles.safetime}>지금</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '시위' })}>
-            <Text style={styles.safetitle}>시위</Text>
-            <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
-            <Text style={styles.safetime}>10분 전</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('NearbySafety', { filter: '주의' })}>
-            <Text style={styles.safetitle}>주의</Text>
-            <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
-            <Text style={styles.safetime}>1일 전</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: { id: 'trafficPostId', title: '교통', message: '지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요', timestamp: '지금' } })}>
+          <Text style={styles.safetitle}>교통</Text>
+          <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
+          <Text style={styles.safetime}>지금</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: { id: 'protestPostId', title: '시위', message: '내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!', timestamp: '10분 전' } })}>
+          <Text style={styles.safetitle}>시위</Text>
+          <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
+          <Text style={styles.safetime}>10분 전</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: { id: 'cautionPostId', title: '주의', message: '00동 내일 잠깐 단수된다고 하던데 주의하세요', timestamp: '1일 전' } })}>
+          <Text style={styles.safetitle}>주의</Text>
+          <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
+          <Text style={styles.safetime}>1일 전</Text>
+        </TouchableOpacity>
+
         </View>
         <StatusBar style="auto" />
 
