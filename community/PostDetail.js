@@ -35,7 +35,7 @@ export default function PostDetail({ route, navigation }) {
         ...comments,
         [postId]: [
           ...postComments,
-          { text: newComment, timestamp: moment().format('YYYY.MM.DD hh:mm A') }
+          { text: newComment, timestamp: new Date().toISOString() } // ISO 형식으로 저장
         ]
       };
       setComments(newComments);
@@ -77,7 +77,7 @@ export default function PostDetail({ route, navigation }) {
       </View>
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
-        <Text style={styles.timestamp}>{post.timestamp}</Text>
+        <Text style={styles.timestamp}>{moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
         <Text style={styles.postText}>{post.message}</Text>
         {post.image && <Image source={{ uri: post.image }} style={styles.postImage} />}
         <View style={styles.separator}></View>
@@ -90,7 +90,7 @@ export default function PostDetail({ route, navigation }) {
             >
               <View style={styles.commentContainer}>
                 <Text style={styles.comment}>{comment.text}</Text>
-                <Text style={styles.commentTimestamp}>{comment.timestamp}</Text>
+                <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
               </View>
             </Swipeable>
           ))}
