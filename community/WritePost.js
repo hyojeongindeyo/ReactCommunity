@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Alert, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { PostsContext } from './PostsContext';
@@ -23,7 +23,7 @@ export default function WritePost({ navigation }) {
         title: postTitle,
         message: postContent,
         image: selectedImage,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(), // ISO 형식으로 저장
       };
       addPost(newPost);
       setPostTitle('');
@@ -49,67 +49,71 @@ export default function WritePost({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.title}>글 등록하기</Text>
-        <View style={styles.placeholder} />
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.categoryContainer}>
-          <Text style={styles.label}>카테고리</Text>
-          <View style={styles.categories}>
-            {['교통', '시위', '재해', '주의'].map((category, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.categoryButton, selectedCategory === category && styles.selectedCategoryButton]}
-                onPress={() => handleCategorySelect(category)}
-              >
-                <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
-                  {category}
-                </Text>
-              </TouchableOpacity>
-            ))}
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+              <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+            </TouchableOpacity>
+            <Text style={styles.title}>글 등록하기</Text>
+            <View style={styles.placeholder} />
           </View>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>제목</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="제목을 입력하세요."
-            value={postTitle}
-            onChangeText={setPostTitle}
-          />
-        </View>
+          <View style={styles.content}>
+            <View style={styles.categoryContainer}>
+              <Text style={styles.label}>카테고리</Text>
+              <View style={styles.categories}>
+                {['교통', '시위', '재해', '주의'].map((category, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.categoryButton, selectedCategory === category && styles.selectedCategoryButton]}
+                    onPress={() => handleCategorySelect(category)}
+                  >
+                    <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
+                      {category}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>내용</Text>
-          <TextInput
-            style={[styles.input, { height: 100 }]}
-            multiline
-            placeholder="내용을 입력하세요."
-            value={postContent}
-            onChangeText={setPostContent}
-          />
-        </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>제목</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="제목을 입력하세요."
+                value={postTitle}
+                onChangeText={setPostTitle}
+              />
+            </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>사진 첨부</Text>
-          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-            <Text style={styles.imageButtonText}>사진 선택</Text>
-          </TouchableOpacity>
-          {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
-        </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>내용</Text>
+              <TextInput
+                style={[styles.input, { height: 100 }]}
+                multiline
+                placeholder="내용을 입력하세요."
+                value={postContent}
+                onChangeText={setPostContent}
+              />
+            </View>
 
-        <TouchableOpacity style={styles.addButton} onPress={handlePostSubmit}>
-          <Text style={styles.buttonText}>작성 완료</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>사진 첨부</Text>
+              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+                <Text style={styles.imageButtonText}>사진 선택</Text>
+              </TouchableOpacity>
+              {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
+            </View>
+
+            <TouchableOpacity style={styles.addButton} onPress={handlePostSubmit}>
+              <Text style={styles.buttonText}>작성 완료</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -117,6 +121,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
