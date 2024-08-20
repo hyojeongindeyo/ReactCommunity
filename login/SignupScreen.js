@@ -1,7 +1,9 @@
 import 'react-native-gesture-handler';
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, Image, View, Dimensions, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, Text, Image, View, Dimensions, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import axios from 'axios'; // axios를 사용하여 API 호출
+import config from '../config';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -9,20 +11,44 @@ const SignupScreen = ({ navigation }) => {
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
+    const apiUrl = config.apiUrl;
 
-    const handleSignup = () => {
+    const handleSignup = async () => {
         if (password !== confirmPassword) {
-            console.log('비밀번호가 일치하지 않습니다.');
+            Alert.alert('비밀번호 불일치', '비밀번호가 일치하지 않습니다.');
             return;
         }
-        console.log('아이디:', id);
-        console.log('비밀번호:', password);
-        console.log('휴대폰 번호:', phone);
-        console.log('닉네임:', nickname);
-        // 회원가입 처리 로직 추가 후 LoginScreen으로 이동
-        navigation.navigate('Login');
+
+        try {
+            
+            const response = await axios.post(`${apiUrl}/signup`, { // 서버의 IP 주소와 포트를 사용하세요
+                id,
+                password,
+                email,
+                nickname,
+            });
+
+            if (response.status === 200) {
+                Alert.alert('회원가입 성공', response.data.message);
+                navigation.navigate('Login');
+            }
+        }  catch (error) {
+            if (error.response) {
+                // 서버가 응답했지만 상태 코드가 2xx가 아닌 경우
+                console.error('서버 응답 오류:', error.response.data);
+                Alert.alert('회원가입 실패', `오류: ${error.response.data.error}`);
+            } else if (error.request) {
+                // 요청이 서버로 전송되었으나 응답을 받지 못한 경우
+                console.error('요청 오류:', error.request);
+                Alert.alert('회원가입 실패', '서버가 응답하지 않습니다.');
+            } else {
+                // 오류가 발생한 이유가 설정된 요청이 아닌 경우
+                console.error('설정 오류:', error.message);
+                Alert.alert('회원가입 실패', '회원가입 처리 중 오류가 발생했습니다.');
+            }
+        }
     };
 
     return (
@@ -62,9 +88,9 @@ const SignupScreen = ({ navigation }) => {
 
                     <TextInput
                         style={styles.input}
-                        placeholder="휴대폰 번호"
-                        value={phone}
-                        onChangeText={setPhone}
+                        placeholder="이메일 주소"
+                        value={email}
+                        onChangeText={setEmail}
                         placeholderTextColor="#000"
                     />
 
@@ -91,16 +117,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        justifyContent: 'center', // 수직 정렬
-        alignItems: 'center', // 수평 정렬
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     formContainer: {
-        width: '80%', // 폼 컨테이너의 너비를 화면 너비의 80%로 설정
-        alignItems: 'center', // 폼 컨테이너 내부의 요소를 수평으로 가운데 정렬
-    },
-    inputContainer: {
-        width: '100%', // 입력 필드의 너비를 폼 컨테이너에 맞게 설정
-        marginVertical: 10,
+        width: '80%',
+        alignItems: 'center',
     },
     input: {
         height: 40,
@@ -109,11 +131,11 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         paddingHorizontal: 10,
-        width: '100%', // 입력 필드 너비를 폼 컨테이너에 맞추기 위해 100%로 설정
+        width: '100%',
         marginTop: 18,
     },
     button: {
-        width: '100%', // 버튼의 너비를 폼 컨테이너의 너비에 맞추기 위해 100%로 설정
+        width: '100%',
         height: 40,
         backgroundColor: '#92B2AE',
         justifyContent: 'center',
@@ -127,8 +149,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     logoImage: {
-        width: 70, // 로고 이미지의 너비
-        height: 70, // 로고 이미지의 높이
+        width: 70,
+        height: 70,
     },
 });
 
