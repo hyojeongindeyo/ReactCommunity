@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -14,6 +14,8 @@ import SafetyInfo from './community/SafetyInfo';
 import WritePost from './community/WritePost.js';
 import PostDetail from './community/PostDetail';
 import Shelter from './shelter/Shelter.js';
+import LoginScreen from './login/LoginScreen'; // 로그인 페이지
+import SignupScreen from './login/SignupScreen'; // 회원가입 페이지
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -38,20 +40,34 @@ const HomeStack = () => (
 );
 
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태를 관리
+
   return (
     <PostsProvider>
       <CommentsProvider>
         <NavigationContainer>
-          <Tab.Navigator
-            tabBar={(props) => <BottomTabBar {...props} />}
-            screenOptions={{ headerShown: false }}
-          >
-            <Tab.Screen name="Home" component={HomeStack} />
-            <Tab.Screen name="Mypage" component={Mypage} />
-            <Tab.Screen name="Camera" component={Camera} />
-            <Tab.Screen name="Community" component={CommunityStack} />
-            <Tab.Screen name="Shelter" component={Shelter} />
-          </Tab.Navigator>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {isLoggedIn ? (
+              // 로그인 상태가 true일 때, Tab Navigator를 표시
+              <Stack.Screen name="Main" component={() => (
+                <Tab.Navigator
+                  tabBar={(props) => <BottomTabBar {...props} />}
+                  screenOptions={{ headerShown: false }}
+                >
+                  <Tab.Screen name="Home" component={HomeStack} />
+                  <Tab.Screen name="Mypage" component={Mypage} />
+                  <Tab.Screen name="Camera" component={Camera} />
+                  <Tab.Screen name="Community" component={CommunityStack} />
+                  <Tab.Screen name="Shelter" component={Shelter} />
+                </Tab.Navigator>
+              )} />
+            ) : (
+              <>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Signup" component={SignupScreen} />
+              </>
+            )}
+          </Stack.Navigator>
         </NavigationContainer>
       </CommentsProvider>
     </PostsProvider>
