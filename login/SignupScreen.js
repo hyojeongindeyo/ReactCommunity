@@ -10,6 +10,7 @@ const SignupScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [nickname, setNickname] = useState('');
 
   const handleSignup = () => {
     if (password !== confirmPassword) {
@@ -19,17 +20,19 @@ const SignupScreen = ({ navigation }) => {
     console.log('아이디:', id);
     console.log('비밀번호:', password);
     console.log('휴대폰 번호:', phone);
+    console.log('닉네임:', nickname);
     // 회원가입 처리 로직 추가 후 LoginScreen으로 이동
     navigation.navigate('Login');
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>평안</Text>
+
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>아이디</Text>
         <TextInput
           style={styles.input}
-          placeholder="8자 이상(영소문자, 숫자)"
+          placeholder="아이디"
           value={id}
           onChangeText={setId}
           placeholderTextColor="#000"
@@ -37,10 +40,9 @@ const SignupScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>비밀번호</Text>
         <TextInput
           style={styles.input}
-          placeholder="8자 이상(영소문자, 숫자, 특수문자)"
+          placeholder="비밀번호"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -49,10 +51,9 @@ const SignupScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>비밀번호 확인</Text>
         <TextInput
           style={styles.input}
-          placeholder="비밀번호 재입력"
+          placeholder="비밀번호 확인"
           secureTextEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
@@ -61,12 +62,21 @@ const SignupScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>휴대폰 번호</Text>
         <TextInput
           style={styles.input}
           placeholder="휴대폰 번호"
           value={phone}
           onChangeText={setPhone}
+          placeholderTextColor="#000"
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="닉네임"
+          value={nickname}
+          onChangeText={setNickname}
           placeholderTextColor="#000"
         />
       </View>
@@ -89,33 +99,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 50,
   },
+  title: {
+    fontSize: 36,
+    color: '#92B2AE',
+    marginBottom: 40,
+  },
   inputContainer: {
     width: SCREEN_WIDTH * 0.8,
     marginVertical: 10,
-  },
-  label: {
-    fontSize: 14,
-    color: '#000',
-    marginBottom: 5,
   },
   input: {
     height: 40,
     borderColor: '#ccc',
     backgroundColor: '#F3F3F3',
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
+    borderRadius: 20,
+    paddingHorizontal: 15,
     width: '100%',
-    marginTop: 10,
   },
   button: {
     width: SCREEN_WIDTH * 0.6,
-    height: 40,
+    height: 50,
     backgroundColor: '#92B2AE',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10,
-    marginTop: 20,
+    borderRadius: 25,
+    marginTop: 30,
   },
   buttonText: {
     color: '#fff',
