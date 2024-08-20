@@ -42,6 +42,11 @@ const HomeStack = () => (
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태를 관리
 
+  // 로그인 성공 시 호출될 함수
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true); // 로그인 상태를 true로 변경
+  };
+
   return (
     <PostsProvider>
       <CommentsProvider>
@@ -63,7 +68,9 @@ const App = () => {
               )} />
             ) : (
               <>
-                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Login">
+                  {props => <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />}
+                </Stack.Screen>
                 <Stack.Screen name="Signup" component={SignupScreen} />
               </>
             )}
