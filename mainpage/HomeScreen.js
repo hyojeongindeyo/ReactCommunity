@@ -5,12 +5,13 @@ import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIn
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
-
+import axios from 'axios';
+import config from '../config'; // config 파일 import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const App = ( { navigation }) => {
-
+  const [userData, setUserData] = useState(null);
   const [city, setCity] = useState('Loading...');
   const [location, setLocation] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
@@ -21,8 +22,19 @@ const App = ( { navigation }) => {
 
   // 위치 가져오기
   useEffect(() => {
+    fetchUserSession();
     getLocation();
   }, []);
+
+  const fetchUserSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user session:', error);
+      // 에러 처리 로직 추가 가능
+    }
+  };
 
   const getLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -100,7 +112,7 @@ const App = ( { navigation }) => {
                 <Weather latitude={location.latitude} longitude={location.longitude} city={city} />
               </View>
             )}
-            <Text style={styles.pyeongT}>000님의 평안이</Text>
+            <Text style={styles.pyeongT}>{userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}</Text>
           </View>
         </View>
 
