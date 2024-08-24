@@ -1,11 +1,13 @@
 import 'react-native-gesture-handler';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
+import axios from 'axios';
+import config from '../config';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
@@ -13,6 +15,21 @@ const Stack = createStackNavigator();
 function MainScreen({ navigation }) {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
+  const [nickname, setNickname] = useState('');  // 닉네임 상태 추가
+
+  useEffect(() => {
+    // 로그인된 사용자의 세션 정보를 가져오는 함수
+    const fetchUserSession = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        setNickname(response.data.nickname);  // 닉네임 상태 업데이트
+      } catch (error) {
+        console.error('Error fetching user session:', error);
+      }
+    };
+
+    fetchUserSession();
+  }, []);
 
   const handleLogout = () => {
     setLogoutModalVisible(false);
@@ -26,7 +43,7 @@ function MainScreen({ navigation }) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View>
-          <Text style={styles.nametitle}>000님의 평안이</Text>
+          <Text style={styles.nametitle}>{nickname}님의 평안이</Text>
         </View>
 
         <View style={styles.imgContainer}>
