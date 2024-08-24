@@ -1,18 +1,52 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Dimensions, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import axios from 'axios'; // axios 추가
+import config from '../config';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const LoginScreen = ({ navigation, onLoginSuccess }) => {
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const apiUrl = config.apiUrl;
 
-    const handleLogin = () => {
-        console.log('아이디:', id);
-        console.log('비밀번호:', password);
-        // 로그인 성공 처리 로직 후 onLoginSuccess 호출
-        onLoginSuccess(); // App.js에서 전달받은 함수 호출
+    const handleLogin = async () => {
+        if (id.trim() === '' || password.trim() === '') {
+            Alert.alert('입력 오류', '아이디와 비밀번호를 모두 입력해 주세요.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await axios.post(`${apiUrl}/login`, {
+                id,
+                password
+            });
+
+            if (response.status === 200) {
+                Alert.alert('로그인 성공', response.data.message);
+                onLoginSuccess(); // 로그인 성공 시 onLoginSuccess 호출
+                
+            } else {
+                Alert.alert('로그인 실패', '올바르지 않은 로그인 정보입니다.');
+            }
+        } catch (error) {
+            if (error.response) {
+                console.error('서버 응답 오류:', error.response.data);
+                Alert.alert('로그인 실패', `오류: ${error.response.data.error}`);
+            } else if (error.request) {
+                console.error('요청 오류:', error.request);
+                Alert.alert('로그인 실패', '서버가 응답하지 않습니다.');
+            } else {
+                console.error('설정 오류:', error.message);
+                Alert.alert('로그인 실패', '로그인 처리 중 오류가 발생했습니다.');
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -39,8 +73,8 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
                             onChangeText={setPassword}
                             placeholderTextColor="#000"
                         />
-                        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                            <Text style={styles.buttonText}>로그인</Text>
+                        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+                            <Text style={styles.buttonText}>{loading ? '로그인 중...' : '로그인'}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
                             <Text style={styles.linkText}>회원가입</Text>
@@ -85,6 +119,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10,
         marginTop: 20,
+        elevation: 3, // Android에서 그림자 효과
+        shadowColor: '#000', // iOS에서 그림자 효과
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
     },
     buttonText: {
         color: '#fff',

@@ -39,6 +39,19 @@ const HomeStack = () => (
   </Stack.Navigator>
 );
 
+const MainScreen = () => (
+  <Tab.Navigator
+    tabBar={(props) => <BottomTabBar {...props} />}
+    screenOptions={{ headerShown: false }}
+  >
+    <Tab.Screen name="Home" component={HomeStack} />
+    <Tab.Screen name="Mypage" component={Mypage} />
+    <Tab.Screen name="Camera" component={Camera} />
+    <Tab.Screen name="Community" component={CommunityStack} />
+    <Tab.Screen name="Shelter" component={Shelter} />
+  </Tab.Navigator>
+);
+
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태를 관리
 
@@ -53,19 +66,7 @@ const App = () => {
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             {isLoggedIn ? (
-              // 로그인 상태가 true일 때, Tab Navigator를 표시
-              <Stack.Screen name="Main" component={() => (
-                <Tab.Navigator
-                  tabBar={(props) => <BottomTabBar {...props} />}
-                  screenOptions={{ headerShown: false }}
-                >
-                  <Tab.Screen name="Home" component={HomeStack} />
-                  <Tab.Screen name="Mypage" component={Mypage} />
-                  <Tab.Screen name="Camera" component={Camera} />
-                  <Tab.Screen name="Community" component={CommunityStack} />
-                  <Tab.Screen name="Shelter" component={Shelter} />
-                </Tab.Navigator>
-              )} />
+              <Stack.Screen name="Main" component={MainScreen} />
             ) : (
               <>
                 <Stack.Screen name="Login">
