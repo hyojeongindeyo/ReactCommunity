@@ -1,8 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Alert, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { PostsContext } from './PostsContext';
+import * as Location from 'expo-location';
+import { PostsContext } from './PostsContext'; // PostsContext import
+import axios from 'axios'; // axios import
+import config from '../config'; // config 파일 import
 
 export default function WritePost({ navigation }) {
   const { addPost } = useContext(PostsContext);
@@ -10,26 +13,95 @@ export default function WritePost({ navigation }) {
   const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
+  const [userData, setUserData] = useState(null); // 사용자 정보 상태 추가
+  const [location, setLocation] = useState(null); // 위치 정보 상태 추가
+  const [address, setAddress] = useState(null); // 주소 상태 추가
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+
+  useEffect(() => {
+    fetchUserSession();
+    getLocation();
+  }, []);
+
+  const fetchUserSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user session:', error);
+      Alert.alert('Error', 'Failed to load user data.');
+    }
+  };
+
+  const getLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Cannot access location.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { coords } = await Location.getCurrentPositionAsync({});
+      setLocation(coords);
+      const address = await getAddressFromCoordinates(coords.latitude, coords.longitude);
+      setAddress(address);
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      Alert.alert('Error', 'Failed to fetch location.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getAddressFromCoordinates = async (latitude, longitude) => {
+    try {
+      const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
+      return result ? `${result.city}, ${result.street}` : null; // 필요한 정보에 맞게 조정
+    } catch (error) {
+      console.error('Error getting address from coordinates:', error);
+      return null;
+    }
+  };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
 
-  const handlePostSubmit = () => {
+  const handlePostSubmit = async () => {
     if (selectedCategory && postTitle.trim() && postContent.trim()) {
+      if (!userData || !location || !address) {
+        Alert.alert('Error', 'User data, location, or address not available.');
+        return;
+      }
+
+      const now = new Date();
+      const timestamp = now.toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS 형식으로 변환
+
       const newPost = {
         id: Date.now().toString(),
         category: selectedCategory,
         title: postTitle,
         message: postContent,
         image: selectedImage,
-        timestamp: new Date().toISOString(), // ISO 형식으로 저장
+        timestamp: timestamp,
+        user: userData, // 사용자 정보 추가
+        location: {
+          address: address // 주소 정보 추가
+        }
       };
-      addPost(newPost);
-      setPostTitle('');
-      setPostContent('');
-      setSelectedImage(null);
-      navigation.goBack();
+
+      try {
+        await axios.post(`${config.apiUrl}/posts`, newPost, { withCredentials: true });
+        addPost(newPost);
+        setPostTitle('');
+        setPostContent('');
+        setSelectedImage(null);
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error submitting post:', error);
+        Alert.alert('Error', 'Failed to submit post.');
+      }
     } else {
       Alert.alert('모든 필드를 채워주세요.');
     }
@@ -107,7 +179,7 @@ export default function WritePost({ navigation }) {
               {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
             </View>
 
-            <TouchableOpacity style={styles.addButton} onPress={handlePostSubmit}>
+            <TouchableOpacity style={styles.addButton} onPress={handlePostSubmit} disabled={loading}>
               <Text style={styles.buttonText}>작성 완료</Text>
             </TouchableOpacity>
           </View>
