@@ -197,7 +197,7 @@ function Community({ navigation }) {
                 <ScrollView contentContainerStyle={styles.menuItemsContainer}>
                   {menuItems.map(item => (
                     <TouchableOpacity 
-                      key={item.id} 
+                      key={item.id} d
                       onPress={() => { 
                         setModalVisible(false); 
                         if (item.filter === null) {

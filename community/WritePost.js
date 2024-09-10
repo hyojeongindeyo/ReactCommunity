@@ -16,12 +16,16 @@ export default function WritePost({ navigation }) {
   const [userData, setUserData] = useState(null); // 사용자 정보 상태 추가
   const [location, setLocation] = useState(null); // 위치 정보 상태 추가
   const [address, setAddress] = useState(null); // 주소 상태 추가
-  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [loading, setLoading] = useState(false); // 로딩 상태 수정
 
   useEffect(() => {
     fetchUserSession();
     getLocation();
   }, []);
+
+  useEffect(() => {
+    console.log('Fetched address:', address);  // 주소가 제대로 설정되었는지 확인
+  }, [address]);
 
   const fetchUserSession = async () => {
     try {
@@ -33,92 +37,134 @@ export default function WritePost({ navigation }) {
     }
   };
 
-  const getLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Cannot access location.');
-      setLoading(false);
-      return;
-    }
-
+  const checkLogin = async () => {
     try {
-      const { coords } = await Location.getCurrentPositionAsync({});
-      setLocation(coords);
-      const address = await getAddressFromCoordinates(coords.latitude, coords.longitude);
-      setAddress(address);
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      if (!response.data.user) {
+        Alert.alert('로그인이 필요합니다.');
+        navigation.navigate('Login');  // 로그인 페이지로 리다이렉트
+      }
     } catch (error) {
-      console.error('Error fetching location:', error);
-      Alert.alert('Error', 'Failed to fetch location.');
-    } finally {
-      setLoading(false);
+      console.error('세션 확인 중 오류 발생:', error);
     }
   };
+
+  useEffect(() => {
+    checkLogin();  // 화면 로드 시 로그인 상태 확인
+  }, []);
+
+  const getLocation = async () => {
+    try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            throw new Error('Permission Denied');
+        }
+
+        const { coords } = await Location.getCurrentPositionAsync({});
+        const address = await getAddressFromCoordinates(coords.latitude, coords.longitude);
+        setAddress(address || 'Seoul, Jongno-gu');  // 주소가 없을 경우 기본값 설정
+
+    } catch (error) {
+        console.error('Error fetching location:', error);
+        setAddress('Seoul, Jongno-gu');
+        Alert.alert('Error', 'Failed to fetch location.');
+    }
+};
 
   const getAddressFromCoordinates = async (latitude, longitude) => {
-    try {
-      const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
-      return result ? `${result.city}, ${result.street}` : null; // 필요한 정보에 맞게 조정
-    } catch (error) {
-      console.error('Error getting address from coordinates:', error);
-      return null;
-    }
-  };
+  try {
+    const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
+    console.log("Reverse geocode result:", result);  // 결과 확인 로그 추가
+    // 만약 주소 데이터가 없다면 기본값을 반환
+    return result && result.city && result.street ? `${result.city}, ${result.street}` : 'Unknown Location';
+  } catch (error) {
+    console.error('Error getting address from coordinates:', error);
+    return 'Unknown Location';  // 기본값 설정
+  }
+};
 
   const handleCategorySelect = (category) => {
+    console.log("Selected category:", category);  // 카테고리 선택 로그 추가
     setSelectedCategory(category);
   };
 
   const handlePostSubmit = async () => {
-    if (selectedCategory && postTitle.trim() && postContent.trim()) {
-      if (!userData || !location || !address) {
-        Alert.alert('Error', 'User data, location, or address not available.');
-        return;
-      }
+    // 로그 확인
+    console.log("User Data:", userData);
+    console.log('Selected Category:', selectedCategory);
+    console.log('Post Title:', postTitle);
+    console.log('Post Content:', postContent);
+    console.log('Location Address:', address);  // location_address를 address로 설정
+    console.log('Selected Image:', selectedImage);
 
-      const now = new Date();
-      const timestamp = now.toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS 형식으로 변환
-
-      const newPost = {
-        id: Date.now().toString(),
-        category: selectedCategory,
-        title: postTitle,
-        message: postContent,
-        image: selectedImage,
-        timestamp: timestamp,
-        user: userData, // 사용자 정보 추가
-        location: {
-          address: address // 주소 정보 추가
-        }
-      };
-
-      try {
-        await axios.post(`${config.apiUrl}/posts`, newPost, { withCredentials: true });
-        addPost(newPost);
-        setPostTitle('');
-        setPostContent('');
-        setSelectedImage(null);
-        navigation.goBack();
-      } catch (error) {
-        console.error('Error submitting post:', error);
-        Alert.alert('Error', 'Failed to submit post.');
-      }
-    } else {
-      Alert.alert('모든 필드를 채워주세요.');
+    if (!userData.id || !selectedCategory || !postTitle.trim() || !postContent.trim()) {
+      Alert.alert('All fields are required');
+      return;
     }
-  };
+
+    if (selectedCategory && postTitle.trim() && postContent.trim() && (address || 'Seoul, Jongno-gu') && userData) {
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('category', selectedCategory);
+        formData.append('title', postTitle);
+        formData.append('message', postContent);
+        formData.append('user_id', userData.id); 
+        formData.append('timestamp', new Date().toISOString().slice(0, 19).replace('T', ' '));
+
+        if (selectedImage) {
+            formData.append('image', {
+                uri: selectedImage.startsWith('file://') ? selectedImage : `file://${selectedImage}`, 
+                name: selectedImage.split('/').pop(),
+                type: 'image/jpeg',
+            });
+        }
+
+        // location_address만 전송
+        formData.append('location_address', address);
+
+        try {
+            const response = await axios.post(`${config.apiUrl}/posts`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+            });
+            console.log('서버 응답:', response.data);
+            navigation.goBack();
+        } catch (error) {
+            if (error.response) {
+                console.log('Response error data:', error.response.data);
+                console.log('Response status:', error.response.status);
+                Alert.alert('Error', `Failed to submit post. Server returned: ${error.response.data.error}`);
+            } else if (error.request) {
+                console.log('Request made but no response:', error.request);
+                Alert.alert('Error', 'Request made but no response from server.');
+            } else {
+                console.log('Other error:', error.message);
+                Alert.alert('Error', `Failed to submit post: ${error.message}`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    } else {
+        Alert.alert('모든 필드를 채워주세요');
+        setLoading(false);
+    }
+};
+
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    //quality: 1,  // 이미지 품질을 낮춰 크기를 줄임
+  });
 
-    if (!result.canceled) {
-      setSelectedImage(result.uri);
-    }
-  };
+  if (!result.canceled) {
+    setSelectedImage(result.assets[0].uri); // 이미지 선택 후 URI 설정
+  }
+};
+
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -193,10 +239,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    
   },
   scrollView: {
     flexGrow: 1,
     justifyContent: 'space-between',
+    paddingBottom: 110,
   },
   header: {
     flexDirection: 'row',
@@ -278,7 +326,7 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     width: '100%',
-    height: 200,
+    height: 300,
     borderRadius: 10,
     marginTop: 10,
   },

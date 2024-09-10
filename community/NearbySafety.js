@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Modal, TextInput, TouchableWithoutFeedback } from 'react-native';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
@@ -6,25 +6,39 @@ import { PostsContext } from './PostsContext';
 import moment from 'moment';
 
 export default function NearbySafety({ navigation, route }) {
+  // 선택된 필터 설정
   const { filter } = route.params || { filter: '전체' };
-  const { posts } = useContext(PostsContext);
+  const { posts, loadPosts } = useContext(PostsContext); // PostsContext에서 posts를 가져옴
   const [selectedCategory, setSelectedCategory] = useState(filter);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
 
+  // 게시글 작성 후 게시글 목록을 다시 불러오는 useEffect
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadPosts();  // 게시글 작성 후 목록 다시 불러오기
+    });
+    return unsubscribe;
+  }, [navigation, loadPosts]);
+
+  // 카테고리 목록
   const categories = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
 
+  // 선택한 카테고리에 맞는 게시물 필터링
   const filteredPosts = selectedCategory === '전체' ? posts : posts.filter(post => post.category === selectedCategory);
 
+  // 게시글 작성 페이지로 이동
   const navigateToWritePost = () => {
     navigation.navigate('WritePost');
   };
 
+  // 날짜 포맷팅
   const formatDate = (date) => {
     return moment(date).format('YYYY.MM.DD A hh:mm');
   };
 
+  // 검색 처리
   const handleSearch = () => {
     if (searchQuery.trim() !== '') {
       setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
@@ -32,6 +46,7 @@ export default function NearbySafety({ navigation, route }) {
     }
   };
 
+  // 검색 기록 삭제
   const deleteSearchHistoryItem = (index) => {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
   };
@@ -48,17 +63,19 @@ export default function NearbySafety({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
+      {/* HOT 게시물 상단 표시 */}
       <View style={styles.hotBox}>
         <Text style={styles.hotTitle}>[HOT]</Text>
         <Text style={styles.hotMessage}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
         <Text style={styles.hotTimestamp}>2분 전</Text>
       </View>
 
+      {/* 카테고리 버튼 */}
       <View style={styles.categoryContainer}>
         {categories.map((category) => (
           <TouchableOpacity
             key={category}
-            onPress={() => setSelectedCategory(category)}
+            onPress={() => setSelectedCategory(category)} // 선택된 카테고리 설정
             style={styles.categoryButton}
           >
             <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
@@ -70,13 +87,14 @@ export default function NearbySafety({ navigation, route }) {
 
       <View style={styles.horizontalLine}></View>
 
+      {/* 필터링된 게시물 목록 */}
       <ScrollView style={styles.content}>
         {filteredPosts.map((post, index) => (
           <TouchableOpacity key={index} style={styles.postContainer} onPress={() => navigation.navigate('PostDetail', { post })}>
             <Text style={styles.postText}>
               [{post.category}] {post.title}
             </Text>
-            {post.image && <Image source={{ uri: post.image }} style={styles.postImage} />}
+            {/* {post.image && <Image source={{ uri: post.image }} style={styles.postImage} />} */}
             <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
           </TouchableOpacity>
         ))}
@@ -88,12 +106,16 @@ export default function NearbySafety({ navigation, route }) {
         )}
       </ScrollView>
 
+
+      {/* 게시물 작성 버튼 */}
       <TouchableOpacity style={styles.addButton} onPress={navigateToWritePost}>
         <Entypo name="plus" size={30} color="black" />
       </TouchableOpacity>
 
+      {/* 하단 탭 바 */}
       <BottomTabBar navigation={navigation} />
 
+      {/* 검색 모달 */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -143,9 +165,11 @@ export default function NearbySafety({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  // 스타일 정의
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingBottom:80,
   },
   header: {
     flexDirection: 'row',
