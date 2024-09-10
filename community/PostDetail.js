@@ -78,8 +78,22 @@ export default function PostDetail({ route, navigation }) {
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
         <Text style={styles.timestamp}>{moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
-        <Text style={styles.postText}>{post.message}</Text>
-        {post.image && <Image source={{ uri: post.image }} style={styles.postImage} />}
+        
+
+        {/* 본문에서만 이미지가 보이게 렌더링 */}
+        {post.image && (
+          <Image
+            source={{ uri: post.image }}
+            style={styles.postImage}
+            resizeMode="contain" // 이미지가 잘리지 않도록 설정
+            onError={(error) => {
+              console.error("Image load error: ", error);
+              Alert.alert("이미지를 로드할 수 없습니다.");
+            }} // 이미지 로드 에러 핸들링
+          />      
+        )}
+
+<Text style={styles.postText}>{post.message}</Text>
         <View style={styles.separator}></View>
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>

@@ -1,5 +1,7 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react'; // useEffect, useState 가져오기
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';  
+import config from '../config';  
 
 export const PostsContext = createContext();
 
@@ -13,21 +15,28 @@ export const PostsProvider = ({ children }) => {
     { id: '4', category: '주의', title: '폭염 주의', message: '외출을 삼가하세요.', timestamp: '2024-07-24T15:20:00', image: null },
   ];
 
-  useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const storedPosts = await AsyncStorage.getItem('posts');
-        if (storedPosts) {
-          setPosts(JSON.parse(storedPosts));
-        } else {
-          setPosts(defaultPosts);
-        }
-      } catch (error) {
-        console.error('Failed to load posts:', error);
+  // 서버에서 게시글 목록을 가져오는 함수
+  const loadPosts = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/posts`, {
+        withCredentials: true,
+      });
+      const fetchedPosts = response.data;
+      setPosts(fetchedPosts);
+      await AsyncStorage.setItem('posts', JSON.stringify(fetchedPosts));
+    } catch (error) {
+      console.error('Failed to load posts from server:', error);
+      const storedPosts = await AsyncStorage.getItem('posts');
+      if (storedPosts) {
+        setPosts(JSON.parse(storedPosts));
+      } else {
         setPosts(defaultPosts);
       }
-    };
-    loadPosts();
+    }
+  };
+
+  useEffect(() => {
+    loadPosts();  // 앱 로드 시 게시글 목록 불러오기
   }, []);
 
   const savePosts = async (newPosts) => {
@@ -39,9 +48,20 @@ export const PostsProvider = ({ children }) => {
     }
   };
 
-  const addPost = (newPost) => {
-    const updatedPosts = [...posts, { ...newPost, id: (posts.length + 1).toString() }];
-    savePosts(updatedPosts);
+  const addPost = async (newPost) => {
+    try {
+      const response = await axios.post(`${config.apiUrl}/posts`, newPost, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      });
+
+      const savedPost = response.data;
+      const updatedPosts = [...posts, savedPost];
+      setPosts(updatedPosts);
+      await AsyncStorage.setItem('posts', JSON.stringify(updatedPosts));
+    } catch (error) {
+      console.error('Failed to add post:', error);
+    }
   };
 
   const updatePost = (updatedPost) => {
@@ -57,7 +77,7 @@ export const PostsProvider = ({ children }) => {
   };
 
   return (
-    <PostsContext.Provider value={{ posts, addPost, updatePost, deletePost }}>
+    <PostsContext.Provider value={{ posts, loadPosts, addPost, updatePost, deletePost }}>
       {children}
     </PostsContext.Provider>
   );
