@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -11,6 +11,19 @@ export default function PostDetail({ route, navigation }) {
   const postId = post.id;
 
   const [newComment, setNewComment] = useState('');
+  const [imageAspectRatio, setImageAspectRatio] = useState(1); // 기본 비율 설정
+
+  // 이미지 비율 동적 계산
+  useEffect(() => {
+    if (post.image) {
+      Image.getSize(post.image, (width, height) => {
+        setImageAspectRatio(width / height);  // 가로/세로 비율 설정
+      }, (error) => {
+        console.error("Image load error: ", error);
+        Alert.alert("이미지를 로드할 수 없습니다.");
+      });
+    }
+  }, [post.image]);
 
   const postComments = comments[postId] || [];
 
@@ -77,20 +90,24 @@ export default function PostDetail({ route, navigation }) {
       </View>
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
-        <Text style={styles.timestamp}>{moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
+        <Text style={styles.timestamp}>
+          {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')} 
+          작성자: {post.user_nickname} {/* 작성자 닉네임 표시 */}
+        </Text>
+
         
 
         {/* 본문에서만 이미지가 보이게 렌더링 */}
         {post.image && (
           <Image
             source={{ uri: post.image }}
-            style={styles.postImage}
-            resizeMode="contain" // 이미지가 잘리지 않도록 설정
+            style={[styles.postImage, { aspectRatio: imageAspectRatio }]}  // 동적 비율 적용
+            resizeMode="contain"
             onError={(error) => {
               console.error("Image load error: ", error);
               Alert.alert("이미지를 로드할 수 없습니다.");
-            }} // 이미지 로드 에러 핸들링
-          />      
+            }}
+          />
         )}
 
 <Text style={styles.postText}>{post.message}</Text>
@@ -165,9 +182,15 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
-  postImage: {
+  ppostImage: {
     width: '100%',
-    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  ostImage: {
+    width: '100%',
+    aspectRatio: 1,  // 1:1 비율 (정사각형 이미지를 위해 설정)
+    resizeMode: 'contain',  // 이미지 비율 유지
     borderRadius: 10,
     marginBottom: 20,
   },
