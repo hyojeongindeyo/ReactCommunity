@@ -33,10 +33,12 @@ export default function PostDetail({ route, navigation }) {
       "정말로 이 글을 삭제하시겠습니까?",
       [
         { text: "취소", style: "cancel" },
-        { text: "삭제", onPress: () => {
-          // 글 삭제 로직 추가
-          navigation.goBack();
-        }},
+        {
+          text: "삭제", onPress: () => {
+            // 글 삭제 로직 추가
+            navigation.goBack();
+          }
+        },
       ],
       { cancelable: false }
     );
@@ -80,7 +82,7 @@ export default function PostDetail({ route, navigation }) {
         </TouchableOpacity>
         <Text style={styles.title}>{post.title}</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => {/* 글 수정 로직 추가 */}} style={styles.iconButton}>
+          <TouchableOpacity onPress={() => {/* 글 수정 로직 추가 */ }} style={styles.iconButton}>
             <MaterialIcons name="edit" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
@@ -91,11 +93,13 @@ export default function PostDetail({ route, navigation }) {
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
         <Text style={styles.timestamp}>
-          {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')} 
           작성자: {post.user_nickname} {/* 작성자 닉네임 표시 */}
         </Text>
+        <Text  style={styles.timestamp}>
+          {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+        </Text>
 
-        
+
 
         {/* 본문에서만 이미지가 보이게 렌더링 */}
         {post.image && (
@@ -110,7 +114,7 @@ export default function PostDetail({ route, navigation }) {
           />
         )}
 
-<Text style={styles.postText}>{post.message}</Text>
+        <Text style={styles.postText}>{post.message}</Text>
         <View style={styles.separator}></View>
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>
@@ -182,12 +186,12 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
-  ppostImage: {
+  postImage: {
     width: '100%',
     borderRadius: 10,
     marginBottom: 20,
   },
-  ostImage: {
+  postImage: {
     width: '100%',
     aspectRatio: 1,  // 1:1 비율 (정사각형 이미지를 위해 설정)
     resizeMode: 'contain',  // 이미지 비율 유지
@@ -198,7 +202,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
     textAlign: 'right',
-    marginVertical: 10,
+    marginTop: 3,
+    // marginVertical: 10,
   },
   separator: {
     height: 1,
