@@ -93,10 +93,10 @@ export default function PostDetail({ route, navigation }) {
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
         <Text style={styles.timestamp}>
-          작성자: {post.user_nickname} {/* 작성자 닉네임 표시 */}
-        </Text>
-        <Text  style={styles.timestamp}>
           {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+        </Text>
+        <Text style={styles.timestamp}>
+          작성자: {post.user_nickname} {/* 작성자 닉네임 표시 */}
         </Text>
 
 
