@@ -1,18 +1,91 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Image, Modal, TextInput, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 import { PostsContext } from './PostsContext';
 import moment from 'moment';
+import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage for caching
 
 export default function NearbySafety({ navigation, route }) {
-  // 선택된 필터 설정
-  const { filter } = route.params || { filter: '전체' };
   const { posts, loadPosts } = useContext(PostsContext); // PostsContext에서 posts를 가져옴
-  const [selectedCategory, setSelectedCategory] = useState(filter);
+  const [userLocation, setUserLocation] = useState(null); // 사용자 위치 상태
+  const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물 상태
+  const [selectedCategory, setSelectedCategory] = useState('전체'); // 선택된 카테고리 상태
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
+
+  // 위치 정보 캐싱 함수
+  const getCachedLocation = async () => {
+    try {
+      const cachedLocation = await AsyncStorage.getItem('userLocation');
+      if (cachedLocation !== null) {
+        setUserLocation(cachedLocation);
+        setLoading(false); // 캐시에서 로드된 경우 로딩 상태 해제
+      }
+    } catch (error) {
+      console.error('Failed to load cached location:', error);
+    }
+  };
+
+  // 사용자 위치 가져오기
+  useEffect(() => {
+    const fetchLocation = async () => {
+      setLoading(true); // 위치 정보 로드 시작 시 로딩 상태 활성화
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        return;
+      }
+
+      try {
+        // 빠르게 위치를 얻기 위해 정확도를 낮춤
+        let location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        });
+
+        const address = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude
+        });
+
+        if (address.length > 0) {
+          const { city, district } = address[0];
+          const userAddress = `${city} ${district}`;
+          setUserLocation(userAddress);  // 시(city)와 동(district) 정보 설정
+          await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
+        }
+      } catch (error) {
+        console.error('Error fetching location:', error);
+      } finally {
+        setLoading(false); // 위치 정보 로드 완료 후 로딩 상태 해제
+      }
+    };
+
+    getCachedLocation(); // 캐시된 위치 먼저 가져오기
+    fetchLocation(); // 새 위치 정보 요청
+  }, []);
+
+  // 위치와 카테고리에 따른 게시물 필터링
+  useEffect(() => {
+    if (userLocation && posts) {
+      const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
+      const filtered = posts.filter(post => {
+        // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
+        const isMatchingLocation = post.location_address === formattedUserLocation;
+        const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
+        return isMatchingLocation && isMatchingCategory;
+      });
+      setFilteredPosts(filtered);  // 필터링된 게시물 설정
+    }
+  }, [userLocation, posts, selectedCategory]);
+
+  // 날짜 포맷팅 함수
+  const formatDate = (date) => {
+    return moment(date).format('YYYY.MM.DD A hh:mm');
+  };
 
   // 게시글 작성 후 게시글 목록을 다시 불러오는 useEffect
   useEffect(() => {
@@ -21,22 +94,6 @@ export default function NearbySafety({ navigation, route }) {
     });
     return unsubscribe;
   }, [navigation, loadPosts]);
-
-  // 카테고리 목록
-  const categories = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
-
-  // 선택한 카테고리에 맞는 게시물 필터링
-  const filteredPosts = selectedCategory === '전체' ? posts : posts.filter(post => post.category === selectedCategory);
-
-  // 게시글 작성 페이지로 이동
-  const navigateToWritePost = () => {
-    navigation.navigate('WritePost');
-  };
-
-  // 날짜 포맷팅
-  const formatDate = (date) => {
-    return moment(date).format('YYYY.MM.DD A hh:mm');
-  };
 
   // 검색 처리
   const handleSearch = () => {
@@ -63,56 +120,60 @@ export default function NearbySafety({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
-      {/* HOT 게시물 상단 표시 */}
-      <View style={styles.hotBox}>
-        <Text style={styles.hotTitle}>[HOT]</Text>
-        <Text style={styles.hotMessage}>2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요!!!</Text>
-        <Text style={styles.hotTimestamp}>2분 전</Text>
-      </View>
-
-      {/* 카테고리 버튼 */}
-      <View style={styles.categoryContainer}>
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category}
-            onPress={() => setSelectedCategory(category)} // 선택된 카테고리 설정
-            style={styles.categoryButton}
-          >
-            <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
-              {category}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={styles.horizontalLine}></View>
-
-      {/* 필터링된 게시물 목록 */}
-      <ScrollView style={styles.content}>
-        {filteredPosts.map((post, index) => (
-          <TouchableOpacity key={index} style={styles.postContainer} onPress={() => navigation.navigate('PostDetail', { post })}>
-            <Text style={styles.postText}>
-              [{post.category}] {post.title}
-            </Text>
-            {/* {post.image && <Image source={{ uri: post.image }} style={styles.postImage} />} */}
-            <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
-          </TouchableOpacity>
-        ))}
-
-        {filteredPosts.length === 0 && (
-          <View style={styles.alertBox}>
-            <Text style={styles.message}>해당 카테고리에 대한 소식이 없습니다.</Text>
+      {loading ? ( 
+        // 위치 정보 로딩 중 로딩 표시
+        <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} /> 
+      ) : (
+        <>
+          {/* HOT 게시물 상단 표시 - 현재 비워둠 */}
+          <View style={styles.hotBox}>
+            <Text style={styles.hotTitle}>[HOT]</Text>
+            <Text style={styles.hotMessage}>HOT 게시물은 아직 없습니다.</Text>
+            <Text style={styles.hotTimestamp}>-</Text>
           </View>
-        )}
-      </ScrollView>
 
+          {/* 카테고리 버튼 */}
+          <View style={styles.categoryContainer}>
+            {['전체', 'HOT', '교통', '시위', '재해', '주의'].map((category) => (
+              <TouchableOpacity
+                key={category}
+                onPress={() => setSelectedCategory(category)}  // 선택된 카테고리 설정
+                style={styles.categoryButton}
+              >
+                <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.horizontalLine}></View>
+
+          {/* 필터링된 게시물 목록 */}
+          <ScrollView style={styles.content}>
+            {filteredPosts.length > 0 ? (
+              filteredPosts.map((post, index) => (
+                <TouchableOpacity key={index} style={styles.postContainer} onPress={() => navigation.navigate('PostDetail', { post })}>
+                  <Text style={styles.postText}>
+                    [{post.category}] {post.title}
+                  </Text>
+                  <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.alertBox}>
+                <Text style={styles.message}>해당 위치에 대한 소식이 없습니다.</Text>
+              </View>
+            )}
+          </ScrollView>
+        </>
+      )}
 
       {/* 게시물 작성 버튼 */}
-      <TouchableOpacity style={styles.addButton} onPress={navigateToWritePost}>
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('WritePost')}>
         <Entypo name="plus" size={30} color="black" />
       </TouchableOpacity>
 
-      {/* 하단 탭 바 */}
       <BottomTabBar navigation={navigation} />
 
       {/* 검색 모달 */}
@@ -165,11 +226,10 @@ export default function NearbySafety({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  // 스타일 정의
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingBottom:80,
+    paddingBottom: 80,
   },
   header: {
     flexDirection: 'row',
@@ -215,6 +275,11 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'right',
   },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -254,17 +319,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  postImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginTop: 10,
-    marginBottom: 10,
-  },
   timestamp: {
     fontSize: 12,
     color: '#999',
-    textAlign: 'left',
   },
   alertBox: {
     backgroundColor: '#fff3e0',
@@ -276,6 +333,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  message: {
+    fontSize: 16,
+    color: '#999',
   },
   addButton: {
     position: 'absolute',
