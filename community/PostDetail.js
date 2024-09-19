@@ -188,11 +188,6 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  postImage: {
-    width: '100%',
     aspectRatio: 1,  // 1:1 비율 (정사각형 이미지를 위해 설정)
     resizeMode: 'contain',  // 이미지 비율 유지
     borderRadius: 10,

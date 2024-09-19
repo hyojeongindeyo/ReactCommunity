@@ -71,12 +71,12 @@ export default function WritePost({ navigation }) {
     }
 };
 
-  const getAddressFromCoordinates = async (latitude, longitude) => {
+const getAddressFromCoordinates = async (latitude, longitude) => {
   try {
     const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
     console.log("Reverse geocode result:", result);  // 결과 확인 로그 추가
-    // 만약 주소 데이터가 없다면 기본값을 반환
-    return result && result.city && result.street ? `${result.city}, ${result.street}` : 'Unknown Location';
+    // 시(city)와 동(district)을 반환, 주소 데이터가 없을 경우 기본값 설정
+    return result && result.city && result.district ? `${result.city}, ${result.district}` : 'Unknown Location';
   } catch (error) {
     console.error('Error getting address from coordinates:', error);
     return 'Unknown Location';  // 기본값 설정
