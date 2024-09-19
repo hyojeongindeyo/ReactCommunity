@@ -155,8 +155,8 @@ const getAddressFromCoordinates = async (latitude, longitude) => {
   const pickImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 3],
+    allowsEditing: false,
+    // aspect: [4, 3],
     //quality: 1,  // 이미지 품질을 낮춰 크기를 줄임
   });
 
