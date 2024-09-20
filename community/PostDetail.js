@@ -4,10 +4,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { CommentsContext } from './CommentsContext';
+import axios from 'axios';
+import config from '../config';
 
 export default function PostDetail({ route, navigation }) {
   const { post } = route.params;
   const { comments, setComments } = useContext(CommentsContext);
+  const [userData, setUserData] = useState(null);
   const postId = post.id;
 
   const [newComment, setNewComment] = useState('');
@@ -24,6 +27,19 @@ export default function PostDetail({ route, navigation }) {
       });
     }
   }, [post.image]);
+
+  useEffect(() => {
+    fetchUserSession();
+  }, []);
+
+  const fetchUserSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user session:', error);
+    }
+  };
 
   const postComments = comments[postId] || [];
 
@@ -115,7 +131,19 @@ export default function PostDetail({ route, navigation }) {
         )}
 
         <Text style={styles.postText}>{post.message}</Text>
+
+        {/* 삭제 버튼 */}
+        {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteText}>삭제</Text>
+          </TouchableOpacity>
+        )}
+        {/* <View><Text></Text></View> */}
+
+
         <View style={styles.separator}></View>
+
+
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>
           {postComments.map((comment, index) => (
@@ -182,14 +210,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
   },
   postText: {
-    fontSize: 16,
+    fontSize: 17,
     color: '#333',
     marginBottom: 20,
   },
   postImage: {
     width: '100%',
-    aspectRatio: 1,  // 1:1 비율 (정사각형 이미지를 위해 설정)
+    // height: 280,
+    // aspectRatio: 1,  // 1:1 비율 (정사각형 이미지를 위해 설정)
+    // aspectRatio: imageAspectRatio, 
     resizeMode: 'contain',  // 이미지 비율 유지
+    height: 280,
     borderRadius: 10,
     marginBottom: 20,
   },
@@ -251,10 +282,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deleteButton: {
-    backgroundColor: '#ff0000',
+    backgroundColor: '#F3F3F3',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 60,
-    height: '100%',
+    width: 55,
+    height: 25,
+    borderRadius: 6,
   },
+  deleteText:{
+    fontWeight: 'bold',
+  }
 });
