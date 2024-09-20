@@ -123,11 +123,10 @@ export default function PostDetail({ route, navigation }) {
             // style={styles.postImage}
             style={{
               width: '100%',
-              height: 250,
+              height: imageAspectRatio > 1 ? 200 : 250, // 가로 비율에 따라 높이 조정
               resizeMode: 'contain',
-              borderRadius: 10,
-               marginBottom: imageAspectRatio > 1 ? -28 : 20, // 가로일 경우 더 줄이기
-               marginTop:imageAspectRatio > 1 ? -28 :20,
+              marginTop : 10,
+              marginBottom: 16, // 이미지 아래 간격 추가
             }}
             onError={(error) => {
               console.error("Image load error: ", error);
