@@ -117,18 +117,24 @@ export default function PostDetail({ route, navigation }) {
 
 
 
-        {/* 본문에서만 이미지가 보이게 렌더링 */}
-        {post.image && (
+        <View>
           <Image
             source={{ uri: post.image }}
-            style={[styles.postImage, { aspectRatio: imageAspectRatio }]}  // 동적 비율 적용
-            resizeMode="contain"
+            // style={styles.postImage}
+            style={{
+              width: '100%',
+              height: 250,
+              resizeMode: 'contain',
+              borderRadius: 10,
+               marginBottom: imageAspectRatio > 1 ? -28 : 20, // 가로일 경우 더 줄이기
+               marginTop:imageAspectRatio > 1 ? -28 :20,
+            }}
             onError={(error) => {
               console.error("Image load error: ", error);
               Alert.alert("이미지를 로드할 수 없습니다.");
             }}
           />
-        )}
+        </View>
 
         <Text style={styles.postText}>{post.message}</Text>
 
@@ -214,16 +220,13 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
-  postImage: {
-    width: '100%',
-    // height: 280,
-    // aspectRatio: 1,  // 1:1 비율 (정사각형 이미지를 위해 설정)
-    // aspectRatio: imageAspectRatio, 
-    resizeMode: 'contain',  // 이미지 비율 유지
-    height: 280,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
+  // postImage: {
+  //   width: '100%',
+  //   resizeMode: 'contain',  // 이미지 비율 유지
+  //   height: 280,
+  //   borderRadius: 10,
+  //   marginBottom: 20,
+  // },
   timestamp: {
     fontSize: 12,
     color: '#999',
@@ -289,7 +292,8 @@ const styles = StyleSheet.create({
     height: 25,
     borderRadius: 6,
   },
-  deleteText:{
+  deleteText: {
     fontWeight: 'bold',
   }
+  
 });
