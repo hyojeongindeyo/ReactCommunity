@@ -103,8 +103,8 @@ export default function PostDetail({ route, navigation }) {
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>{post.title}</Text>
-        <View style={styles.headerRight}>
-        </View>
+        
+        <View style={styles.iconhide}><MaterialIcons name="keyboard-arrow-left" size={30} color="black" /></View>
       </View>
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
@@ -139,11 +139,17 @@ export default function PostDetail({ route, navigation }) {
 
         {/* 삭제 버튼 */}
         {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Text style={styles.deleteText}>삭제</Text>
+          <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
+            <Text style={styles.udText}>삭제</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.udButton, { marginLeft: 5 }]} onPress={() => {/* 수정 로직 추가 */ }}>
+            <Text style={styles.udText}>수정</Text>
+          </TouchableOpacity>
+        </View>
+          
         )}
-        {/* <View><Text></Text></View> */}
+
 
 
         <View style={styles.separator}></View>
@@ -201,9 +207,8 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: '2%',
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  iconhide: {
+    opacity: 0
   },
   headerSeparator: {
     height: 1,
@@ -283,15 +288,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  deleteButton: {
-    backgroundColor: '#F3F3F3',
+  udButton: {
+    backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
     width: 55,
     height: 25,
     borderRadius: 6,
   },
-  deleteText: {
+  udText: {
     fontWeight: 'bold',
   }
   
