@@ -43,22 +43,28 @@ export default function PostDetail({ route, navigation }) {
 
   const postComments = comments[postId] || [];
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     Alert.alert(
       "글 삭제",
       "정말로 이 글을 삭제하시겠습니까?",
       [
         { text: "취소", style: "cancel" },
         {
-          text: "삭제", onPress: () => {
-            // 글 삭제 로직 추가
-            navigation.goBack();
+          text: "삭제", onPress: async () => {
+            try {
+              await axios.delete(`${config.apiUrl}/posts/${postId}`, { withCredentials: true });
+              Alert.alert("삭제 완료", "게시물이 삭제되었습니다.");
+              navigation.goBack(); // 삭제 후 이전 화면으로 돌아가기
+            } catch (error) {
+              console.error('Error deleting post:', error);
+              Alert.alert("삭제 실패", "게시물 삭제에 실패했습니다.");
+            }
           }
         },
       ],
       { cancelable: false }
     );
-  };
+  };  
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
@@ -98,12 +104,6 @@ export default function PostDetail({ route, navigation }) {
         </TouchableOpacity>
         <Text style={styles.title}>{post.title}</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => {/* 글 수정 로직 추가 */ }} style={styles.iconButton}>
-            <MaterialIcons name="edit" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
-            <MaterialIcons name="delete" size={24} color="black" />
-          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.headerSeparator}></View>
