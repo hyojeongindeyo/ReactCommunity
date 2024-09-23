@@ -113,7 +113,7 @@ export default function PostDetail({ route, navigation }) {
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
         <Text style={styles.timestamp}>
-          {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+          작성 시간: {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
         </Text>
         {post.updated_timestamp && ( // 수정 시간이 존재할 경우에만 표시
           <Text style={styles.timestamp}>

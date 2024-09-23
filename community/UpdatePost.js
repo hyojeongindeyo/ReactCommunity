@@ -65,9 +65,12 @@ export default function UpdatePost({ navigation, route }) {
         formData.append('message', postContent);
         formData.append('user_email', userEmail); // 추가된 부분
         formData.append('user_nickname', userNickname); // 추가된 부분
-        
-        const updatedTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+        const updatedTimestamp = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')
         formData.append('updated_timestamp', updatedTimestamp);
+
+        // formData.append('timestamp', new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')); // KST로 변환
+
 
         // 선택된 이미지가 기존 이미지와 다를 경우에만 새 이미지를 추가
         if (selectedImage && selectedImage !== post.image) {
