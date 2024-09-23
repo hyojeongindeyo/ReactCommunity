@@ -16,6 +16,7 @@ import PostDetail from './community/PostDetail';
 import Shelter from './shelter/Shelter.js';
 import LoginScreen from './login/LoginScreen'; // 로그인 페이지
 import SignupScreen from './login/SignupScreen'; // 회원가입 페이지
+import UpdatePost from './community/UpdatePost.js';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -27,6 +28,7 @@ const CommunityStack = () => (
     <Stack.Screen name="WritePost" component={WritePost} />
     <Stack.Screen name="SafetyInfo" component={SafetyInfo} />
     <Stack.Screen name="PostDetail" component={PostDetail} />
+    <Stack.Screen name="UpdatePost" component={UpdatePost} />
   </Stack.Navigator>
 );
 

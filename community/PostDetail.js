@@ -16,6 +16,10 @@ export default function PostDetail({ route, navigation }) {
   const [newComment, setNewComment] = useState('');
   const [imageAspectRatio, setImageAspectRatio] = useState(1); // 기본 비율 설정
 
+  useEffect(() => {
+    console.log("수정된 데이터:", post);
+  }, [post]);
+
   // 이미지 비율 동적 계산
   useEffect(() => {
     if (post.image) {
@@ -64,7 +68,7 @@ export default function PostDetail({ route, navigation }) {
       ],
       { cancelable: false }
     );
-  };  
+  };
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
@@ -103,7 +107,7 @@ export default function PostDetail({ route, navigation }) {
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>{post.title}</Text>
-        
+
         <View style={styles.iconhide}><MaterialIcons name="keyboard-arrow-left" size={30} color="black" /></View>
       </View>
       <View style={styles.headerSeparator}></View>
@@ -125,7 +129,7 @@ export default function PostDetail({ route, navigation }) {
               width: '100%',
               height: imageAspectRatio > 1 ? 200 : 250, // 가로 비율에 따라 높이 조정
               resizeMode: 'contain',
-              marginTop : 10,
+              marginTop: 10,
               marginBottom: 16, // 이미지 아래 간격 추가
             }}
             onError={(error) => {
@@ -140,14 +144,21 @@ export default function PostDetail({ route, navigation }) {
         {/* 삭제 버튼 */}
         {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
           <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
-            <Text style={styles.udText}>삭제</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.udButton, { marginLeft: 5 }]} onPress={() => {/* 수정 로직 추가 */ }}>
-            <Text style={styles.udText}>수정</Text>
-          </TouchableOpacity>
-        </View>
-          
+            <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
+              <Text style={styles.udText}>삭제</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                console.log("수정할 데이터: ", post); // 수정할 데이터 로그
+                navigation.replace('UpdatePost', { post });
+              }}
+              style={[styles.udButton, { marginLeft: 5 }]}
+            >
+              <Text style={styles.udText}>수정</Text>
+            </TouchableOpacity>
+
+          </View>
+
         )}
 
 
@@ -299,5 +310,5 @@ const styles = StyleSheet.create({
   udText: {
     fontWeight: 'bold',
   }
-  
+
 });
