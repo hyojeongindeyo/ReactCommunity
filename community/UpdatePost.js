@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import config from '../config';
 import { PostsContext } from './PostsContext';
+import moment from 'moment-timezone';
 
 export default function UpdatePost({ navigation, route }) {
     const { post } = route.params;
@@ -16,10 +17,11 @@ export default function UpdatePost({ navigation, route }) {
     const [loading, setLoading] = useState(false);
     const [userEmail, setUserEmail] = useState('');
     const [userNickname, setUserNickname] = useState('');
+    // const [updatedTimestamp, setupdatedTimestamp] = useState('');
 
     useEffect(() => {
         console.log("전달된 포스트 데이터: ", route.params.post);
-      }, [route.params.post]);
+    }, [route.params.post]);
 
     useEffect(() => {
         setPostTitle(post.title);
@@ -27,9 +29,10 @@ export default function UpdatePost({ navigation, route }) {
         setSelectedCategory(post.category);
         setSelectedImage(post.image);
         setUserEmail(post.user_email); // 추가된 부분
-            setUserNickname(post.user_nickname); // 추가된 부분
+        setUserNickname(post.user_nickname); // 추가된 부분
+        // setupdatedTimestamp(post.updated_timestamp);
     }, [post]);
-    
+
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
@@ -48,21 +51,24 @@ export default function UpdatePost({ navigation, route }) {
 
     const handlePostUpdate = async () => {
         const postId = post.id;
-    
+
         if (!selectedCategory || !postTitle.trim() || !postContent.trim()) {
             Alert.alert('모든 필드를 채워주세요');
             return;
         }
-    
+
         setLoading(true);
-    
+
         const formData = new FormData();
         formData.append('category', selectedCategory);
         formData.append('title', postTitle);
         formData.append('message', postContent);
         formData.append('user_email', userEmail); // 추가된 부분
         formData.append('user_nickname', userNickname); // 추가된 부분
-    
+        
+        const updatedTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        formData.append('updated_timestamp', updatedTimestamp);
+
         // 선택된 이미지가 기존 이미지와 다를 경우에만 새 이미지를 추가
         if (selectedImage && selectedImage !== post.image) {
             formData.append('image', {
@@ -71,13 +77,13 @@ export default function UpdatePost({ navigation, route }) {
                 type: 'image/jpeg',
             });
         }
-    
+
         try {
             await axios.put(`${config.apiUrl}/posts/${postId}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true,
             });
-    
+
             // 업데이트된 포스트 정보를 생성
             const updatedPost = {
                 id: postId,
@@ -87,13 +93,13 @@ export default function UpdatePost({ navigation, route }) {
                 image: selectedImage || post.image,
                 user_email: userEmail, // 추가된 부분
                 user_nickname: userNickname, // 추가된 부분
-                // 필요한 경우 location_address도 추가
+                updated_timestamp: updatedTimestamp,
             };
-            
+
             // console.log('Updated Post:', updatedPost);
-    
+
             navigation.replace('PostDetail', { post: updatedPost });
-    
+
         } catch (error) {
             console.error('Error updating post:', error.response ? error.response.data : error.message);
             Alert.alert('Error', 'Failed to update post: ' + (error.response ? error.response.data.message : 'Unknown error'));
