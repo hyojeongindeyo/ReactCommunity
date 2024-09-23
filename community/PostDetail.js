@@ -126,23 +126,24 @@ export default function PostDetail({ route, navigation }) {
 
 
 
-        <View>
-          <Image
-            source={{ uri: post.image }}
-            // style={styles.postImage}
-            style={{
-              width: '100%',
-              height: imageAspectRatio > 1 ? 200 : 250, // 가로 비율에 따라 높이 조정
-              resizeMode: 'contain',
-              marginTop: 10,
-              marginBottom: 16, // 이미지 아래 간격 추가
-            }}
-            onError={(error) => {
-              console.error("Image load error: ", error);
-              Alert.alert("이미지를 로드할 수 없습니다.");
-            }}
-          />
-        </View>
+        {post.image ? (
+          <View>
+            <Image
+              source={{ uri: post.image }}
+              style={{
+                width: '100%',
+                height: imageAspectRatio > 1 ? 200 : 250, // 가로 비율에 따라 높이 조정
+                resizeMode: 'contain',
+                marginTop: 10,
+                marginBottom: 16, // 이미지 아래 간격 추가
+              }}
+              onError={(error) => {
+                console.error("Image load error: ", error);
+                Alert.alert("이미지를 로드할 수 없습니다.");
+              }}
+            />
+          </View>
+        ) : null}
 
         <Text style={styles.postText}>{post.message}</Text>
 
