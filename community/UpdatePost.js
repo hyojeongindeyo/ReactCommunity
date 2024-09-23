@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import config from '../config';
 import { PostsContext } from './PostsContext';
-import moment from 'moment-timezone';
+//import moment from 'moment-timezone';
 
 export default function UpdatePost({ navigation, route }) {
     const { post } = route.params;
