@@ -66,6 +66,9 @@ export default function UpdatePost({ navigation, route }) {
         formData.append('user_email', userEmail); // 추가된 부분
         formData.append('user_nickname', userNickname); // 추가된 부분
 
+        const Timestamp = post.timestamp; // 예: '2024-01-01 12:00:00'
+
+
         const updatedTimestamp = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')
         formData.append('updated_timestamp', updatedTimestamp);
 
@@ -96,6 +99,7 @@ export default function UpdatePost({ navigation, route }) {
                 image: selectedImage || post.image,
                 user_email: userEmail, // 추가된 부분
                 user_nickname: userNickname, // 추가된 부분
+                timestamp: Timestamp, // 작성 시간 유지
                 updated_timestamp: updatedTimestamp,
             };
 
