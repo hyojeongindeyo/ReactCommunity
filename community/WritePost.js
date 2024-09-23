@@ -110,7 +110,7 @@ const getAddressFromCoordinates = async (latitude, longitude) => {
         formData.append('title', postTitle);
         formData.append('message', postContent);
         formData.append('user_id', userData.id); 
-        formData.append('timestamp', new Date().toISOString().slice(0, 19).replace('T', ' '));
+        formData.append('timestamp', new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')); // KST로 변환
 
         if (selectedImage) {
             formData.append('image', {
