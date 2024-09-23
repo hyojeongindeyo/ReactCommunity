@@ -68,19 +68,23 @@ export default function NearbySafety({ navigation, route }) {
     fetchLocation(); // 새 위치 정보 요청
   }, []);
 
-  // 위치와 카테고리에 따른 게시물 필터링
-  useEffect(() => {
-    if (userLocation && posts) {
-      const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
-      const filtered = posts.filter(post => {
-        // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
-        const isMatchingLocation = post.location_address === formattedUserLocation;
-        const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
-        return isMatchingLocation && isMatchingCategory;
-      });
-      setFilteredPosts(filtered);  // 필터링된 게시물 설정
-    }
-  }, [userLocation, posts, selectedCategory]);
+  // 위치와 카테고리에 따른 게시물 필터링 및 정렬
+useEffect(() => {
+  if (userLocation && posts) {
+    const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
+    const filtered = posts.filter(post => {
+      // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
+      const isMatchingLocation = post.location_address === formattedUserLocation;
+      const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
+      return isMatchingLocation && isMatchingCategory;
+    });
+    
+    // 최신순으로 정렬 (timestamp를 기준으로 내림차순 정렬)
+    const sortedPosts = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    setFilteredPosts(sortedPosts);  // 필터링 및 정렬된 게시물 설정
+  }
+}, [userLocation, posts, selectedCategory]);
 
   // 날짜 포맷팅 함수
   const formatDate = (date) => {
