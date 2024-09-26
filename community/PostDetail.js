@@ -36,6 +36,24 @@ export default function PostDetail({ route, navigation }) {
     fetchUserSession();
   }, []);
 
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}/comments/${post.id}`);
+        console.log("Fetched comments:", response.data); // 받아온 댓글 데이터를 확인
+  
+        setComments({
+          ...comments,
+          [postId]: response.data
+        });
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+    };
+  
+    fetchComments();
+  }, [post.id]);  
+  
   const fetchUserSession = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
@@ -72,17 +90,31 @@ export default function PostDetail({ route, navigation }) {
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      const newComments = {
-        ...comments,
-        [postId]: [
-          ...postComments,
-          { text: newComment, timestamp: new Date().toISOString() } // ISO 형식으로 저장
-        ]
-      };
-      setComments(newComments);
-      setNewComment('');
-    } else {
-      Alert.alert("댓글을 입력해주세요.");
+      axios.post(`${config.apiUrl}/comments`, {
+        post_id: post.id,
+        comment_text: newComment
+      }, { withCredentials: true })
+        .then(response => {
+          // 성공적으로 댓글 작성 후 다시 댓글 목록을 가져옴
+          axios.get(`${config.apiUrl}/comments/${post.id}`)
+            .then(response => {
+              console.log("Fetched updated comments:", response.data); // 최신 댓글 로그
+  
+              // 댓글 상태를 다시 업데이트
+              setComments({
+                ...comments,
+                [postId]: response.data
+              });
+            })
+            .catch(error => {
+              console.error('Error fetching updated comments:', error);
+            });
+  
+          setNewComment(''); // 입력란 비우기
+        })
+        .catch(error => {
+          console.error('댓글 전송 오류:', error.response ? error.response.data : error);
+        });
     }
   };
 
@@ -180,7 +212,12 @@ export default function PostDetail({ route, navigation }) {
               renderRightActions={() => renderRightActions(index)}
             >
               <View style={styles.commentContainer}>
-                <Text style={styles.comment}>{comment.text}</Text>
+                {/* 닉네임이 표시되지 않는 경우 comment.user_nickname 대신 다른 필드를 확인 */}
+                <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text> 
+      
+                {/* 댓글 내용이 표시되지 않는 경우 comment.text 대신 다른 필드를 확인 */}
+                <Text style={styles.comment}>{comment.text || comment.comment_text}</Text> 
+      
                 <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
               </View>
             </Swipeable>
@@ -273,6 +310,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
+  commentAuthor: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333', // 작성자 닉네임 색상
+    marginBottom: 3, // 댓글 본문과의 간격 조절
+  },
   comment: {
     fontSize: 16,
     color: '#333',
@@ -280,7 +323,7 @@ const styles = StyleSheet.create({
   commentTimestamp: {
     fontSize: 12,
     color: '#999',
-    textAlign: 'right',
+    textAlign: 'left',
     marginTop: 5,
   },
   commentInputContainer: {
