@@ -82,6 +82,16 @@ const SafetyInfo = ({ navigation, route }) => {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
   };
 
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+  
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -178,16 +188,10 @@ const SafetyInfo = ({ navigation, route }) => {
                     onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
                   />
                   <View style={styles.imageNavigation}>
-                    <TouchableOpacity
-                      onPress={() => setCurrentImageIndex((prevIndex) => Math.max(prevIndex - 1, 0))}
-                      disabled={currentImageIndex === 0} // 첫 번째 이미지일 경우 비활성화
-                    >
+                    <TouchableOpacity onPress={handlePrevImage} disabled={images.length === 0}>
                       <Text style={styles.navigationText}>이전</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setCurrentImageIndex((prevIndex) => Math.min(prevIndex + 1, images.length - 1))}
-                      disabled={currentImageIndex === images.length - 1} // 마지막 이미지일 경우 비활성화
-                    >
+                    <TouchableOpacity onPress={handleNextImage} disabled={images.length === 0}>
                       <Text style={styles.navigationText}>다음</Text>
                     </TouchableOpacity>
                   </View>
