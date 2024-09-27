@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 import { PostsContext } from './PostsContext';
@@ -69,22 +69,22 @@ export default function NearbySafety({ navigation, route }) {
   }, []);
 
   // 위치와 카테고리에 따른 게시물 필터링 및 정렬
-useEffect(() => {
-  if (userLocation && posts) {
-    const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
-    const filtered = posts.filter(post => {
-      // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
-      const isMatchingLocation = post.location_address === formattedUserLocation;
-      const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
-      return isMatchingLocation && isMatchingCategory;
-    });
-    
-    // 최신순으로 정렬 (timestamp를 기준으로 내림차순 정렬)
-    const sortedPosts = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  useEffect(() => {
+    if (userLocation && posts) {
+      const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
+      const filtered = posts.filter(post => {
+        // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
+        const isMatchingLocation = post.location_address === formattedUserLocation;
+        const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
+        return isMatchingLocation && isMatchingCategory;
+      });
 
-    setFilteredPosts(sortedPosts);  // 필터링 및 정렬된 게시물 설정
-  }
-}, [userLocation, posts, selectedCategory]);
+      // 최신순으로 정렬 (timestamp를 기준으로 내림차순 정렬)
+      const sortedPosts = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      setFilteredPosts(sortedPosts);  // 필터링 및 정렬된 게시물 설정
+    }
+  }, [userLocation, posts, selectedCategory]);
 
   // 날짜 포맷팅 함수
   const formatDate = (date) => {
@@ -124,9 +124,9 @@ useEffect(() => {
         </TouchableOpacity>
       </View>
 
-      {loading ? ( 
+      {loading ? (
         // 위치 정보 로딩 중 로딩 표시
-        <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} /> 
+        <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
       ) : (
         <>
           {/* HOT 게시물 상단 표시 - 현재 비워둠 */}
@@ -158,11 +158,33 @@ useEffect(() => {
             {filteredPosts.length > 0 ? (
               filteredPosts.map((post, index) => (
                 <TouchableOpacity key={index} style={styles.postContainer} onPress={() => navigation.navigate('PostDetail', { post })}>
-                  <Text style={styles.postText}>
-                    [{post.category}] {post.title}
-                  </Text>
-                  <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
+                  <View style={styles.postContent}>
+                    {/* 텍스트 블록 (제목, 본문, 날짜) */}
+                    <View style={styles.textContainer}>
+                      {/* 제목 */}
+                      <Text style={styles.postText}>
+                        [{post.category}] {post.title}
+                      </Text>
+
+                      {/* 본문 */}
+                      <Text style={styles.postMessage}>
+                        {post.message.length > 30 ? `${post.message.slice(0, 30)}...` : post.message}
+                      </Text>
+
+                      {/* 타임스탬프 */}
+                      <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
+                    </View>
+
+                    {/* 이미지 */}
+                    {post.image ? (
+                      <Image
+                        source={{ uri: post.image }}
+                        style={styles.postImage}
+                      />
+                    ) : null}
+                  </View>
                 </TouchableOpacity>
+
               ))
             ) : (
               <View style={styles.alertBox}>
@@ -322,6 +344,7 @@ const styles = StyleSheet.create({
   postText: {
     fontSize: 16,
     color: '#333',
+    fontWeight: 'bold'
   },
   timestamp: {
     fontSize: 12,
@@ -419,5 +442,44 @@ const styles = StyleSheet.create({
   historyText: {
     fontSize: 16,
     flex: 1,
+  },
+  postContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingVertical: 10,
+    flexDirection: 'row',  // 텍스트와 이미지를 가로로 정렬
+    justifyContent: 'space-between',  // 텍스트와 이미지 간의 공간 분배
+    alignItems: 'center',  // 수직 중앙 정렬
+  },
+  postContent: {
+    flexDirection: 'row',  // 텍스트와 이미지를 가로로 배치
+    flex: 1,
+    justifyContent: 'space-between', // 텍스트와 이미지 사이 간격 확보
+    alignItems: 'center', // 수직 중앙 정렬
+  },
+  textContainer: {
+    flex: 1,  // 텍스트가 이미지 옆에서 충분한 공간을 차지하도록
+    flexDirection: 'column',  // 텍스트는 수직 배치
+    marginRight: 10, // 이미지와 텍스트 간의 간격
+  },
+  postText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,  // 제목과 본문 사이 간격
+  },
+  postMessage: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,  // 본문과 날짜 사이 간격
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#999',
+  },
+  postImage: {
+    width: 55,   // 이미지 너비 (텍스트 블록 높이에 맞춰 조정)
+    height: 55,  // 이미지 높이
+    borderRadius: 5,  // 이미지 모서리 둥글게 처리
   },
 });
