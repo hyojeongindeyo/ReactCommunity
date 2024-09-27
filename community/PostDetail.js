@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { CommentsContext } from './CommentsContext';
@@ -218,6 +218,12 @@ export default function PostDetail({ route, navigation }) {
 
         <Text style={styles.postText}>{post.message}</Text>
 
+        {/* 말풍선 아이콘과 댓글 수 표시 */}
+        <View style={styles.commentCountContainer}>
+            <Ionicons name="chatbubble-outline" size={16} color="#666" />
+            <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
+        </View>
+
         {/* 삭제 버튼 */}
         {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
           <View style={{ flexDirection: 'row' }}>
@@ -413,6 +419,15 @@ const styles = StyleSheet.create({
   },
   udText: {
     fontWeight: 'bold',
-  }
-
+  },
+  commentCountContainer: {
+    flexDirection: 'row',  // 한 줄로 배치
+    alignItems: 'center',  // 수직 중앙 정렬
+    marginTop: 5,          // 간격 조절
+  },
+  commentCountText: {
+    fontSize: 14,          // 댓글 수의 글씨 크기를 12로 설정
+    color: '#666',
+    marginLeft: 3,         // 말풍선 아이콘과 댓글 수 텍스트 사이의 간격
+  }, 
 });
