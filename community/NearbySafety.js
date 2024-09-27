@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
-import { MaterialIcons, Entypo } from '@expo/vector-icons';
+import { MaterialIcons, Entypo, Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 import { PostsContext } from './PostsContext';
 import moment from 'moment';
@@ -163,7 +163,7 @@ export default function NearbySafety({ navigation, route }) {
                     <View style={styles.textContainer}>
                       {/* 제목 */}
                       <Text style={styles.postText}>
-                        [{post.category}] {post.title}
+                          [{post.category}] {post.title}
                       </Text>
 
                       {/* 본문 */}
@@ -171,20 +171,25 @@ export default function NearbySafety({ navigation, route }) {
                         {post.message.length > 30 ? `${post.message.slice(0, 30)}...` : post.message}
                       </Text>
 
-                      {/* 타임스탬프 */}
-                      <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
+                      {/* 댓글 수와 타임스탬프를 한 줄에 배치 */}
+                      <View style={styles.commentTimestampContainer}>
+                        <View style={styles.commentCountContainer}>
+                          <Ionicons name="chatbubble-outline" size={14} color="#666" />
+                          <Text style={styles.commentCountText}>{post.commentCount || 0}</Text>
+                        </View>
+                        <Text style={styles.timestamp}>{formatDate(post.timestamp)}</Text>
+                      </View>
                     </View>
 
                     {/* 이미지 */}
                     {post.image ? (
                       <Image
                         source={{ uri: post.image }}
-                        style={styles.postImage}
+                      style={styles.postImage}
                       />
                     ) : null}
                   </View>
                 </TouchableOpacity>
-
               ))
             ) : (
               <View style={styles.alertBox}>
@@ -481,5 +486,19 @@ const styles = StyleSheet.create({
     width: 55,   // 이미지 너비 (텍스트 블록 높이에 맞춰 조정)
     height: 55,  // 이미지 높이
     borderRadius: 5,  // 이미지 모서리 둥글게 처리
+  },
+  commentTimestampContainer: {
+    flexDirection: 'row',  // 한 줄로 배치
+    alignItems: 'center',  // 수직 중앙 정렬
+  },
+  commentCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,  // 댓글 수와 타임스탬프 사이의 간격
+  },
+  commentCountText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 5, // 말풍선 아이콘과 댓글 수 텍스트 사이의 간격
   },
 });
