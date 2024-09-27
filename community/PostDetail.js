@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Swipeable } from 'react-native-gesture-handler';
+// import { Swipeable } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { CommentsContext } from './CommentsContext';
 import axios from 'axios';
@@ -118,19 +118,58 @@ export default function PostDetail({ route, navigation }) {
     }
   };
 
-  const handleCommentDelete = (index) => {
-    const newComments = postComments.filter((_, i) => i !== index);
-    setComments({
-      ...comments,
-      [postId]: newComments
-    });
+  const handleCommentOptions = (commentId) => {
+    Alert.alert(
+      "댓글 옵션",
+      "이 댓글을 삭제하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          onPress: () => handleCommentDelete(commentId),
+          style: "destructive",
+        },
+      ],
+      { cancelable: true }
+    );
   };
+  
+  const handleCommentDelete = (commentId) => {
+    Alert.alert(
+      "댓글 삭제",
+      "정말로 이 댓글을 삭제하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제", onPress: async () => {
+            try {
+              // 서버에 삭제 요청 보내기
+              await axios.delete(`${config.apiUrl}/comments/${commentId}`, { withCredentials: true });
+  
+              // 삭제된 댓글을 상태에서 제거
+              const updatedComments = postComments.filter(comment => comment.id !== commentId);
+              setComments({
+                ...comments,
+                [postId]: updatedComments
+              });
+  
+              Alert.alert("삭제 완료", "댓글이 삭제되었습니다.");
+            } catch (error) {
+              console.error('댓글 삭제 오류:', error);
+              Alert.alert("삭제 실패", "댓글 삭제에 실패했습니다.");
+            }
+          }
+        },
+      ],
+      { cancelable: false }
+    );
+  };  
 
-  const renderRightActions = (index) => (
-    <TouchableOpacity onPress={() => handleCommentDelete(index)} style={styles.deleteButton}>
+  const renderRightActions = (commentId) => (
+    <TouchableOpacity onPress={() => handleCommentDelete(commentId)} style={styles.deleteButton}>
       <MaterialIcons name="delete" size={24} color="white" />
     </TouchableOpacity>
-  );
+  );  
 
   return (
     <View style={styles.container}>
@@ -207,21 +246,25 @@ export default function PostDetail({ route, navigation }) {
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>댓글</Text>
           {postComments.map((comment, index) => (
-            <Swipeable
-              key={index}
-              renderRightActions={() => renderRightActions(index)}
-            >
-              <View style={styles.commentContainer}>
-                {/* 닉네임이 표시되지 않는 경우 comment.user_nickname 대신 다른 필드를 확인 */}
-                <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text> 
-      
-                {/* 댓글 내용이 표시되지 않는 경우 comment.text 대신 다른 필드를 확인 */}
-                <Text style={styles.comment}>{comment.text || comment.comment_text}</Text> 
-      
-                <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
-              </View>
-            </Swipeable>
-          ))}
+  <View key={index} style={styles.commentContainer}>
+    {/* 댓글 작성자의 닉네임 표시 */}
+    <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
+
+    {/* 댓글 내용 표시 */}
+    <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
+
+    {/* 댓글 작성 시간 표시 */}
+    <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
+
+    {/* 점점점 버튼 추가 */}
+    {userData && comment.user_id === userData.id && (
+      <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
+        <MaterialIcons name="more-vert" size={20} color="gray" />
+      </TouchableOpacity>
+    )}
+  </View>
+))}
+
           <View style={styles.commentInputContainer}>
             <TextInput
               style={styles.commentInput}
@@ -348,6 +391,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  optionsButton: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+  },
+  // deleteButton: {
+  //   backgroundColor: 'red',
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   width: 70,
+  //   height: '100%',
+  // },
   udButton: {
     backgroundColor: '#E0E0E0',
     justifyContent: 'center',
