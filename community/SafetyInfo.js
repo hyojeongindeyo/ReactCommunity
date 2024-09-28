@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
@@ -20,8 +20,9 @@ const SafetyInfo = ({ navigation, route }) => {
   const [images, setImages] = useState([]); // 선택된 정보의 이미지 목록 저장
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // 현재 보고 있는 이미지 인덱스
   const [coverImages, setCoverImages] = useState({}); // 카드의 표지 이미지를 저장하는 객체
-
-
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0); // 현재 배너 인덱스
+  const [randomBanners, setRandomBanners] = useState([]); // 랜덤 배너 목록
+  const scrollViewRef = useRef(null); // ScrollView의 ref 생성
   const categories = ['전체', '자연', '사회', '생활'];
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const SafetyInfo = ({ navigation, route }) => {
         const response = await axios.get(`${config.apiUrl}/safetyInfos`); // API URL로 변경
         setSafetyInfos(response.data); // API로부터 받은 데이터를 저장
         await fetchCoverImages(response.data); // 이 부분 추가
-
+        setRandomBanners(selectRandomBanners(response.data)); // 랜덤 배너 선택
         setLoading(false); // 데이터 로딩 완료
       } catch (error) {
         console.error('Error fetching safety info:', error);
@@ -48,6 +49,19 @@ const SafetyInfo = ({ navigation, route }) => {
     fetchSafetyInfos();
   }, []);
 
+  // 4초마다 배너 변경
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % randomBanners.length;
+        scrollViewRef.current?.scrollTo({ x: nextIndex * SCREEN_WIDTH, animated: true });
+        return nextIndex;
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [randomBanners]);
+  
     // 모든 카드의 표지 이미지를 가져오는 함수
     const fetchCoverImages = async (infos) => {
       const images = {};
@@ -70,6 +84,12 @@ const SafetyInfo = ({ navigation, route }) => {
         return null; // 이미지가 없을 경우 null 반환
       }
     };
+  // 랜덤으로 배너 세 개를 선택하는 함수
+  const selectRandomBanners = (infos) => {
+    // infos 배열을 복사하여 원본을 변경하지 않음
+    const shuffled = [...infos].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3); // 세 개의 랜덤 배너 선택
+  };
 
   const filteredInfos = selectedCategory === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedCategory);
 
@@ -91,7 +111,7 @@ const SafetyInfo = ({ navigation, route }) => {
   };
 
   const handleBannerPress = (banner) => {
-    const info = safetyInfos.find(info => info.banner === banner);
+    const info = safetyInfos.find(info => info.title === banner.title);
     if (info) {
       handleInfoPress(info);
     }
@@ -138,21 +158,29 @@ const SafetyInfo = ({ navigation, route }) => {
       ) : (
         <>
           <View style={styles.bannerContainer}>
-            <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.banner}>
-              <TouchableOpacity style={[styles.bannerItem, styles.firstBanner]} onPress={() => handleBannerPress('폭우 시 예방수칙')}>
-                <Text style={styles.bannerSubtitle}>여름철 빈번하게 발생하는</Text>
-                <Text style={styles.bannerText}>폭우 시 예방수칙</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.bannerItem, styles.secondBanner]} onPress={() => handleBannerPress('화재 시 행동요령')}>
-                <Text style={styles.bannerSubtitle}>북한 오물풍선</Text>
-                <Text style={styles.bannerText}>발견 시 행동요령</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.bannerItem, styles.thirdBanner]} onPress={() => handleBannerPress('산불 예방수칙')}>
-                <Text style={styles.bannerSubtitle}>봄철 산불 예방</Text>
-                <Text style={styles.bannerText}>산불 예방수칙</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
+        <ScrollView
+          ref={scrollViewRef} // ScrollView에 ref 연결
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          style={styles.banner}
+          scrollEventThrottle={16} // 이벤트 업데이트 빈도 설정
+        >
+          {randomBanners.map((banner, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.bannerItem,
+                index === 0 ? styles.firstBanner : index === 1 ? styles.secondBanner : styles.thirdBanner,
+              ]}
+              onPress={() => handleBannerPress(banner)}
+            >
+              <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+              <Text style={styles.bannerText}>{banner.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
           <View style={styles.categoryContainer}>
             {categories.map((category) => (
