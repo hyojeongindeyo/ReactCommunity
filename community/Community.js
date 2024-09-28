@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, TextInput, Keyboard } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Image, StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback, TextInput, Keyboard } from 'react-native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
+import axios from 'axios';
+import config from '../config'; // SafetyInfo.js와 동일한 config 파일 사용
 
 function Community({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -10,7 +12,12 @@ function Community({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
   const [selectedInfo, setSelectedInfo] = useState(null);
-
+  const [safetyInfos, setSafetyInfos] = useState([]);
+  const [coverImages, setCoverImages] = useState({}); // 카드 표지 이미지를 저장하는 상태
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [images, setImages] = useState([]); // 선택된 안전 뉴스 카드의 이미지들을 저장
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 모달 이미지 인덱스 관리
+  
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   const today = new Date();
@@ -26,19 +33,6 @@ function Community({ navigation }) {
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
   const categories = ['전체', '자연', '사회', '생활'];
-
-  const safetyInfos = [
-    { id: 1, title: '화재 시\n행동요령', date: '2024.07.01', category: '자연', banner: '화재 시 행동요령' },
-    { id: 2, title: '태풍 시\n행동요령', date: '2024.07.02', category: '자연', banner: '태풍 시 대피요령' },
-    { id: 3, title: '교통사고', date: '2024.07.03', category: '사회', banner: '교통사고 예방수칙' },
-    { id: 4, title: '심폐소생술', date: '2024.07.04', category: '생활', banner: '심폐소생술 방법' },
-    { id: 5, title: '침수 시\n행동요령', date: '2024.07.05', category: '자연', banner: '침수 시 예방수칙' },
-    { id: 6, title: '뺑소니', date: '2024.07.06', category: '사회', banner: '뺑소니 대처법' },
-    { id: 7, title: '응급처치', date: '2024.07.07', category: '생활', banner: '응급처치 방법' },
-    { id: 8, title: '폭우 시\n예방수칙', date: '2024.07.01', category: '자연', banner: '폭우 시 예방수칙' },
-    { id: 9, title: '산불 예방\n수칙', date: '2024.07.08', category: '자연', banner: '산불 예방수칙' },
-    { id: 10, title: '오물풍선 발견 시\n행동요령', date: '2024.07.10', category: '생활', banner: '오물풍선 발견 시 행동요령' },
-  ];
 
   const posts = [
     { category: 'HOT', title: '2호선 강남역 근처 시위', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2분전' },
@@ -64,6 +58,71 @@ function Community({ navigation }) {
     { id: '12', title: '생활', navigateTo: 'SafetyInfo', filter: '생활' }
   ];
 
+  // 안전정보 데이터 및 각 카드의 표지 이미지 가져오기
+  useEffect(() => {
+    const fetchSafetyInfos = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}/safetyInfos`);
+        setSafetyInfos(response.data); // 데이터를 state에 저장
+        await fetchCoverImages(response.data); // 각 카드의 표지 이미지 가져오기
+        setLoading(false); // 데이터 로딩 완료
+      } catch (error) {
+        console.error('Error fetching safety info:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchSafetyInfos();
+  }, []);
+
+  // 모든 카드의 표지 이미지를 가져오는 함수
+  const fetchCoverImages = async (infos) => {
+    const images = {};
+    for (const info of infos) {
+      const image = await fetchCoverImage(info.id);
+      if (image) {
+        images[info.id] = image; // 각 카드의 ID를 키로 하여 이미지 URL을 저장
+      }
+    }
+    setCoverImages(images); // 모든 표지 이미지를 상태에 저장
+  };
+
+  // 각 게시물의 표지 이미지를 불러오는 함수
+  const fetchCoverImage = async (infoId) => {
+    try {
+      const imageResponse = await axios.get(`${config.apiUrl}/cardnews/${infoId}`);
+      return imageResponse.data[0]; // 첫 번째 이미지를 반환
+    } catch (error) {
+      console.error('Error fetching cover image:', error);
+      return null; // 이미지가 없을 경우 null 반환
+    }
+  };
+
+  // 선택된 안전 뉴스 카드의 이미지를 가져오는 함수
+  const fetchImages = async (infoId) => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
+      setImages(response.data); // 가져온 이미지 목록 설정
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      setImages([]); // 에러 발생 시 이미지 목록 초기화
+    }
+  };
+
+  const handleInfoPress = async (info) => {
+    setSelectedInfo(info);
+    setInfoModalVisible(true);
+    await fetchImages(info.id); // 선택된 안전 뉴스 카드의 모든 이미지를 가져오기
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+  };
+
   const handleSearch = () => {
     if (searchQuery.trim() !== '') {
       setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
@@ -73,11 +132,6 @@ function Community({ navigation }) {
 
   const deleteSearchHistoryItem = (index) => {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
-  };
-
-  const handleInfoPress = (info) => {
-    setSelectedInfo(info);
-    setInfoModalVisible(true);
   };
 
   const handlePostPress = (post) => {
@@ -95,6 +149,7 @@ function Community({ navigation }) {
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
+
       <View style={styles.calendarContainer}>
         <View style={styles.calendar}>
           {daysOfWeek.map((day, index) => (
@@ -105,6 +160,7 @@ function Community({ navigation }) {
           ))}
         </View>
       </View>
+
       <ScrollView style={styles.content}>
         <TouchableOpacity onPress={() => navigation.navigate('NearbySafety')}>
           <Text style={styles.safetyHeaderText}>
@@ -114,6 +170,7 @@ function Community({ navigation }) {
             </View>
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(posts[0])}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
@@ -121,6 +178,7 @@ function Community({ navigation }) {
           <Text style={styles.postTitle}>{posts[0].message}</Text>
           <Text style={styles.hotTime}>{posts[0].timestamp}</Text>
         </TouchableOpacity>
+
         <View style={styles.safe}>
           <TouchableOpacity onPress={() => handlePostPress(posts[1])}>
             <Text style={styles.safeText}>[교통] 3호선 서울역에서 승객 수가 많아서 ...</Text>
@@ -137,6 +195,7 @@ function Community({ navigation }) {
             <Text style={styles.postTime}>{posts[4].timestamp}</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>
           <Text style={styles.infoHeader}>
@@ -146,6 +205,7 @@ function Community({ navigation }) {
             </View>
           </Text>
         </TouchableOpacity>
+
         <View style={styles.categoryContainer}>
           {categories.map((category, index) => (
             <TouchableOpacity
@@ -167,23 +227,33 @@ function Community({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
+
         <View style={styles.infoCardsContainer}>
           {filteredInfos.map((info) => (
             <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
-              <View style={styles.infoCard}>
-                <Text style={styles.infoCardTitle}>{info.title}</Text>
+            <View style={styles.infoCard}>
+              {/* 이미지 배경 설정 */}
+              {coverImages[info.id] && (
+                <Image
+                  source={{ uri: coverImages[info.id] }} // 카드의 표지 이미지를 표시
+                  style={styles.cardImageBackground} // 배경 이미지 스타일
+                  opacity={0.45} 
+                />
+              )}
+              <Text style={styles.infoTitle}>{info.title}</Text>
+            </View>
+            <View style={styles.infoFooter}>
+              <Text style={styles.infoDate}>{info.date}</Text>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>{info.category}</Text>
               </View>
-              <View style={styles.infoCardFooter}>
-                <Text style={styles.infoCardDate}>{info.date}</Text>
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryBadgeText}>{info.category}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+            </View>
+          </TouchableOpacity>          
           ))}
         </View>
       </ScrollView>
 
+      {/* 메뉴 모달 */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -197,7 +267,7 @@ function Community({ navigation }) {
                 <ScrollView contentContainerStyle={styles.menuItemsContainer}>
                   {menuItems.map(item => (
                     <TouchableOpacity 
-                      key={item.id} d
+                      key={item.id}
                       onPress={() => { 
                         setModalVisible(false); 
                         if (item.filter === null) {
@@ -219,6 +289,7 @@ function Community({ navigation }) {
         </TouchableWithoutFeedback>
       </Modal>
 
+      {/* 검색 모달 */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -264,6 +335,7 @@ function Community({ navigation }) {
         </TouchableWithoutFeedback>
       </Modal>
 
+      {/* 정보 모달 */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -272,13 +344,30 @@ function Community({ navigation }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedInfo?.banner}</Text>
+            <Text style={styles.modalTitle}>{selectedInfo?.title}</Text>
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
               <Text style={styles.modalCloseText}>X</Text>
             </TouchableOpacity>
-            <View style={styles.grayRectangle}>
-              <Text style={styles.rectangleX}>X</Text>
-            </View>
+            {images.length > 0 ? (
+              <>
+                <Image
+                    key={currentImageIndex}
+                    source={{ uri: images[currentImageIndex] }}
+                    style={styles.cardImage}
+                    resizeMode="contain" 
+                />
+                <View style={styles.imageNavigation}>
+                  <TouchableOpacity onPress={handlePrevImage}>
+                    <Text style={styles.navigationText}>이전</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleNextImage}>
+                    <Text style={styles.navigationText}>다음</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <Text>No images available.</Text>
+            )}
           </View>
         </View>
       </Modal>
@@ -556,20 +645,41 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   infoCard: {
-    backgroundColor: '#f3f3f3',
-    padding: 10,
+    backgroundColor: '#F3F3F3',
+    padding: 20,
     borderRadius: 10,
     height: 110,
     elevation: 5,
     justifyContent: 'flex-end',
+    position: 'relative', // 부모 뷰에 상대적 위치 설정
+    overflow: 'hidden', // 이미지가 카드 밖으로 나가지 않도록
   },
-  infoCardTitle: {
-    fontSize: 16,
+  cardImageBackground: {
+    position: 'absolute', // 이미지 위치 설정
+    top: 0, // 카드의 상단에 위치
+    left: 0, // 카드의 왼쪽에 위치
+    right: 0, // 카드의 오른쪽에 맞춤
+    bottom: 0, // 카드의 하단에 맞춤
+    borderRadius: 10, // 카드의 모서리 둥글게 만들기
+    opacity: 0.45, // 이미지의 투명도 조절
+    resizeMode: 'cover', // 이미지가 카드에 맞게 설정
+  },
+  infoTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#969696',
+    color: '#000',
     textAlign: 'left',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)', // 흐릿한 하얀색 배경
+    paddingHorizontal: 5, // 텍스트 좌우 여백
+    paddingVertical: 2, // 텍스트 위아래 여백
+    borderRadius: 5, // 모서리 둥글게 처리
+    position: 'absolute',
+    bottom: 10, // 카드의 아래쪽에 위치
+    left: 10, // 왼쪽에 여백 설정
+    right: 10, // 오른쪽 여백 설정
+    zIndex: 1, // 이미지 위로 표시
   },
-  infoCardFooter: {
+  infoFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
@@ -577,7 +687,7 @@ const styles = StyleSheet.create({
     bottom: -20,
     right: 10,
   },
-  infoCardDate: {
+  infoDate: {
     fontSize: 12,
     color: '#999',
     marginRight: 5,
@@ -629,6 +739,23 @@ const styles = StyleSheet.create({
     height: '50%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cardImage: {
+    width: '100%',
+    height: 300,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  imageNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 10,
+  },
+  navigationText: {
+    fontSize: 18,
+    color: '#007BFF',
+    fontWeight: 'bold',
   },
   modalTitle: {
     fontSize: 18,
