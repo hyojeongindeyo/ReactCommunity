@@ -13,16 +13,14 @@ function Community({ navigation }) {
   const [searchHistory, setSearchHistory] = useState([]);
   const [selectedInfo, setSelectedInfo] = useState(null);
   const [safetyInfos, setSafetyInfos] = useState([]);
-  const [coverImages, setCoverImages] = useState({}); // 카드 표지 이미지를 저장하는 상태
-  const [loading, setLoading] = useState(true); // 로딩 상태 추가
-  const [images, setImages] = useState([]); // 선택된 안전 뉴스 카드의 이미지들을 저장
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 모달 이미지 인덱스 관리
+  const [coverImages, setCoverImages] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [images, setImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
   const today = new Date();
   const todayIndex = today.getDay();
-
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay());
   const datesOfWeek = Array.from({ length: 7 }, (_, i) => {
@@ -34,15 +32,36 @@ function Community({ navigation }) {
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
   const categories = ['전체', '자연', '사회', '생활'];
 
-  const posts = [
-    { category: 'HOT', title: '2호선 강남역 근처 시위', message: '2호선 강남역 근처에서 시위 때문에 교통정체가 심하니 다들 참고 하세요 !!!', timestamp: '2분전' },
-    { category: '교통', title: '3호선 서울역 혼잡', message: '3호선 서울역에서 승객 수가 많아서 혼잡할 수 있습니다.', timestamp: '2024.07.24 pm 15:30' },
-    { category: '시위', title: '시민 시위', message: '시민들이 시위를 벌이고 있습니다. 주의하시기 바랍니다.', timestamp: '2024.07.24 pm 15:20' },
-    { category: '재해', title: '비로 인한 미끄러움', message: '비가 오고 있어서 길이 미끄럽습니다. 운전에 주의하세요.', timestamp: '2024.07.24 pm 15:10' },
-    { category: '주의', title: '해수욕장 물때', message: '해수욕장에서 물때가 높습니다. 안전을 위해 신호를 따르세요.', timestamp: '2024.07.24 pm 15:00' },
-  ];
+  // 실제 게시물 데이터를 가져오기
+  const [posts, setPosts] = useState([]);
+  
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}/posts`); // 실제 API로 교체
+        setPosts(response.data);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  // 각 카테고리별로 첫 번째 게시물만 가져오기
+  const getCategoryPosts = (category) => {
+    return posts.find(post => post.category === category) || null;
+  };
+  
+  // 타임스탬프 포맷팅 함수 (NearbySafety.js 참고)
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'} ${String(date.getHours() % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return formattedDate;
+  };
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
+
   const menuItems = [
     { id: '1', title: '내 주변 안전소식', navigateTo: 'NearbySafety', filter: null },
     { id: '2', title: '전체', navigateTo: 'NearbySafety', filter: '전체' },
@@ -171,31 +190,31 @@ function Community({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(posts[0])}>
+        {/* HOT 게시물 표시 */}
+        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(getCategoryPosts('HOT'))}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
           </View>
-          <Text style={styles.postTitle}>{posts[0].message}</Text>
-          <Text style={styles.hotTime}>{posts[0].timestamp}</Text>
+          <Text style={styles.postTitle}>{getCategoryPosts('HOT') ? getCategoryPosts('HOT').title : 'HOT 게시물은 아직 없습니다.'}</Text>
+          <Text style={styles.hotTime}>{getCategoryPosts('HOT') ? formatTimestamp(getCategoryPosts('HOT').timestamp) : '-'}</Text>
         </TouchableOpacity>
 
         <View style={styles.safe}>
-          <TouchableOpacity onPress={() => handlePostPress(posts[1])}>
-            <Text style={styles.safeText}>[교통] 3호선 서울역에서 승객 수가 많아서 ...</Text>
-            <Text style={styles.postTime}>{posts[1].timestamp}</Text>
-          </TouchableOpacity>
-          <View style={styles.horizontalLine}></View>
-          <TouchableOpacity onPress={() => handlePostPress(posts[2])}>
-            <Text style={styles.safeText}>[시위] 시민들이 시위를 벌이고 있습니다 ...</Text>
-            <Text style={styles.postTime}>{posts[2].timestamp}</Text>
-          </TouchableOpacity>
-          <View style={styles.horizontalLine}></View>
-          <TouchableOpacity onPress={() => handlePostPress(posts[4])}>
-            <Text style={styles.safeText}>[주의] 해수욕장에서 물때가 높습니다. 안전 ...</Text>
-            <Text style={styles.postTime}>{posts[4].timestamp}</Text>
-          </TouchableOpacity>
+          {['교통', '시위', '재해', '주의'].map((category, index) => {
+            const post = getCategoryPosts(category);
+            
+            return (
+              <TouchableOpacity key={index} onPress={() => handlePostPress(post)}>
+                <Text style={styles.safeText}>
+                  [{category}] {post ? (post.message.length > 30 ? `${post.message.slice(0, 30)}...` : post.message) : `${category}에 대한 게시물이 아직 없습니다.`}
+                </Text>
+                <Text style={styles.postTime}>{post ? formatTimestamp(post.timestamp) : '-'}</Text>
+                {index < 3 && <View style={styles.horizontalLine}></View>}
+              </TouchableOpacity>
+            );
+          })}
         </View>
-
+        
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>
           <Text style={styles.infoHeader}>
@@ -232,11 +251,10 @@ function Community({ navigation }) {
           {filteredInfos.map((info) => (
             <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
             <View style={styles.infoCard}>
-              {/* 이미지 배경 설정 */}
               {coverImages[info.id] && (
                 <Image
-                  source={{ uri: coverImages[info.id] }} // 카드의 표지 이미지를 표시
-                  style={styles.cardImageBackground} // 배경 이미지 스타일
+                  source={{ uri: coverImages[info.id] }}
+                  style={styles.cardImageBackground}
                   opacity={0.45} 
                 />
               )}
@@ -252,7 +270,7 @@ function Community({ navigation }) {
           ))}
         </View>
       </ScrollView>
-
+      
       {/* 메뉴 모달 */}
       <Modal
         animationType="slide"
