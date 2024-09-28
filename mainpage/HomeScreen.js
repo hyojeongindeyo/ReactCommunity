@@ -10,21 +10,31 @@ import config from '../config'; // config 파일 import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const App = ( { navigation }) => {
+const App = ({ navigation }) => {
+  const [posts, setPosts] = useState([]); // posts 상태 정의
   const [userData, setUserData] = useState(null);
   const [city, setCity] = useState('Loading...');
   const [location, setLocation] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
-  const scrollViewRef = useRef(null)
-  const bannerWidth = SCREEN_WIDTH
+  const [modalVisible, setModalVisible] = useState(false); // 모달 상태 정의
+  const scrollViewRef = useRef(null);
 
-
-
-  // 위치 가져오기
+  // 위치 가져오기 및 데이터 호출
   useEffect(() => {
     fetchUserSession();
+    fetchPosts(); // 게시물 데이터 가져오기 호출
     getLocation();
   }, []);
+
+  // 게시물 데이터 가져오기
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/posts`);
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
 
   const fetchUserSession = async () => {
     try {
@@ -32,7 +42,6 @@ const App = ( { navigation }) => {
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user session:', error);
-      // 에러 처리 로직 추가 가능
     }
   };
 
@@ -50,8 +59,8 @@ const App = ( { navigation }) => {
       setLocation({ latitude, longitude });
       const address = await Location.reverseGeocodeAsync({ latitude, longitude });
       const city = address[0].city || 'Unknown';
-      const district = address[0].district || ''; // 구 정보 가져오기
-      setCity(`${city} ${district}`); // city와 district 함께 출력
+      const district = address[0].district || '';
+      setCity(`${city} ${district}`);
       setLoadingLocation(false);
     } catch (error) {
       console.error('Error fetching location:', error);
@@ -60,32 +69,30 @@ const App = ( { navigation }) => {
     }
   };
 
+  const getCategoryPost = (category) => {
+    return posts.find(post => post.category === category) || null;
+  };
 
-
-
+  const formatTimestamp = (timestamp) => {
+    try {
+      const date = new Date(timestamp);
+      return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'} ${String(date.getHours() % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    } catch (error) {
+      console.error('Error formatting timestamp:', error);
+      return timestamp;
+    }
+  };
 
   return (
     <View style={styles.allItems}>
-      {/* <View style={styles.header}>
-        <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
-        <Entypo name="menu" size={24} color="black" style={styles.menuIcon} />
-      </View> */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
         <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
         <MaterialIcons name="search" size={24} style={styles.logohidden} color="black" />
-
       </View>
 
-
-      {/* <View style={styles.topline}></View> */}
-
-
-
-
-      {/* 오늘의~, 위치, 내주변안전소식 묶음 */}
       <View style={styles.container}>
         {/* 평안팁 부분 */}
         <View style={styles.tips}>
@@ -95,10 +102,10 @@ const App = ( { navigation }) => {
             <Text style={styles.condition}>폭염주의보</Text>
           </View>
           <View style={styles.verticalLine}></View>
-          <Text style={styles.tip} resizeMode="contain">외출 시 물 챙기기</Text>
+          <Text style={styles.tip}>외출 시 물 챙기기</Text>
         </View>
 
-        {/* 날씨랑 평안이 부분 */}
+        {/* 날씨 정보 */}
         <View style={styles.weather}>
           <Text style={styles.locationText}>현재 위치: {city}</Text>
           <View style={styles.weatherwrap}>
@@ -106,7 +113,6 @@ const App = ( { navigation }) => {
               <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
               <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
             </View>
-            {/* Weather part */}
             {location && (
               <View style={styles.weatherContent}>
                 <Weather latitude={location.latitude} longitude={location.longitude} city={city} />
@@ -115,7 +121,6 @@ const App = ( { navigation }) => {
             <Text style={styles.pyeongT}>{userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}</Text>
           </View>
         </View>
-
 
         <View style={styles.horizontalLine}></View>
         <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
@@ -126,31 +131,23 @@ const App = ( { navigation }) => {
           <View style={styles.icons}>
             <AntDesign name="right" size={16} color="black" />
           </View>
-          
         </TouchableOpacity>
-
 
         <View style={styles.safe}>
-        <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: { id: 'trafficPostId', title: '교통', message: '지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요', timestamp: '지금' } })}>
-          <Text style={styles.safetitle}>교통</Text>
-          <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>지금 00사거리에 사고가 나서 차가 좌회전 때 많이 막히는 것 같네요</Text>
-          <Text style={styles.safetime}>지금</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: { id: 'protestPostId', title: '시위', message: '내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!', timestamp: '10분 전' } })}>
-          <Text style={styles.safetitle}>시위</Text>
-          <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>내일 부천역 앞에서 시위를 한다고 하네요 출퇴근 조심하세요!!</Text>
-          <Text style={styles.safetime}>10분 전</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: { id: 'cautionPostId', title: '주의', message: '00동 내일 잠깐 단수된다고 하던데 주의하세요', timestamp: '1일 전' } })}>
-          <Text style={styles.safetitle}>주의</Text>
-          <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>00동 내일 잠깐 단수된다고 하던데 주의하세요</Text>
-          <Text style={styles.safetime}>1일 전</Text>
-        </TouchableOpacity>
-
+          {['교통', '시위', '재해', '주의'].map((category, index) => {
+            const post = getCategoryPost(category);
+            return (
+              <TouchableOpacity key={index} style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post })}>
+                <Text style={styles.safetitle}>{category}</Text>
+                <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
+                  {post ? post.message : `${category}에 대한 게시물이 아직 없습니다.`}
+                </Text>
+                <Text style={styles.safetime}>{post ? formatTimestamp(post.timestamp) : '-'}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
         <StatusBar style="auto" />
-
-
       </View>
 
       <View style={styles.banners}>
