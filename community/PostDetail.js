@@ -41,7 +41,7 @@ export default function PostDetail({ route, navigation }) {
       try {
         const response = await axios.get(`${config.apiUrl}/comments/${post.id}`);
         console.log("Fetched comments:", response.data); // 받아온 댓글 데이터를 확인
-  
+
         setComments({
           ...comments,
           [postId]: response.data
@@ -50,10 +50,10 @@ export default function PostDetail({ route, navigation }) {
         console.error('Error fetching comments:', error);
       }
     };
-  
+
     fetchComments();
-  }, [post.id]);  
-  
+  }, [post.id]);
+
   const fetchUserSession = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
@@ -99,7 +99,7 @@ export default function PostDetail({ route, navigation }) {
           axios.get(`${config.apiUrl}/comments/${post.id}`)
             .then(response => {
               console.log("Fetched updated comments:", response.data); // 최신 댓글 로그
-  
+
               // 댓글 상태를 다시 업데이트
               setComments({
                 ...comments,
@@ -109,7 +109,7 @@ export default function PostDetail({ route, navigation }) {
             .catch(error => {
               console.error('Error fetching updated comments:', error);
             });
-  
+
           setNewComment(''); // 입력란 비우기
         })
         .catch(error => {
@@ -133,7 +133,7 @@ export default function PostDetail({ route, navigation }) {
       { cancelable: true }
     );
   };
-  
+
   const handleCommentDelete = (commentId) => {
     Alert.alert(
       "댓글 삭제",
@@ -145,14 +145,14 @@ export default function PostDetail({ route, navigation }) {
             try {
               // 서버에 삭제 요청 보내기
               await axios.delete(`${config.apiUrl}/comments/${commentId}`, { withCredentials: true });
-  
+
               // 삭제된 댓글을 상태에서 제거
               const updatedComments = postComments.filter(comment => comment.id !== commentId);
               setComments({
                 ...comments,
                 [postId]: updatedComments
               });
-  
+
               Alert.alert("삭제 완료", "댓글이 삭제되었습니다.");
             } catch (error) {
               console.error('댓글 삭제 오류:', error);
@@ -163,13 +163,13 @@ export default function PostDetail({ route, navigation }) {
       ],
       { cancelable: false }
     );
-  };  
+  };
 
   const renderRightActions = (commentId) => (
     <TouchableOpacity onPress={() => handleCommentDelete(commentId)} style={styles.deleteButton}>
       <MaterialIcons name="delete" size={24} color="white" />
     </TouchableOpacity>
-  );  
+  );
 
   return (
     <View style={styles.container}>
@@ -218,12 +218,6 @@ export default function PostDetail({ route, navigation }) {
 
         <Text style={styles.postText}>{post.message}</Text>
 
-        {/* 말풍선 아이콘과 댓글 수 표시 */}
-        <View style={styles.commentCountContainer}>
-            <Ionicons name="chatbubble-outline" size={16} color="#666" />
-            <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
-        </View>
-
         {/* 삭제 버튼 */}
         {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
           <View style={{ flexDirection: 'row' }}>
@@ -250,26 +244,34 @@ export default function PostDetail({ route, navigation }) {
 
 
         <View style={styles.commentsSection}>
-          <Text style={styles.commentsTitle}>댓글</Text>
+          <View style={styles.commentsHeader}>
+            <Text style={styles.commentsTitle}>댓글</Text>
+            <View style={styles.commentCountContainer}>
+              <Ionicons name="chatbubble-outline" size={16} color="#666" />
+              <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
+            </View>
+          </View>
+
+
           {postComments.map((comment, index) => (
-  <View key={index} style={styles.commentContainer}>
-    {/* 댓글 작성자의 닉네임 표시 */}
-    <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
+            <View key={index} style={styles.commentContainer}>
+              {/* 댓글 작성자의 닉네임 표시 */}
+              <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
 
-    {/* 댓글 내용 표시 */}
-    <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
+              {/* 댓글 내용 표시 */}
+              <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
 
-    {/* 댓글 작성 시간 표시 */}
-    <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
+              {/* 댓글 작성 시간 표시 */}
+              <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
 
-    {/* 점점점 버튼 추가 */}
-    {userData && comment.user_id === userData.id && (
-      <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
-        <MaterialIcons name="more-vert" size={20} color="gray" />
-      </TouchableOpacity>
-    )}
-  </View>
-))}
+              {/* 점점점 버튼 추가 */}
+              {userData && comment.user_id === userData.id && (
+                <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
+                  <MaterialIcons name="more-vert" size={20} color="gray" />
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
 
           <View style={styles.commentInputContainer}>
             <TextInput
@@ -352,7 +354,7 @@ const styles = StyleSheet.create({
   commentsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+
   },
   commentContainer: {
     padding: 10,
@@ -423,11 +425,17 @@ const styles = StyleSheet.create({
   commentCountContainer: {
     flexDirection: 'row',  // 한 줄로 배치
     alignItems: 'center',  // 수직 중앙 정렬
-    marginTop: 5,          // 간격 조절
+        // 간격 조절
   },
   commentCountText: {
     fontSize: 14,          // 댓글 수의 글씨 크기를 12로 설정
     color: '#666',
     marginLeft: 3,         // 말풍선 아이콘과 댓글 수 텍스트 사이의 간격
-  }, 
+  },
+  commentsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // 양쪽 끝에 요소 배치
+    alignItems: 'center',            // 수직 중앙 정렬
+    marginBottom: 10,
+  },
 });
