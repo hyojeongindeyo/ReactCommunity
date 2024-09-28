@@ -19,6 +19,7 @@ const SafetyInfo = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true); // 로딩 상태 관리
   const [images, setImages] = useState([]); // 선택된 정보의 이미지 목록 저장
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // 현재 보고 있는 이미지 인덱스
+  const [coverImages, setCoverImages] = useState({}); // 카드의 표지 이미지를 저장하는 객체
 
 
   const categories = ['전체', '자연', '사회', '생활'];
@@ -35,6 +36,8 @@ const SafetyInfo = ({ navigation, route }) => {
       try {
         const response = await axios.get(`${config.apiUrl}/safetyInfos`); // API URL로 변경
         setSafetyInfos(response.data); // API로부터 받은 데이터를 저장
+        await fetchCoverImages(response.data); // 이 부분 추가
+
         setLoading(false); // 데이터 로딩 완료
       } catch (error) {
         console.error('Error fetching safety info:', error);
@@ -44,6 +47,29 @@ const SafetyInfo = ({ navigation, route }) => {
 
     fetchSafetyInfos();
   }, []);
+
+    // 모든 카드의 표지 이미지를 가져오는 함수
+    const fetchCoverImages = async (infos) => {
+      const images = {};
+      for (const info of infos) {
+        const image = await fetchCoverImage(info.id);
+        if (image) {
+          images[info.id] = image; // 각 카드의 ID를 키로 하여 이미지 URL을 저장
+        }
+      }
+      setCoverImages(images); // 모든 표지 이미지를 상태에 저장
+    };
+  
+    // 각 게시물의 표지 이미지를 불러오는 함수
+    const fetchCoverImage = async (infoId) => {
+      try {
+        const imageResponse = await axios.get(`${config.apiUrl}/cardnews/${infoId}`);
+        return imageResponse.data[0]; // 첫 번째 이미지를 반환
+      } catch (error) {
+        console.error('Error fetching cover image:', error);
+        return null; // 이미지가 없을 경우 null 반환
+      }
+    };
 
   const filteredInfos = selectedCategory === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedCategory);
 
@@ -144,9 +170,17 @@ const SafetyInfo = ({ navigation, route }) => {
 
           <ScrollView contentContainerStyle={styles.infoContainer}>
             <View style={styles.infoRow}>
-              {filteredInfos.map((info) => (
+            {filteredInfos.map((info) => (
                 <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
                   <View style={styles.infoCard}>
+                    {/* 이미지 배경 설정 */}
+                    {coverImages[info.id] && (
+                      <Image
+                        source={{ uri: coverImages[info.id] }} // 카드의 표지 이미지를 표시
+                        style={styles.cardImageBackground} // 배경 이미지 스타일
+                        opacity={0.45} 
+                      />
+                    )}
                     <Text style={styles.infoTitle}>{info.title}</Text>
                   </View>
                   <View style={styles.infoFooter}>
@@ -351,12 +385,16 @@ const styles = StyleSheet.create({
     height: 110,
     elevation: 5,
     justifyContent: 'flex-end',
+    position: 'relative', // 부모 뷰에 상대적 위치 설정
+    overflow: 'hidden', // 이미지가 카드 밖으로 나가지 않도록
   },
   infoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#969696',
+    // color: 'white',
     textAlign: 'left',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)', // 흐릿한 하얀색 배경
+    
   },
   infoFooter: {
     flexDirection: 'row',
@@ -498,6 +536,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#007BFF', // 버튼 색상
     fontWeight: 'bold',
+  },
+  cardImageBackground: {
+    position: 'absolute', // 이미지 위치 설정
+    top: 0, // 카드의 상단에 위치
+    left: 0, // 카드의 왼쪽에 위치
+    right: 0, // 카드의 오른쪽에 맞춤
+    bottom: 0, // 카드의 하단에 맞춤
+    borderRadius: 10, // 카드의 모서리 둥글게 만들기
+    
   },
 
 });
