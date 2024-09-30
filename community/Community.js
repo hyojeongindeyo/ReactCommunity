@@ -17,7 +17,10 @@ function Community({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+  const [nearbySafetyResults, setNearbySafetyResults] = useState([]); // 내 주변 안전소식 검색 결과
+  const [safetyInfoResults, setSafetyInfoResults] = useState([]); // 안전 정보 검색 결과
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
+
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const today = new Date();
   const todayIndex = today.getDay();
@@ -142,12 +145,46 @@ function Community({ navigation }) {
     setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
   };
 
-  const handleSearch = () => {
-    if (searchQuery.trim() !== '') {
-      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
-      setSearchQuery('');
-    }
-  };
+  // 검색 처리 함수
+const handleSearch = () => {
+  if (searchQuery.trim() !== '') {
+    setIsSearchSubmitted(true); // 검색 버튼을 눌렀을 때만 true로 설정
+
+    // 내 주변 안전소식 검색
+    const nearbyResults = posts.filter(post =>
+      post.title.includes(searchQuery) || post.message.includes(searchQuery)
+    );
+
+    // 안전 정보 검색
+    const safetyResults = safetyInfos.filter(info =>
+      (info.title && info.title.includes(searchQuery)) ||
+      (info.subtitle && info.subtitle.includes(searchQuery))
+    );
+
+    setNearbySafetyResults(nearbyResults); // 내 주변 안전소식 결과 설정
+    setSafetyInfoResults(safetyResults); // 안전 정보 결과 설정
+    setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
+  } else {
+    setNearbySafetyResults([]);
+    setSafetyInfoResults([]);
+  }
+  // 여기서 searchQuery를 초기화하는 대신, 이후에 검색 결과를 확인하고 난 후 초기화하도록 변경
+};
+
+// 검색 모달이 열렸을 때 검색 결과 초기화
+useEffect(() => {
+  if (searchModalVisible) {
+    setIsSearchSubmitted(false); // 모달을 열 때마다 검색 결과를 리셋
+    setNearbySafetyResults([]);
+    setSafetyInfoResults([]);
+  }
+}, [searchModalVisible]);
+
+// 검색어 입력 시 검색어 상태만 업데이트하고, 결과는 업데이트하지 않도록 변경
+const handleSearchQueryChange = (text) => {
+  setSearchQuery(text);
+  setIsSearchSubmitted(false); // 검색 버튼을 누르기 전까지는 결과를 표시하지 않음
+};
 
   const deleteSearchHistoryItem = (index) => {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
@@ -327,7 +364,7 @@ function Community({ navigation }) {
                     placeholder="검색어를 입력하세요"
                     placeholderTextColor="#888888" 
                     value={searchQuery}
-                    onChangeText={setSearchQuery}
+                    onChangeText={handleSearchQueryChange}
                     autoFocus
                   />
                   <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
@@ -335,18 +372,65 @@ function Community({ navigation }) {
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={styles.historyContainer}>
-                  {searchHistory.map((item, index) => (
-                    <View key={index} style={styles.historyItem}>
-                      <View style={styles.historyIconContainer}>
-                        <MaterialIcons name="history" size={24} color="black" />
-                      </View>
-                      <Text style={styles.historyText}>{item}</Text>
-                      <TouchableOpacity onPress={() => deleteSearchHistoryItem(index)}>
-                        <MaterialIcons name="close" size={24} color="black" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </ScrollView>
+  {isSearchSubmitted ? ( // 검색 버튼을 눌렀을 때만 결과를 보여줌
+    <>
+      {/* 내 주변 안전소식 검색 결과 */}
+      <Text style={styles.resultHeader}>내 주변 안전소식</Text>
+      {nearbySafetyResults.length > 0 ? (
+        nearbySafetyResults.map((result, index) => (
+          <TouchableOpacity
+            key={`nearby-${index}`}
+            style={styles.searchResultContainer}
+            onPress={() => {
+              setSearchModalVisible(false);
+              handlePostPress(result); // 선택된 게시물로 이동
+            }}
+          >
+            <Text style={styles.resultTitle}>[{result.category}] {result.title}</Text>
+            <Text style={styles.resultContent}>{result.message}</Text>
+            <Text style={styles.resultDate}>{formatTimestamp(result.timestamp)}</Text>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <Text style={styles.noResultText}>검색어에 해당하는 결과가 없습니다.</Text>
+      )}
+
+      {/* 안전 정보 검색 결과 */}
+      <Text style={styles.resultHeader}>안전 정보</Text>
+      {safetyInfoResults.length > 0 ? (
+        safetyInfoResults.map((info, index) => (
+          <TouchableOpacity
+            key={`safety-${index}`}
+            style={styles.searchResultContainer}
+            onPress={() => {
+              setSearchModalVisible(false);
+              handleInfoPress(info); // 선택된 안전 정보로 이동
+            }}
+          >
+            <View style={styles.infoCard}>
+              {coverImages[info.id] && (
+                <Image
+                  source={{ uri: coverImages[info.id] }}
+                  style={styles.cardImageBackground}
+                  opacity={0.45}
+                />
+              )}
+              <Text style={styles.infoTitle}>{info.title}</Text>
+            </View>
+            <View style={styles.infoFooter}>
+              <Text style={styles.infoDate}>{info.date}</Text>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>{info.category}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <Text style={styles.noResultText}>검색어에 해당하는 결과가 없습니다.</Text>
+      )}
+    </>
+  ) : null}
+</ScrollView>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -843,6 +927,36 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 250,
     fontWeight: '100',
+  },
+  resultHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: '#333',
+  },
+  resultTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  resultContent: {
+    fontSize: 12,
+    color: '#666',
+  },
+  resultDate: {
+    fontSize: 10,
+    color: '#999',
+  },
+  noResultText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  searchResultContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
 });
 

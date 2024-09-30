@@ -16,6 +16,7 @@ export default function NearbySafety({ navigation, route }) {
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
 
   // 위치 정보 캐싱 함수
   const getCachedLocation = async () => {
@@ -99,13 +100,29 @@ export default function NearbySafety({ navigation, route }) {
     return unsubscribe;
   }, [navigation, loadPosts]);
 
-  // 검색 처리
-  const handleSearch = () => {
-    if (searchQuery.trim() !== '') {
-      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
-      setSearchQuery('');
-    }
-  };
+  // 검색 처리 (검색 결과 필터링 및 설정)
+const handleSearch = () => {
+  if (searchQuery.trim() !== '' && userLocation) {
+    const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
+    const results = posts.filter(post =>
+      (post.title.includes(searchQuery) || post.message.includes(searchQuery)) &&
+      post.location_address === formattedUserLocation // 사용자 위치와 일치하는 게시글만 필터링
+    );
+
+    setSearchResults(results); // 검색 결과를 searchResults로 설정
+    setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
+  } else {
+    setSearchResults([]); // 검색어가 비어있을 때 또는 위치가 없을 때 검색 결과를 빈 배열로 설정
+  }
+  setSearchQuery(''); // 검색어 초기화
+};
+
+// 모달이 처음 열릴 때 searchResults 초기화
+useEffect(() => {
+  if (searchModalVisible) {
+    setSearchResults([]); // 검색 모달이 열릴 때 searchResults를 빈 배열로 초기화
+  }
+}, [searchModalVisible]);
 
   // 검색 기록 삭제
   const deleteSearchHistoryItem = (index) => {
@@ -207,51 +224,68 @@ export default function NearbySafety({ navigation, route }) {
 
       <BottomTabBar navigation={navigation} />
 
-      {/* 검색 모달 */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={searchModalVisible}
-        onRequestClose={() => setSearchModalVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
-          <View style={styles.searchModalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.searchModalContent}>
-                <View style={styles.searchHeader}>
-                  <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
-                    <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
-                  </TouchableOpacity>
-                  <TextInput
-                    style={styles.searchInput}
-                    placeholder="검색어를 입력하세요"
-                    placeholderTextColor="#888888"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    autoFocus
-                  />
-                  <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                    <Text style={styles.searchButtonText}>검색</Text>
-                  </TouchableOpacity>
-                </View>
-                <ScrollView style={styles.historyContainer}>
-                  {searchHistory.map((item, index) => (
-                    <View key={index} style={styles.historyItem}>
-                      <View style={styles.historyIconContainer}>
-                        <MaterialIcons name="history" size={24} color="black" />
-                      </View>
-                      <Text style={styles.historyText}>{item}</Text>
-                      <TouchableOpacity onPress={() => deleteSearchHistoryItem(index)}>
-                        <MaterialIcons name="close" size={24} color="black" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
-            </TouchableWithoutFeedback>
+      {/* 검색 모달 */} 
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={searchModalVisible}
+  onRequestClose={() => setSearchModalVisible(false)}
+>
+  <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
+    <View style={styles.searchModalOverlay}>
+      <TouchableWithoutFeedback>
+        <View style={styles.searchModalContent}>
+          <View style={styles.searchHeader}>
+            <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
+              <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+            </TouchableOpacity>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="검색어를 입력하세요"
+              placeholderTextColor="#888888"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+              <Text style={styles.searchButtonText}>검색</Text>
+            </TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+          <ScrollView style={styles.historyContainer}>
+            {searchResults.length > 0 ? (
+              searchResults.map((post, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.searchResultContainer}
+                  onPress={() => {
+                    setSearchModalVisible(false);
+                    navigation.navigate('PostDetail', { post });
+                  }}
+                >
+                  <View style={styles.searchResultContent}>
+                    <Text style={styles.searchResultTitle}>
+                      [{post.category}] {post.title}
+                    </Text>
+                    <Text style={styles.searchResultMessage}>
+                      {post.message.length > 50 ? `${post.message.slice(0, 50)}...` : post.message}
+                    </Text>
+                    <Text style={styles.searchResultTimestamp}>
+                      {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.noResultContainer}>
+                <Text style={styles.noResultText}>해당 검색어에 대한 결과가 없습니다.</Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </TouchableWithoutFeedback>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
     </View>
   );
 }
@@ -429,6 +463,39 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+searchResultContainer: {
+  borderBottomWidth: 1,
+  borderBottomColor: '#ddd',
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+},
+searchResultContent: {
+  flexDirection: 'column',
+},
+searchResultTitle: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#333',
+},
+searchResultMessage: {
+  fontSize: 14,
+  color: '#666',
+  marginTop: 3,
+},
+searchResultTimestamp: {
+  fontSize: 12,
+  color: '#999',
+  textAlign: 'right',
+  marginTop: 3,
+},
+noResultContainer: {
+  padding: 20,
+  alignItems: 'center',
+},
+noResultText: {
+  fontSize: 16,
+  color: '#999',
+},
   historyContainer: {
     width: '100%',
     marginTop: 20,
