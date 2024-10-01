@@ -6,6 +6,8 @@ import { PostsContext } from './PostsContext';
 import moment from 'moment';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage for caching
+import axios from 'axios'; // axios 임포트
+import config from '../config'; // API URL을 위한 config 임포트
 
 export default function NearbySafety({ navigation, route }) {
   const { posts, loadPosts } = useContext(PostsContext); // PostsContext에서 posts를 가져옴
@@ -101,16 +103,23 @@ export default function NearbySafety({ navigation, route }) {
   }, [navigation, loadPosts]);
 
   // 검색 처리 (검색 결과 필터링 및 설정)
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (searchQuery.trim() !== '' && userLocation) {
-      const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
-      const results = posts.filter(post =>
-        (post.title.includes(searchQuery) || post.message.includes(searchQuery)) &&
-        post.location_address === formattedUserLocation // 사용자 위치와 일치하는 게시글만 필터링
-      );
+      try {
+        const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
+        
+        // 백엔드에 검색 요청
+        const response = await axios.post(`${config.apiUrl}/posts/search/location`, { 
+          searchQuery, 
+          userLocation: formattedUserLocation 
+        });
 
-      setSearchResults(results); // 검색 결과를 searchResults로 설정
-      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
+        setSearchResults(response.data); // 검색 결과를 searchResults로 설정
+        setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
+      } catch (error) {
+        console.error('Error during location-based search:', error);
+        setSearchResults([]); // 에러 발생 시 검색 결과를 빈 배열로 설정
+      }
     } else {
       setSearchResults([]); // 검색어가 비어있을 때 또는 위치가 없을 때 검색 결과를 빈 배열로 설정
     }
