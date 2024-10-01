@@ -120,22 +120,26 @@ const SafetyInfo = ({ navigation, route }) => {
   };
 
   // 검색 처리 (검색 결과 필터링 및 설정)
-const handleSearch = () => {
-  setSearchPerformed(true); // 검색이 수행되었음을 표시
-
-  if (searchQuery.trim() !== '') {
-    const results = safetyInfos.filter(info =>
-      (info.title && info.title.includes(searchQuery)) || 
-      (info.subtitle && info.subtitle.includes(searchQuery))
-    );
-
-    setSearchResults(results); // 검색 결과를 searchResults로 설정
-    setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
-  } else {
-    setSearchResults([]); // 검색어가 비어있을 때 검색 결과를 빈 배열로 설정
-  }
-  setSearchQuery(''); // 검색어 초기화
-};
+  const handleSearch = async () => {
+    setSearchPerformed(true); // 검색이 수행되었음을 표시
+  
+    if (searchQuery.trim() !== '') {
+      try {
+        // 백엔드에 검색 요청 보내기
+        const response = await axios.post(`${config.apiUrl}/safetyInfos/search`, { searchQuery });
+        
+        // 백엔드에서 가져온 검색 결과를 searchResults로 설정
+        setSearchResults(response.data);
+        setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
+      } catch (error) {
+        console.error('Error during search:', error); // 에러 메시지 출력
+      }
+    } else {
+      setSearchResults([]); // 검색어가 비어있을 때 검색 결과를 빈 배열로 설정
+    }
+    
+    setSearchQuery(''); // 검색어 초기화
+  };
 
 // 모달이 처음 열릴 때 searchResults와 searchPerformed 초기화
 useEffect(() => {

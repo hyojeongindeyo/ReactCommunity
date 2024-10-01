@@ -3,6 +3,7 @@ import { Image, StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView, Tou
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
 import config from '../config'; // SafetyInfo.js와 동일한 config 파일 사용
+import * as Location from 'expo-location';
 
 function Community({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -20,6 +21,7 @@ function Community({ navigation }) {
   const [nearbySafetyResults, setNearbySafetyResults] = useState([]); // 내 주변 안전소식 검색 결과
   const [safetyInfoResults, setSafetyInfoResults] = useState([]); // 안전 정보 검색 결과
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
+  const [userLocation, setUserLocation] = useState(null); // 사용자 위치 상태 추가
 
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const today = new Date();
@@ -34,6 +36,37 @@ function Community({ navigation }) {
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
   const categories = ['전체', '자연', '사회', '생활'];
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        return;
+      }
+  
+      try {
+        let location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        });
+  
+        const address = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude
+        });
+  
+        if (address.length > 0) {
+          const { city, district } = address[0];
+          const userAddress = `${city} ${district}`;
+          setUserLocation(userAddress);  // 시(city)와 동(district) 정보 설정
+        }
+      } catch (error) {
+        console.error('Error fetching location:', error);
+      }
+    };
+  
+    fetchLocation(); // 위치 정보 가져오기 호출
+  }, []);
 
   // 실제 게시물 데이터를 가져오기
   const [posts, setPosts] = useState([]);
@@ -146,29 +179,37 @@ function Community({ navigation }) {
   };
 
   // 검색 처리 함수
-const handleSearch = () => {
+const handleSearch = async () => {
   if (searchQuery.trim() !== '') {
     setIsSearchSubmitted(true); // 검색 버튼을 눌렀을 때만 true로 설정
 
-    // 내 주변 안전소식 검색
-    const nearbyResults = posts.filter(post =>
-      post.title.includes(searchQuery) || post.message.includes(searchQuery)
-    );
+    try {
+      // 현재 사용자의 위치를 가져옵니다.
+      const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
 
-    // 안전 정보 검색
-    const safetyResults = safetyInfos.filter(info =>
-      (info.title && info.title.includes(searchQuery)) ||
-      (info.subtitle && info.subtitle.includes(searchQuery))
-    );
+      // 백엔드에 검색 요청
+      const postResponse = await axios.post(`${config.apiUrl}/posts/search/location`, {
+        searchQuery, 
+        userLocation: formattedUserLocation
+      });
+      
+      const safetyInfoResponse = await axios.post(`${config.apiUrl}/safetyInfos/search`, { searchQuery }); // 안전 정보 검색을 위한 추가 요청
 
-    setNearbySafetyResults(nearbyResults); // 내 주변 안전소식 결과 설정
-    setSafetyInfoResults(safetyResults); // 안전 정보 결과 설정
-    setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
+      // 백엔드에서 가져온 검색 결과 설정
+      setNearbySafetyResults(postResponse.data); // 내 주변 안전소식 결과 설정
+      setSafetyInfoResults(safetyInfoResponse.data); // 안전 정보 결과 설정
+      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색 기록 저장
+
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
   } else {
+    // 검색어가 비어있을 때 결과를 빈 배열로 설정
     setNearbySafetyResults([]);
     setSafetyInfoResults([]);
   }
-  // 여기서 searchQuery를 초기화하는 대신, 이후에 검색 결과를 확인하고 난 후 초기화하도록 변경
+  // 검색어 초기화
+  setSearchQuery(''); 
 };
 
 // 검색 모달이 열렸을 때 검색 결과 초기화
