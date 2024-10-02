@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons,FontAwesome } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
 import moment from 'moment';
 import { CommentsContext } from './CommentsContext';
@@ -12,7 +12,7 @@ export default function PostDetail({ route, navigation }) {
   const { comments, setComments } = useContext(CommentsContext);
   const [userData, setUserData] = useState(null);
   const postId = post.id;
-
+  const [isScraped, setIsScraped] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [imageAspectRatio, setImageAspectRatio] = useState(1); // 기본 비율 설정
 
@@ -34,6 +34,7 @@ export default function PostDetail({ route, navigation }) {
 
   useEffect(() => {
     fetchUserSession();
+    checkIfScraped(); // 스크랩 상태 확인
   }, []);
 
   useEffect(() => {
@@ -171,6 +172,34 @@ export default function PostDetail({ route, navigation }) {
     </TouchableOpacity>
   );
 
+  const checkIfScraped = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/scrap/${post.id}`, { withCredentials: true });
+      setIsScraped(response.data.isScraped);
+    } catch (error) {
+      console.error('스크랩 상태 조회 오류:', error);
+    }
+  };
+
+  const handleScrap = async () => {
+    try {
+      if (isScraped) {
+        // 스크랩 취소
+        await axios.delete(`${config.apiUrl}/scrap/${post.id}`, { withCredentials: true });
+        setIsScraped(false);
+        Alert.alert('스크랩 취소', '스크랩이 취소되었습니다.');
+      } else {
+        // 스크랩 추가
+        await axios.post(`${config.apiUrl}/scrap`, { post_id: post.id }, { withCredentials: true });
+        setIsScraped(true);
+        Alert.alert('스크랩 완료', '게시물이 스크랩되었습니다.');
+      }
+    } catch (error) {
+      console.error('스크랩 오류:', error);
+      Alert.alert('스크랩 실패', '스크랩 처리에 실패했습니다.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -217,6 +246,12 @@ export default function PostDetail({ route, navigation }) {
         ) : null}
 
         <Text style={styles.postText}>{post.message}</Text>
+
+        {/* 스크랩 버튼 */}
+        <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
+          <FontAwesome name={isScraped ? 'star' : 'star-o'} size={16} color={isScraped ? 'gold' : 'black'} />
+          <Text>{isScraped ? '스크랩 취소' : '스크랩'}</Text>
+        </TouchableOpacity>
 
         {/* 삭제 버튼 */}
         {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
@@ -336,6 +371,11 @@ const styles = StyleSheet.create({
   //   borderRadius: 10,
   //   marginBottom: 20,
   // },
+  scrapButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   timestamp: {
     fontSize: 12,
     color: '#999',

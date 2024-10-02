@@ -314,9 +314,8 @@ const styles = StyleSheet.create({
     paddingBottom: '5%',
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
   iconButton: {
     padding: '2%',
