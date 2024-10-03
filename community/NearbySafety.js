@@ -20,7 +20,8 @@ export default function NearbySafety({ navigation, route }) {
   const [searchHistory, setSearchHistory] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const { filter } = route.params || { filter: '전체' };
-
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
+  
   useEffect(() => {
     if (filter) {
       setSelectedCategory(filter);
@@ -112,25 +113,30 @@ export default function NearbySafety({ navigation, route }) {
   // 검색 처리 (검색 결과 필터링 및 설정)
   const handleSearch = async () => {
     if (searchQuery.trim() !== '' && userLocation) {
+      setIsSearchSubmitted(true); // 검색 버튼을 눌렀을 때만 true로 설정
       try {
-        const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
-
-        // 백엔드에 검색 요청
+        const formattedUserLocation = userLocation.replace(' ', ', ');
         const response = await axios.post(`${config.apiUrl}/posts/search/location`, {
           searchQuery,
           userLocation: formattedUserLocation
         });
 
-        setSearchResults(response.data); // 검색 결과를 searchResults로 설정
-        setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
+        setSearchResults(response.data);
+        setSearchHistory(prevHistory => [searchQuery, ...prevHistory]);
       } catch (error) {
         console.error('Error during location-based search:', error);
-        setSearchResults([]); // 에러 발생 시 검색 결과를 빈 배열로 설정
+        setSearchResults([]);
       }
     } else {
-      setSearchResults([]); // 검색어가 비어있을 때 또는 위치가 없을 때 검색 결과를 빈 배열로 설정
+      setSearchResults([]);
     }
-    setSearchQuery(''); // 검색어 초기화
+    setSearchQuery('');
+  };
+
+  // 검색어 입력 시 검색어 상태만 업데이트하고, 결과는 업데이트하지 않도록 변경
+  const handleSearchQueryChange = (text) => {
+    setSearchQuery(text);
+    setIsSearchSubmitted(false); // 검색 버튼을 누르기 전까지는 결과를 표시하지 않음
   };
 
   // 모달이 처음 열릴 때 searchResults 초기화
@@ -268,34 +274,36 @@ export default function NearbySafety({ navigation, route }) {
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={styles.historyContainer}>
-                  {searchResults.length > 0 ? (
-                    searchResults.map((post, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.searchResultContainer}
-                        onPress={() => {
-                          setSearchModalVisible(false);
-                          navigation.navigate('PostDetail', { post });
-                        }}
-                      >
-                        <View style={styles.searchResultContent}>
-                          <Text style={styles.searchResultTitle}>
-                            [{post.category}] {post.title}
-                          </Text>
-                          <Text style={styles.searchResultMessage}>
-                            {post.message.length > 50 ? `${post.message.slice(0, 50)}...` : post.message}
-                          </Text>
-                          <Text style={styles.searchResultTimestamp}>
-                            {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))
-                  ) : (
-                    <View style={styles.noResultContainer}>
-                      <Text style={styles.noResultText}>해당 검색어에 대한 결과가 없습니다.</Text>
-                    </View>
-                  )}
+                  {isSearchSubmitted ? (  // 검색 버튼을 눌렀을 때만 결과를 표시
+                    searchResults.length > 0 ? (
+                      searchResults.map((post, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.searchResultContainer}
+                          onPress={() => {
+                            setSearchModalVisible(false);
+                            navigation.navigate('PostDetail', { post });
+                          }}
+                        >
+                          <View style={styles.searchResultContent}>
+                            <Text style={styles.searchResultTitle}>
+                              [{post.category}] {post.title}
+                            </Text>
+                            <Text style={styles.searchResultMessage}>
+                              {post.message.length > 50 ? `${post.message.slice(0, 50)}...` : post.message}
+                            </Text>
+                            <Text style={styles.searchResultTimestamp}>
+                              {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))
+                    ) : (
+                      <View style={styles.noResultContainer}>
+                        <Text style={styles.noResultText}>해당 검색어에 대한 결과가 없습니다.</Text>
+                      </View>
+                    )
+                  ) : null}
                 </ScrollView>
               </View>
             </TouchableWithoutFeedback>
