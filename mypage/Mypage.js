@@ -267,7 +267,7 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
-            paddingTop: 20,
+            // paddingTop: 20,
             height: 80,
           },
           headerTitleStyle: {
@@ -292,7 +292,7 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
-            paddingTop: 20,
+            // paddingTop: 20,
             height: 80,
           },
           headerTitleStyle: {
@@ -317,8 +317,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
-            paddingTop: 20,
-            height: 80,
+            // paddingTop: 20,
+            // height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -342,8 +342,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
-            paddingTop: 20,
-            height: 80,
+            // paddingTop: 20,
+            // height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -367,8 +367,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
-            paddingTop: 20,
-            height: 80,
+            // paddingTop: 20,
+            // height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -392,8 +392,8 @@ export default function Mypage() {
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
-            paddingTop: 20,
-            height: 80,
+            // paddingTop: 20,
+            // height: 80,
           },
           headerTitleStyle: {
             fontWeight: 'bold',
