@@ -19,6 +19,13 @@ export default function NearbySafety({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const { filter } = route.params || { filter: '전체' };
+
+  useEffect(() => {
+    if (filter) {
+      setSelectedCategory(filter);
+    }
+  }, [filter]);
 
   // 위치 정보 캐싱 함수
   const getCachedLocation = async () => {
@@ -107,11 +114,11 @@ export default function NearbySafety({ navigation, route }) {
     if (searchQuery.trim() !== '' && userLocation) {
       try {
         const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
-        
+
         // 백엔드에 검색 요청
-        const response = await axios.post(`${config.apiUrl}/posts/search/location`, { 
-          searchQuery, 
-          userLocation: formattedUserLocation 
+        const response = await axios.post(`${config.apiUrl}/posts/search/location`, {
+          searchQuery,
+          userLocation: formattedUserLocation
         });
 
         setSearchResults(response.data); // 검색 결과를 searchResults로 설정

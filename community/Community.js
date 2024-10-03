@@ -35,7 +35,6 @@ function Community({ navigation }) {
   });
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
-  const categories = ['전체', '자연', '사회', '생활'];
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -44,17 +43,17 @@ function Community({ navigation }) {
         console.error('Permission to access location was denied');
         return;
       }
-  
+
       try {
         let location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced
         });
-  
+
         const address = await Location.reverseGeocodeAsync({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude
         });
-  
+
         if (address.length > 0) {
           const { city, district } = address[0];
           const userAddress = `${city} ${district}`;
@@ -64,13 +63,13 @@ function Community({ navigation }) {
         console.error('Error fetching location:', error);
       }
     };
-  
+
     fetchLocation(); // 위치 정보 가져오기 호출
   }, []);
 
   // 실제 게시물 데이터를 가져오기
   const [posts, setPosts] = useState([]);
-  
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -88,7 +87,7 @@ function Community({ navigation }) {
   const getCategoryPosts = (category) => {
     return posts.find(post => post.category === category) || null;
   };
-  
+
   // 타임스탬프 포맷팅 함수 (NearbySafety.js 참고)
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -98,20 +97,34 @@ function Community({ navigation }) {
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
 
-  const menuItems = [
-    { id: '1', title: '내 주변 안전소식', navigateTo: 'NearbySafety', filter: null },
-    { id: '2', title: '전체', navigateTo: 'NearbySafety', filter: '전체' },
-    { id: '3', title: 'HOT', navigateTo: 'NearbySafety', filter: 'HOT' },
-    { id: '4', title: '교통', navigateTo: 'NearbySafety', filter: '교통' },
-    { id: '5', title: '시위', navigateTo: 'NearbySafety', filter: '시위' },
-    { id: '6', title: '재해', navigateTo: 'NearbySafety', filter: '재해' },
-    { id: '7', title: '주의', navigateTo: 'NearbySafety', filter: '주의' },
-    { id: '8', title: '안전 정보', navigateTo: 'SafetyInfo', filter: null },
-    { id: '9', title: '전체', navigateTo: 'SafetyInfo', filter: '전체' },
-    { id: '10', title: '자연', navigateTo: 'SafetyInfo', filter: '자연' },
-    { id: '11', title: '사회', navigateTo: 'SafetyInfo', filter: '사회' },
-    { id: '12', title: '생활', navigateTo: 'SafetyInfo', filter: '생활' }
-  ];
+  // 카테고리 데이터 설정 (객체)
+  const categoriesData = {
+    NearbySafety: ['내 주변 안전소식', '전체', 'HOT', '교통', '시위', '재해', '주의'],
+    SafetyInfo: ['안전 정보', '전체', '자연', '사회', '생활'],
+  };
+
+  // 메뉴 아이템 생성 함수
+  const generateMenuItems = () => {
+    let menuId = 1;
+    const items = [];
+
+    Object.entries(categoriesData).forEach(([navigateTo, titles]) => {
+      titles.forEach((title, index) => {
+        items.push({
+          id: menuId.toString(),
+          title: title,
+          navigateTo: navigateTo,
+          filter: index === 0 ? null : title, // 첫 번째 항목의 필터는 null
+        });
+        menuId++;
+      });
+    });
+
+    return items;
+  };
+
+  // 효율적으로 생성된 메뉴 아이템
+  const menuItems = generateMenuItems();
 
   // 안전정보 데이터 및 각 카드의 표지 이미지 가져오기
   useEffect(() => {
@@ -179,53 +192,53 @@ function Community({ navigation }) {
   };
 
   // 검색 처리 함수
-const handleSearch = async () => {
-  if (searchQuery.trim() !== '') {
-    setIsSearchSubmitted(true); // 검색 버튼을 눌렀을 때만 true로 설정
+  const handleSearch = async () => {
+    if (searchQuery.trim() !== '') {
+      setIsSearchSubmitted(true); // 검색 버튼을 눌렀을 때만 true로 설정
 
-    try {
-      // 현재 사용자의 위치를 가져옵니다.
-      const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
+      try {
+        // 현재 사용자의 위치를 가져옵니다.
+        const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
 
-      // 백엔드에 검색 요청
-      const postResponse = await axios.post(`${config.apiUrl}/posts/search/location`, {
-        searchQuery, 
-        userLocation: formattedUserLocation
-      });
-      
-      const safetyInfoResponse = await axios.post(`${config.apiUrl}/safetyInfos/search`, { searchQuery }); // 안전 정보 검색을 위한 추가 요청
+        // 백엔드에 검색 요청
+        const postResponse = await axios.post(`${config.apiUrl}/posts/search/location`, {
+          searchQuery,
+          userLocation: formattedUserLocation
+        });
 
-      // 백엔드에서 가져온 검색 결과 설정
-      setNearbySafetyResults(postResponse.data); // 내 주변 안전소식 결과 설정
-      setSafetyInfoResults(safetyInfoResponse.data); // 안전 정보 결과 설정
-      setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색 기록 저장
+        const safetyInfoResponse = await axios.post(`${config.apiUrl}/safetyInfos/search`, { searchQuery }); // 안전 정보 검색을 위한 추가 요청
 
-    } catch (error) {
-      console.error('Error during search:', error);
+        // 백엔드에서 가져온 검색 결과 설정
+        setNearbySafetyResults(postResponse.data); // 내 주변 안전소식 결과 설정
+        setSafetyInfoResults(safetyInfoResponse.data); // 안전 정보 결과 설정
+        setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색 기록 저장
+
+      } catch (error) {
+        console.error('Error during search:', error);
+      }
+    } else {
+      // 검색어가 비어있을 때 결과를 빈 배열로 설정
+      setNearbySafetyResults([]);
+      setSafetyInfoResults([]);
     }
-  } else {
-    // 검색어가 비어있을 때 결과를 빈 배열로 설정
-    setNearbySafetyResults([]);
-    setSafetyInfoResults([]);
-  }
-  // 검색어 초기화
-  setSearchQuery(''); 
-};
+    // 검색어 초기화
+    setSearchQuery('');
+  };
 
-// 검색 모달이 열렸을 때 검색 결과 초기화
-useEffect(() => {
-  if (searchModalVisible) {
-    setIsSearchSubmitted(false); // 모달을 열 때마다 검색 결과를 리셋
-    setNearbySafetyResults([]);
-    setSafetyInfoResults([]);
-  }
-}, [searchModalVisible]);
+  // 검색 모달이 열렸을 때 검색 결과 초기화
+  useEffect(() => {
+    if (searchModalVisible) {
+      setIsSearchSubmitted(false); // 모달을 열 때마다 검색 결과를 리셋
+      setNearbySafetyResults([]);
+      setSafetyInfoResults([]);
+    }
+  }, [searchModalVisible]);
 
-// 검색어 입력 시 검색어 상태만 업데이트하고, 결과는 업데이트하지 않도록 변경
-const handleSearchQueryChange = (text) => {
-  setSearchQuery(text);
-  setIsSearchSubmitted(false); // 검색 버튼을 누르기 전까지는 결과를 표시하지 않음
-};
+  // 검색어 입력 시 검색어 상태만 업데이트하고, 결과는 업데이트하지 않도록 변경
+  const handleSearchQueryChange = (text) => {
+    setSearchQuery(text);
+    setIsSearchSubmitted(false); // 검색 버튼을 누르기 전까지는 결과를 표시하지 않음
+  };
 
   const deleteSearchHistoryItem = (index) => {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
@@ -280,7 +293,7 @@ const handleSearchQueryChange = (text) => {
         <View style={styles.safe}>
           {['교통', '시위', '재해', '주의'].map((category, index) => {
             const post = getCategoryPosts(category);
-            
+
             return (
               <TouchableOpacity key={index} onPress={() => handlePostPress(post)}>
                 <Text style={styles.safeText}>
@@ -292,7 +305,7 @@ const handleSearchQueryChange = (text) => {
             );
           })}
         </View>
-        
+
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>
           <Text style={styles.infoHeader}>
@@ -304,7 +317,7 @@ const handleSearchQueryChange = (text) => {
         </TouchableOpacity>
 
         <View style={styles.categoryContainer}>
-          {categories.map((category, index) => (
+          {categoriesData[selectedFilter]?.map((category, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => setSelectedFilter(category)}
@@ -325,30 +338,31 @@ const handleSearchQueryChange = (text) => {
           ))}
         </View>
 
+
         <View style={styles.infoCardsContainer}>
           {filteredInfos.map((info) => (
             <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
-            <View style={styles.infoCard}>
-              {coverImages[info.id] && (
-                <Image
-                  source={{ uri: coverImages[info.id] }}
-                  style={styles.cardImageBackground}
-                  opacity={0.45} 
-                />
-              )}
-              <Text style={styles.infoTitle}>{info.title}</Text>
-            </View>
-            <View style={styles.infoFooter}>
-              <Text style={styles.infoDate}>{info.date}</Text>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryBadgeText}>{info.category}</Text>
+              <View style={styles.infoCard}>
+                {coverImages[info.id] && (
+                  <Image
+                    source={{ uri: coverImages[info.id] }}
+                    style={styles.cardImageBackground}
+                    opacity={0.45}
+                  />
+                )}
+                <Text style={styles.infoTitle}>{info.title}</Text>
               </View>
-            </View>
-          </TouchableOpacity>          
+              <View style={styles.infoFooter}>
+                <Text style={styles.infoDate}>{info.date}</Text>
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryBadgeText}>{info.category}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
-      
+
       {/* 메뉴 모달 */}
       <Modal
         animationType="slide"
@@ -362,10 +376,10 @@ const handleSearchQueryChange = (text) => {
               <View style={styles.menuModalContent}>
                 <ScrollView contentContainerStyle={styles.menuItemsContainer}>
                   {menuItems.map(item => (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       key={item.id}
-                      onPress={() => { 
-                        setModalVisible(false); 
+                      onPress={() => {
+                        setModalVisible(false);
                         if (item.filter === null) {
                           navigation.navigate(item.navigateTo);
                         } else {
@@ -403,7 +417,7 @@ const handleSearchQueryChange = (text) => {
                   <TextInput
                     style={styles.searchInput}
                     placeholder="검색어를 입력하세요"
-                    placeholderTextColor="#888888" 
+                    placeholderTextColor="#888888"
                     value={searchQuery}
                     onChangeText={handleSearchQueryChange}
                     autoFocus
@@ -413,65 +427,65 @@ const handleSearchQueryChange = (text) => {
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={styles.historyContainer}>
-  {isSearchSubmitted ? ( // 검색 버튼을 눌렀을 때만 결과를 보여줌
-    <>
-      {/* 내 주변 안전소식 검색 결과 */}
-      <Text style={styles.resultHeader}>내 주변 안전소식</Text>
-      {nearbySafetyResults.length > 0 ? (
-        nearbySafetyResults.map((result, index) => (
-          <TouchableOpacity
-            key={`nearby-${index}`}
-            style={styles.searchResultContainer}
-            onPress={() => {
-              setSearchModalVisible(false);
-              handlePostPress(result); // 선택된 게시물로 이동
-            }}
-          >
-            <Text style={styles.resultTitle}>[{result.category}] {result.title}</Text>
-            <Text style={styles.resultContent}>{result.message}</Text>
-            <Text style={styles.resultDate}>{formatTimestamp(result.timestamp)}</Text>
-          </TouchableOpacity>
-        ))
-      ) : (
-        <Text style={styles.noResultText}>검색어에 해당하는 결과가 없습니다.</Text>
-      )}
+                  {isSearchSubmitted ? ( // 검색 버튼을 눌렀을 때만 결과를 보여줌
+                    <>
+                      {/* 내 주변 안전소식 검색 결과 */}
+                      <Text style={styles.resultHeader}>내 주변 안전소식</Text>
+                      {nearbySafetyResults.length > 0 ? (
+                        nearbySafetyResults.map((result, index) => (
+                          <TouchableOpacity
+                            key={`nearby-${index}`}
+                            style={styles.searchResultContainer}
+                            onPress={() => {
+                              setSearchModalVisible(false);
+                              handlePostPress(result); // 선택된 게시물로 이동
+                            }}
+                          >
+                            <Text style={styles.resultTitle}>[{result.category}] {result.title}</Text>
+                            <Text style={styles.resultContent}>{result.message}</Text>
+                            <Text style={styles.resultDate}>{formatTimestamp(result.timestamp)}</Text>
+                          </TouchableOpacity>
+                        ))
+                      ) : (
+                        <Text style={styles.noResultText}>검색어에 해당하는 결과가 없습니다.</Text>
+                      )}
 
-      {/* 안전 정보 검색 결과 */}
-      <Text style={styles.resultHeader}>안전 정보</Text>
-      {safetyInfoResults.length > 0 ? (
-        safetyInfoResults.map((info, index) => (
-          <TouchableOpacity
-            key={`safety-${index}`}
-            style={styles.searchResultContainer}
-            onPress={() => {
-              setSearchModalVisible(false);
-              handleInfoPress(info); // 선택된 안전 정보로 이동
-            }}
-          >
-            <View style={styles.infoCard}>
-              {coverImages[info.id] && (
-                <Image
-                  source={{ uri: coverImages[info.id] }}
-                  style={styles.cardImageBackground}
-                  opacity={0.45}
-                />
-              )}
-              <Text style={styles.infoTitle}>{info.title}</Text>
-            </View>
-            <View style={styles.infoFooter}>
-              <Text style={styles.infoDate}>{info.date}</Text>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryBadgeText}>{info.category}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))
-      ) : (
-        <Text style={styles.noResultText}>검색어에 해당하는 결과가 없습니다.</Text>
-      )}
-    </>
-  ) : null}
-</ScrollView>
+                      {/* 안전 정보 검색 결과 */}
+                      <Text style={styles.resultHeader}>안전 정보</Text>
+                      {safetyInfoResults.length > 0 ? (
+                        safetyInfoResults.map((info, index) => (
+                          <TouchableOpacity
+                            key={`safety-${index}`}
+                            style={styles.searchResultContainer}
+                            onPress={() => {
+                              setSearchModalVisible(false);
+                              handleInfoPress(info); // 선택된 안전 정보로 이동
+                            }}
+                          >
+                            <View style={styles.infoCard}>
+                              {coverImages[info.id] && (
+                                <Image
+                                  source={{ uri: coverImages[info.id] }}
+                                  style={styles.cardImageBackground}
+                                  opacity={0.45}
+                                />
+                              )}
+                              <Text style={styles.infoTitle}>{info.title}</Text>
+                            </View>
+                            <View style={styles.infoFooter}>
+                              <Text style={styles.infoDate}>{info.date}</Text>
+                              <View style={styles.categoryBadge}>
+                                <Text style={styles.categoryBadgeText}>{info.category}</Text>
+                              </View>
+                            </View>
+                          </TouchableOpacity>
+                        ))
+                      ) : (
+                        <Text style={styles.noResultText}>검색어에 해당하는 결과가 없습니다.</Text>
+                      )}
+                    </>
+                  ) : null}
+                </ScrollView>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -494,10 +508,10 @@ const handleSearchQueryChange = (text) => {
             {images.length > 0 ? (
               <>
                 <Image
-                    key={currentImageIndex}
-                    source={{ uri: images[currentImageIndex] }}
-                    style={styles.cardImage}
-                    resizeMode="contain" 
+                  key={currentImageIndex}
+                  source={{ uri: images[currentImageIndex] }}
+                  style={styles.cardImage}
+                  resizeMode="contain"
                 />
                 <View style={styles.imageNavigation}>
                   <TouchableOpacity onPress={handlePrevImage}>
