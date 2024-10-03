@@ -207,8 +207,11 @@ export default function PostDetail({ route, navigation }) {
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>{post.title}</Text>
-
-        <View style={styles.iconhide}><MaterialIcons name="keyboard-arrow-left" size={30} color="black" /></View>
+        <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
+          <FontAwesome name={isScraped ? 'star' : 'star-o'} size={18} color={isScraped ? 'gold' : 'black'} />
+          {/* <Text>{isScraped ? '스크랩 취소' : '스크랩'}</Text> */}
+        </TouchableOpacity>
+        {/* <View style={styles.iconhide}><MaterialIcons name="keyboard-arrow-left" size={30} color="black" /></View> */}
       </View>
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
@@ -248,10 +251,10 @@ export default function PostDetail({ route, navigation }) {
         <Text style={styles.postText}>{post.message}</Text>
 
         {/* 스크랩 버튼 */}
-        <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
+        {/* <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
           <FontAwesome name={isScraped ? 'star' : 'star-o'} size={16} color={isScraped ? 'gold' : 'black'} />
           <Text>{isScraped ? '스크랩 취소' : '스크랩'}</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* 삭제 버튼 */}
         {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
