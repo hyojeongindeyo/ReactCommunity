@@ -268,7 +268,7 @@ export default function Mypage() {
             shadowOpacity: 0,
             elevation: 0,
             // paddingTop: 20,
-            height: 80,
+            // height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -293,7 +293,7 @@ export default function Mypage() {
             shadowOpacity: 0,
             elevation: 0,
             // paddingTop: 20,
-            height: 80,
+            // height: 80,
           },
           headerTitleStyle: {
             fontSize: 18,
