@@ -15,6 +15,7 @@ export default function PostDetail({ route, navigation }) {
   const [isScraped, setIsScraped] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [imageAspectRatio, setImageAspectRatio] = useState(1); // 기본 비율 설정
+  const [scrapCount, setScrapCount] = useState(0); // 스크랩 수 상태 변수 추가
 
   useEffect(() => {
     console.log("수정된 데이터:", post);
@@ -35,6 +36,7 @@ export default function PostDetail({ route, navigation }) {
   useEffect(() => {
     fetchUserSession();
     checkIfScraped(); // 스크랩 상태 확인
+    fetchScrapCount();
   }, []);
 
   useEffect(() => {
@@ -181,22 +183,29 @@ export default function PostDetail({ route, navigation }) {
     }
   };
 
+  // 스크랩 수 조회 함수
+  const fetchScrapCount = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/scrap/count/${postId}`);
+      setScrapCount(response.data.scrapCount);
+    } catch (error) {
+      console.error('스크랩 수 조회 오류:', error);
+    }
+  };
+
   const handleScrap = async () => {
     try {
       if (isScraped) {
-        // 스크랩 취소
-        await axios.delete(`${config.apiUrl}/scrap/${post.id}`, { withCredentials: true });
+        await axios.delete(`${config.apiUrl}/scrap/${postId}`, { withCredentials: true });
         setIsScraped(false);
-        Alert.alert('스크랩 취소', '스크랩이 취소되었습니다.');
+        setScrapCount(scrapCount - 1); // 스크랩 수 감소
       } else {
-        // 스크랩 추가
-        await axios.post(`${config.apiUrl}/scrap`, { post_id: post.id }, { withCredentials: true });
+        await axios.post(`${config.apiUrl}/scrap`, { post_id: postId }, { withCredentials: true });
         setIsScraped(true);
-        Alert.alert('스크랩 완료', '게시물이 스크랩되었습니다.');
+        setScrapCount(scrapCount + 1); // 스크랩 수 증가
       }
     } catch (error) {
       console.error('스크랩 오류:', error);
-      Alert.alert('스크랩 실패', '스크랩 처리에 실패했습니다.');
     }
   };
 
@@ -208,8 +217,8 @@ export default function PostDetail({ route, navigation }) {
         </TouchableOpacity>
         <Text style={styles.title}>{post.title}</Text>
         <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
-          <FontAwesome name={isScraped ? 'star' : 'star-o'} size={18} color={isScraped ? 'gold' : 'black'} />
-          {/* <Text>{isScraped ? '스크랩 취소' : '스크랩'}</Text> */}
+          <FontAwesome name={isScraped ? 'star' : 'star-o'} size={20} color={isScraped ? 'gold' : 'black'} />
+          <Text style={{ marginLeft: 3 }}>{scrapCount}</Text>
         </TouchableOpacity>
         {/* <View style={styles.iconhide}><MaterialIcons name="keyboard-arrow-left" size={30} color="black" /></View> */}
       </View>
@@ -377,7 +386,6 @@ const styles = StyleSheet.create({
   scrapButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
   },
   timestamp: {
     fontSize: 12,
