@@ -248,6 +248,10 @@ function Community({ navigation }) {
     navigation.navigate('PostDetail', { post });
   };
 
+  const getHotPost = () => {
+    return posts.sort((a, b) => b.views - a.views)[0] || null;
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -282,12 +286,12 @@ function Community({ navigation }) {
         </TouchableOpacity>
 
         {/* HOT 게시물 표시 */}
-        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(getCategoryPosts('HOT'))}>
+        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(getHotPost())}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
           </View>
-          <Text style={styles.postTitle}>{getCategoryPosts('HOT') ? getCategoryPosts('HOT').title : 'HOT 게시물은 아직 없습니다.'}</Text>
-          <Text style={styles.hotTime}>{getCategoryPosts('HOT') ? formatTimestamp(getCategoryPosts('HOT').timestamp) : '-'}</Text>
+          <Text style={styles.postTitle}>{getHotPost() ? getHotPost().title : 'HOT 게시물은 아직 없습니다.'}</Text>
+          <Text style={styles.hotTime}>{getHotPost() ? formatTimestamp(getHotPost().timestamp) : '-'}</Text>
         </TouchableOpacity>
 
         <View style={styles.safe}>

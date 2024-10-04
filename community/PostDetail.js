@@ -37,6 +37,7 @@ export default function PostDetail({ route, navigation }) {
     fetchUserSession();
     checkIfScraped(); // 스크랩 상태 확인
     fetchScrapCount();
+    increaseViews();  // 게시물 열릴 때 조회수 증가
   }, []);
 
   useEffect(() => {
@@ -56,6 +57,14 @@ export default function PostDetail({ route, navigation }) {
 
     fetchComments();
   }, [post.id]);
+
+  const increaseViews = async () => {
+    try {
+      await axios.post(`${config.apiUrl}/posts/${post.id}/increaseViews`);
+    } catch (error) {
+      console.error('조회수 증가 실패:', error);
+    }
+  };  
 
   const fetchUserSession = async () => {
     try {
@@ -341,6 +350,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    marginBottom: 80,
   },
   header: {
     flexDirection: 'row',
