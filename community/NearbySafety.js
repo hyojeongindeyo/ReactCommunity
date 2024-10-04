@@ -21,7 +21,7 @@ export default function NearbySafety({ navigation, route }) {
   const [searchResults, setSearchResults] = useState([]);
   const { filter } = route.params || { filter: '전체' };
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
-  
+
   useEffect(() => {
     if (filter) {
       setSelectedCategory(filter);
@@ -151,6 +151,10 @@ export default function NearbySafety({ navigation, route }) {
     setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
   };
 
+  const getHotPost = () => {
+    return posts.sort((a, b) => b.views - a.views)[0] || null;
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -171,8 +175,14 @@ export default function NearbySafety({ navigation, route }) {
           {/* HOT 게시물 상단 표시 - 현재 비워둠 */}
           <View style={styles.hotBox}>
             <Text style={styles.hotTitle}>[HOT]</Text>
-            <Text style={styles.hotMessage}>HOT 게시물은 아직 없습니다.</Text>
-            <Text style={styles.hotTimestamp}>-</Text>
+            {getHotPost() ? (
+              <TouchableOpacity onPress={() => navigation.navigate('PostDetail', { post: getHotPost() })}>
+                <Text style={styles.hotMessage}>{getHotPost().title}</Text>
+                <Text style={styles.hotTimestamp}>{moment(getHotPost().timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.hotMessage}>HOT 게시물은 아직 없습니다.</Text>
+            )}
           </View>
 
           {/* 카테고리 버튼 */}
