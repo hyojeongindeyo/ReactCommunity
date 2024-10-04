@@ -289,9 +289,24 @@ function Community({ navigation }) {
         <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(getHotPost())}>
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
+            {/* HOT 텍스트 옆에 게시글 제목 추가 */}
+            {getHotPost() ? (
+              <Text style={styles.postTitle}>
+                {getHotPost().title.length > 30 ? `${getHotPost().title.slice(0, 30)}...` : getHotPost().title}
+              </Text>
+            ) : (
+              <Text style={styles.postTitle}>HOT 게시물은 아직 없습니다.</Text>
+            )}
           </View>
-          <Text style={styles.postTitle}>{getHotPost() ? getHotPost().title : 'HOT 게시물은 아직 없습니다.'}</Text>
-          <Text style={styles.hotTime}>{getHotPost() ? formatTimestamp(getHotPost().timestamp) : '-'}</Text>
+          {getHotPost() && (
+            <>
+              {/* 본문에서 굵은 글씨 제거 */}
+              <Text style={styles.hotMessage}>
+                {getHotPost().message.length > 30 ? `${getHotPost().message.slice(0, 30)}...` : getHotPost().message}
+              </Text>
+              <Text style={styles.hotTime}>{formatTimestamp(getHotPost().timestamp)}</Text>
+            </>
+          )}
         </TouchableOpacity>
 
         <View style={styles.safe}>
@@ -738,6 +753,11 @@ const styles = StyleSheet.create({
     color: 'gray',
     textAlign: 'right',
     marginLeft: 10,
+  },
+  hotMessage: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 5,
   },
   postTitle: {
     fontSize: 16,

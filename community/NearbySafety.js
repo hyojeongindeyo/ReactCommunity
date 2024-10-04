@@ -83,19 +83,26 @@ export default function NearbySafety({ navigation, route }) {
   useEffect(() => {
     if (userLocation && posts) {
       const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
+  
       const filtered = posts.filter(post => {
-        // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
         const isMatchingLocation = post.location_address === formattedUserLocation;
-        const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
-        return isMatchingLocation && isMatchingCategory;
+        if (selectedCategory === 'HOT') {
+          // 조회수가 가장 높은 게시물 필터링
+          const maxViews = Math.max(...posts.map(p => p.views || 0)); // 조회수가 가장 높은 값 찾기
+          return isMatchingLocation && post.views === maxViews; // 조회수가 가장 높은 게시물 반환
+        } else {
+          // '전체' 카테고리가 선택된 경우 위치만 필터링, 그 외에는 위치와 카테고리 모두 필터링
+          const isMatchingCategory = selectedCategory === '전체' || post.category === selectedCategory;
+          return isMatchingLocation && isMatchingCategory;
+        }
       });
-
+  
       // 최신순으로 정렬 (timestamp를 기준으로 내림차순 정렬)
       const sortedPosts = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
+  
       setFilteredPosts(sortedPosts);  // 필터링 및 정렬된 게시물 설정
     }
-  }, [userLocation, posts, selectedCategory]);
+  }, [userLocation, posts, selectedCategory]);  
 
   // 날짜 포맷팅 함수
   const formatDate = (date) => {
@@ -174,14 +181,27 @@ export default function NearbySafety({ navigation, route }) {
         <>
           {/* HOT 게시물 상단 표시 - 현재 비워둠 */}
           <View style={styles.hotBox}>
-            <Text style={styles.hotTitle}>[HOT]</Text>
-            {getHotPost() ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.hotTitle}>[HOT]</Text>
+              {/* HOT 옆에 제목 배치, 위치 조정 */}
+              {getHotPost() ? (
+                <TouchableOpacity onPress={() => navigation.navigate('PostDetail', { post: getHotPost() })}>
+                  <Text style={[styles.hotMessage, { marginLeft: 5, lineHeight: 20, paddingTop: 3 }]}>
+                    {getHotPost().title ? getHotPost().title : '제목 없음'}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.hotMessage}>HOT 게시물은 아직 없습니다.</Text>
+              )}
+            </View>
+            {getHotPost() && (
               <TouchableOpacity onPress={() => navigation.navigate('PostDetail', { post: getHotPost() })}>
-                <Text style={styles.hotMessage}>{getHotPost().title}</Text>
+                {/* 본문에서 굵은 글씨 제거 */}
+                <Text style={[styles.hotMessage, { fontWeight: 'normal' }]}>
+                  {getHotPost().message.length > 30 ? `${getHotPost().message.slice(0, 30)}...` : getHotPost().message}
+                </Text>
                 <Text style={styles.hotTimestamp}>{moment(getHotPost().timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
               </TouchableOpacity>
-            ) : (
-              <Text style={styles.hotMessage}>HOT 게시물은 아직 없습니다.</Text>
             )}
           </View>
 
