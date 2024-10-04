@@ -23,6 +23,7 @@ function MainScreen({ navigation }) {
       try {
         const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
         setNickname(response.data.nickname);  // 닉네임 상태 업데이트
+        console.log('서버 응답:', response.data); // 응답 데이터 확인
       } catch (error) {
         console.error('Error fetching user session:', error);
       }
@@ -188,22 +189,54 @@ function MyPostsScreen() {
 }
 
 function ScrappedPostsScreen() {
+  const [scrappedPosts, setScrappedPosts] = useState([]); // 스크랩한 글 목록 상태
+  const [loading, setLoading] = useState(true); // 로딩 상태
+
+  useEffect(() => {
+    fetchScrappedPosts(); // 스크랩된 글을 가져오는 함수
+  }, []);
+
+  const fetchScrappedPosts = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/scrap/read/myscrap`);
+      console.log('Response status:', response.status); // 응답 상태 로그
+      // 서버에서 스크랩한 글 목록을 가져오는 로직
+      const data = response.data; // Axios를 사용하면 응답 데이터에 직접 접근 가능
+      console.log('API Response:', data);
+      setScrappedPosts(data.scrappedPosts || []); // 'scrappedPosts'가 있는지 확인 후 상태 업데이트
+    } catch (error) {
+      console.error('Error fetching scrapped posts:', error);
+    } finally {
+      setLoading(false); // 로딩 상태 종료
+    }
+  };
+
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>로딩 중...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
       <ScrollView style={styles.postsContainer}>
-        <View style={styles.postItem}>
-          <Text style={styles.postTitle}>00사거리에 교통사고 났대요 그래서...</Text>
-          <Ionicons name="star" size={16} color="#FFF500" />
-        </View>
-        <View style={styles.postItem}>
-          <Text style={styles.postTitle}>역 앞에서 시위 중이에요 조심하세요!</Text>
-          <Ionicons name="star" size={16} color="#FFF500" />
-        </View>
-        <View style={styles.postItem}>
-          <Text style={styles.postTitle}>역 주위에 정차된 차들이 많아서 차가 많이...</Text>
-          <Ionicons name="star" size={16} color="#FFF500" />
-        </View>
+        {scrappedPosts.length === 0 ? (
+          <Text style={styles.noPostsText}>스크랩한 글이 없습니다.</Text>
+        ) : (
+          scrappedPosts.map((post, index) => (
+            <View key={index} style={styles.postItem}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.postTitle}>{post.title}</Text>
+                <Ionicons name="star" size={16} color="#FFF500" />
+              </View>
+              <Text style={styles.postMessage}>{post.message}</Text>
+            </View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -438,14 +471,7 @@ const styles = StyleSheet.create({
   postsContainer: {
     paddingHorizontal: 20,
   },
-  postItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
+
   commentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -595,5 +621,28 @@ const styles = StyleSheet.create({
   },
   notificationText: {
     fontSize: 18,
+  },
+  postItem: {
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  titleContainer: {
+    flexDirection: 'row', // 제목과 아이콘을 나란히 배치
+    alignItems: 'center', // 세로 중앙 정렬
+    justifyContent: 'space-between',
+  },
+  postTitle: {
+    // 제목 스타일
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginRight: 8, // 제목과 아이콘 사이 간격
+  },
+  postMessage: {
+    // 본문 스타일
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4, // 본문과 제목 사이 간격
   },
 });
