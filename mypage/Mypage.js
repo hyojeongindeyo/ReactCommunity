@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
+import PostDetail from '../community/PostDetail';
 import axios from 'axios';
 import config from '../config';
 
@@ -157,34 +158,56 @@ function ChangePasswordScreen({ navigation }) {
   );
 }
 
-function MyPostsScreen() {
+function MyPostsScreen({ navigation }) {
+  const [myPosts, setMyPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMyPosts();
+  }, []);
+
+  // 내가 작성한 글 목록 가져오기
+  const fetchMyPosts = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/posts/myposts`, { withCredentials: true });
+      setMyPosts(response.data);
+      setLoading(false);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.error('내가 작성한 글이 없습니다.');
+      } else if (error.response && error.response.status === 401) {
+        console.error('사용자 인증 실패');
+      } else {
+        console.error('내가 작성한 글 불러오기 실패:', error);
+      }
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header} />
-      <ScrollView style={styles.postsContainer}>
-        <View style={styles.postItem}>
-          <Text style={styles.postTitle}>00사거리에 교통사고 났대요 그래서...</Text>
-          <View style={styles.commentContainer}>
-            <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
-            <Text style={styles.postCommentCount}>6</Text>
-          </View>
-        </View>
-        <View style={styles.postItem}>
-          <Text style={styles.postTitle}>역 앞에서 시위 중이에요 조심하세요!</Text>
-          <View style={styles.commentContainer}>
-            <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
-            <Text style={styles.postCommentCount}>2</Text>
-          </View>
-        </View>
-        <View style={styles.postItem}>
-          <Text style={styles.postTitle}>역 주위에 정차된 차들이 많아서 차가 많이...</Text>
-          <View style={styles.commentContainer}>
-            <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
-            <Text style={styles.postCommentCount}>5</Text>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
+    <ScrollView style={styles.postsContainer}>
+      {myPosts.length > 0 ? (
+        myPosts.map((post, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.postItem}
+            onPress={() => navigation.navigate('PostDetail', { post })}
+          >
+            <View style={styles.titleContainer}>
+              <Text style={styles.postTitle}>{post.title}</Text>
+              <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
+            </View>
+            <Text style={styles.postMessage}>{post.message}</Text>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <Text>내가 작성한 글이 없습니다.</Text>
+      )}
+    </ScrollView>
   );
 }
 
@@ -368,6 +391,13 @@ export default function Mypage() {
         }}
       />
       <Stack.Screen
+        name="PostDetail"
+        component={PostDetail}  // PostDetail 추가
+        options={{
+          headerShown: false,  // 상단바 숨기기
+        }}
+      />
+      <Stack.Screen
         name="ScrappedPosts"
         component={ScrappedPostsScreen}
         options={{
@@ -470,8 +500,8 @@ const styles = StyleSheet.create({
   },
   postsContainer: {
     paddingHorizontal: 20,
+    backgroundColor: 'white',
   },
-
   commentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
