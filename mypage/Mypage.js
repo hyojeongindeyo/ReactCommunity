@@ -211,7 +211,7 @@ function MyPostsScreen({ navigation }) {
   );
 }
 
-function ScrappedPostsScreen() {
+function ScrappedPostsScreen({ navigation }) {
   const [scrappedPosts, setScrappedPosts] = useState([]); // 스크랩한 글 목록 상태
   const [loading, setLoading] = useState(true); // 로딩 상태
 
@@ -222,42 +222,37 @@ function ScrappedPostsScreen() {
   const fetchScrappedPosts = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/scrap/read/myscrap`);
-      console.log('Response status:', response.status); // 응답 상태 로그
-      // 서버에서 스크랩한 글 목록을 가져오는 로직
-      const data = response.data; // Axios를 사용하면 응답 데이터에 직접 접근 가능
-      console.log('API Response:', data);
-      setScrappedPosts(data.scrappedPosts || []); // 'scrappedPosts'가 있는지 확인 후 상태 업데이트
+      const data = response.data;
+      setScrappedPosts(data.scrappedPosts || []); // 상태 업데이트
     } catch (error) {
       console.error('Error fetching scrapped posts:', error);
     } finally {
-      setLoading(false); // 로딩 상태 종료
+      setLoading(false);
     }
   };
 
-
   if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text>로딩 중...</Text>
-      </View>
-    );
+    return <Text>로딩 중...</Text>;
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header} />
       <ScrollView style={styles.postsContainer}>
         {scrappedPosts.length === 0 ? (
-          <Text style={styles.noPostsText}>스크랩한 글이 없습니다.</Text>
+          <Text>스크랩한 글이 없습니다.</Text>
         ) : (
           scrappedPosts.map((post, index) => (
-            <View key={index} style={styles.postItem}>
+            <TouchableOpacity
+              key={index}
+              style={styles.postItem}
+              onPress={() => navigation.navigate('PostDetail', { post })}
+            >
               <View style={styles.titleContainer}>
                 <Text style={styles.postTitle}>{post.title}</Text>
                 <Ionicons name="star" size={16} color="#FFF500" />
               </View>
               <Text style={styles.postMessage}>{post.message}</Text>
-            </View>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
