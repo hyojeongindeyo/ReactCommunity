@@ -128,11 +128,28 @@ function ProfileScreen({ navigation }) {
 function ChangePasswordScreen({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handlePasswordChange = () => {
-    console.log('현재 비밀번호:', currentPassword);
-    console.log('새 비밀번호:', newPassword);
-    navigation.goBack();
+  const handlePasswordChange = async () => {
+    try {
+      const response = await axios.post(`${config.apiUrl}/change-password`, {
+        currentPassword,
+        newPassword,
+      });
+
+      if (response.status === 200) {
+        // 비밀번호 변경 성공 시 알림 및 화면 전환
+        alert('비밀번호가 성공적으로 변경되었습니다.');
+        navigation.goBack();
+      }
+    } catch (error) {
+      if (error.response && error.response.data.error) {
+        // 서버에서 온 오류 메시지 한국어로 표시
+        setErrorMessage(error.response.data.error);
+      } else {
+        setErrorMessage('알 수 없는 오류가 발생했습니다. 다시 시도해 주세요.');
+      }
+    }
   };
 
   return (
@@ -151,6 +168,7 @@ function ChangePasswordScreen({ navigation }) {
         value={newPassword}
         onChangeText={setNewPassword}
       />
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
         <Text style={styles.buttonText}>확인</Text>
       </TouchableOpacity>
