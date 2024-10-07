@@ -7,6 +7,7 @@ import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import PostDetail from '../community/PostDetail';
+import UpdatePost from '../community/UpdatePost';
 import axios from 'axios';
 import config from '../config';
 
@@ -443,6 +444,13 @@ export default function Mypage() {
       <Stack.Screen
         name="PostDetail"
         component={PostDetail}  // PostDetail 추가
+        options={{
+          headerShown: false,  // 상단바 숨기기
+        }}
+      />
+      <Stack.Screen
+        name="UpdatePost"
+        component={UpdatePost}
         options={{
           headerShown: false,  // 상단바 숨기기
         }}
