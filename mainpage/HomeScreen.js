@@ -7,177 +7,202 @@ import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
 import axios from 'axios';
 import config from '../config'; // config 파일 import
+import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const App = ({ navigation }) => {
-  const [posts, setPosts] = useState([]); // posts 상태 정의
-  const [userData, setUserData] = useState(null);
-  const [city, setCity] = useState('Loading...');
-  const [location, setLocation] = useState(null);
-  const [loadingLocation, setLoadingLocation] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false); // 모달 상태 정의
-  const scrollViewRef = useRef(null);
+    const [posts, setPosts] = useState([]); // posts 상태 정의
+    const [userData, setUserData] = useState(null);
+    const [city, setCity] = useState('Loading...');
+    const [location, setLocation] = useState(null);
+    const [loadingLocation, setLoadingLocation] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false); // 모달 상태 정의
+    const scrollViewRef = useRef(null);
+    const [userLocation, setUserLocation] = useState(''); // 위치 정보를 저장할 상태 변수
 
-  // 위치 가져오기 및 데이터 호출
-  useEffect(() => {
-    fetchUserSession();
-    fetchPosts(); // 게시물 데이터 가져오기 호출
-    getLocation();
-  }, []);
+    // 위치 가져오기 및 데이터 호출
+    useEffect(() => {
+        fetchUserSession();
+        fetchPosts(); // 게시물 데이터 가져오기 호출
+    }, []);
 
-  // 게시물 데이터 가져오기
-  const fetchPosts = async () => {
-    try {
-      const response = await axios.get(`${config.apiUrl}/posts`);
-      setPosts(response.data);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    }
-  };
+    // 게시물 데이터 가져오기
+    const fetchPosts = async () => {
+        try {
+            const response = await axios.get(`${config.apiUrl}/posts`);
+            setPosts(response.data);
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        }
+    };
 
-  const fetchUserSession = async () => {
-    try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
-      setUserData(response.data);
-    } catch (error) {
-      console.error('Error fetching user session:', error);
-    }
-  };
+    const fetchUserSession = async () => {
+        try {
+            const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+            setUserData(response.data);
+        } catch (error) {
+            console.error('Error fetching user session:', error);
+        }
+    };
 
-  const getLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setCity('Permission to access location was denied');
-      setLoadingLocation(false);
-      return;
-    }
+    useEffect(() => {
+        const fetchLocation = async () => {
+            setLoadingLocation(true); // 위치 정보 로드 시작 시 로딩 상태 활성화
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.error('Permission to access location was denied');
+                setLoadingLocation(false);
+                return;
+            }
 
-    try {
-      const location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      setLocation({ latitude, longitude });
-      const address = await Location.reverseGeocodeAsync({ latitude, longitude });
-      const city = address[0].city || 'Unknown';
-      const district = address[0].district || '';
-      setCity(`${city} ${district}`);
-      setLoadingLocation(false);
-    } catch (error) {
-      console.error('Error fetching location:', error);
-      setCity('Error fetching location');
-      setLoadingLocation(false);
-    }
-  };
+            try {
+                // 빠르게 위치를 얻기 위해 정확도를 낮춤
+                let loc = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Balanced
+                });
+                
+                setLocation(loc.coords); // 위치 상태 업데이트
 
-  const getCategoryPost = (category) => {
-    return posts.find(post => post.category === category) || null;
-  };
+                const address = await Location.reverseGeocodeAsync({
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude
+                });
 
-  const formatTimestamp = (timestamp) => {
-    try {
-      const date = new Date(timestamp);
-      return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'} ${String(date.getHours() % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-    } catch (error) {
-      console.error('Error formatting timestamp:', error);
-      return timestamp;
-    }
-  };
+                if (address.length > 0) {
+                    const { city, district } = address[0];
+                    const userAddress = `${city} ${district}`;
+                    setUserLocation(userAddress); // 시(city)와 동(district) 정보 설정
+                    await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
+                }
+            } catch (error) {
+                console.error('Error fetching location:', error);
+            } finally {
+                setLoadingLocation(false); // 위치 정보 로드 완료 후 로딩 상태 해제
+            }
+        };
 
-  return (
-    <View style={styles.allItems}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
-          <MaterialIcons name="menu" size={24} color="black" />
-        </TouchableOpacity>
-        <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
-        <MaterialIcons name="search" size={24} style={styles.logohidden} color="black" />
-      </View>
+        // 캐시된 위치 먼저 가져오기
+        const getCachedLocation = async () => {
+            const cachedLocation = await AsyncStorage.getItem('userLocation');
+            if (cachedLocation) {
+                setUserLocation(cachedLocation);
+            }
+        };
 
-      <View style={styles.container}>
-        {/* 평안팁 부분 */}
-        <View style={styles.tips}>
-          <Image source={require('../assets/tips.png')} style={styles.tipImage} resizeMode="contain" />
-          <View style={styles.tipTitles}>
-            <Text style={styles.tipstitle}>[오늘의 평안팁]</Text>
-            <Text style={styles.condition}>폭염주의보</Text>
-          </View>
-          <View style={styles.verticalLine}></View>
-          <Text style={styles.tip}>외출 시 물 챙기기</Text>
-        </View>
+        getCachedLocation(); // 캐시된 위치 먼저 가져오기
+        fetchLocation(); // 새 위치 정보 요청
+    }, []);
 
-        {/* 날씨 정보 */}
-        <View style={styles.weather}>
-          <Text style={styles.locationText}>현재 위치: {city}</Text>
-          <View style={styles.weatherwrap}>
-            <View style={styles.imageContainer}>
-              <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
-              <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
+    const getCategoryPost = (category) => {
+        return posts.find(post => post.category === category) || null;
+    };
+
+    const formatTimestamp = (timestamp) => {
+        try {
+            const date = new Date(timestamp);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'} ${String(date.getHours() % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        } catch (error) {
+            console.error('Error formatting timestamp:', error);
+            return timestamp;
+        }
+    };
+
+    return (
+        <View style={styles.allItems}>
+            <View style={styles.header}>
+                <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+                    <MaterialIcons name="menu" size={24} color="black" />
+                </TouchableOpacity>
+                <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
+                <MaterialIcons name="search" size={24} style={styles.logohidden} color="black" />
             </View>
-            {location && (
-              <View style={styles.weatherContent}>
-                <Weather latitude={location.latitude} longitude={location.longitude} city={city} />
-              </View>
-            )}
-            <Text style={styles.pyeongT}>{userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}</Text>
-          </View>
-        </View>
 
-        <View style={styles.horizontalLine}></View>
-        <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
-          <View style={styles.icons}>
-            <MaterialIcons name="health-and-safety" size={25} color="rgb(146, 171, 168)" />
-          </View>
-          <Text style={styles.safetyText}>내 주변 안전소식</Text>
-          <View style={styles.icons}>
-            <AntDesign name="right" size={16} color="black" />
-          </View>
-        </TouchableOpacity>
+            <View style={styles.container}>
+                {/* 평안팁 부분 */}
+                <View style={styles.tips}>
+                    <Image source={require('../assets/tips.png')} style={styles.tipImage} resizeMode="contain" />
+                    <View style={styles.tipTitles}>
+                        <Text style={styles.tipstitle}>[오늘의 평안팁]</Text>
+                        <Text style={styles.condition}>폭염주의보</Text>
+                    </View>
+                    <View style={styles.verticalLine}></View>
+                    <Text style={styles.tip}>외출 시 물 챙기기</Text>
+                </View>
 
-        <View style={styles.safe}>
-          {['교통', '시위', '재해', '주의'].map((category, index) => {
-            const post = getCategoryPost(category);
-            return (
-              <TouchableOpacity key={index} style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post })}>
-                <Text style={styles.safetitle}>{category}</Text>
-                <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
-                  {post ? post.message : `${category}에 대한 게시물이 아직 없습니다.`}
-                </Text>
-                <Text style={styles.safetime}>{post ? formatTimestamp(post.timestamp) : '-'}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-        <StatusBar style="auto" />
-      </View>
+                {/* 날씨 정보 */}
+                <View style={styles.weather}>
+                    <Text style={styles.locationText}>현재 위치: {userLocation}</Text>
+                    <View style={styles.weatherwrap}>
+                        <View style={styles.imageContainer}>
+                            <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
+                            <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
+                        </View>
+                        {location && (
+                            <View style={styles.weatherContent}>
+                                <Weather latitude={location.latitude} longitude={location.longitude} city={city} />
+                            </View>
+                        )}
+                        <Text style={styles.pyeongT}>{userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}</Text>
+                    </View>
+                </View>
 
-      <View style={styles.banners}>
-        {/* 배너 */}
-        <Swiper
-          style={styles.swiperContainer}
-          showsButtons={false}
-          loop={true}
-          paginationStyle={{ bottotopm: 30 }}
-          dotStyle={styles.dot}
-          activeDotStyle={styles.activeDot}
-          width={SCREEN_WIDTH}
-          index={1}
-          autoplay={true} // 자동 재생 활성화
-          autoplayTimeout={3} // 3초마다 변경
-          autoplayDirection={true}
-        >
-          <View style={[styles.slide, styles.slide1]}>
-            <Image source={require('../assets/community.png')} style={styles.bannerImage} />
-          </View>
-          <View style={[styles.slide, styles.slide2]}>
-            <Image source={require('../assets/crack.png')} style={styles.bannerImage} />
-          </View>
-          <View style={[styles.slide, styles.slide3]}>
-            <Image source={require('../assets/shelter.png')} style={styles.bannerImage} />
-          </View>
-        </Swiper>
-      </View>
-    </View >
-  );
+                <View style={styles.horizontalLine}></View>
+                <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
+                    <View style={styles.icons}>
+                        <MaterialIcons name="health-and-safety" size={25} color="rgb(146, 171, 168)" />
+                    </View>
+                    <Text style={styles.safetyText}>내 주변 안전소식</Text>
+                    <View style={styles.icons}>
+                        <AntDesign name="right" size={16} color="black" />
+                    </View>
+                </TouchableOpacity>
+
+                <View style={styles.safe}>
+                    {['교통', '시위', '재해', '주의'].map((category, index) => {
+                        const post = getCategoryPost(category);
+                        return (
+                            <TouchableOpacity key={index} style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post })}>
+                                <Text style={styles.safetitle}>{category}</Text>
+                                <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
+                                    {post ? post.message : `${category}에 대한 게시물이 아직 없습니다.`}
+                                </Text>
+                                <Text style={styles.safetime}>{post ? formatTimestamp(post.timestamp) : '-'}</Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+                <StatusBar style="auto" />
+            </View>
+
+            <View style={styles.banners}>
+                {/* 배너 */}
+                <Swiper
+                    style={styles.swiperContainer}
+                    showsButtons={false}
+                    loop={true}
+                    paginationStyle={{ bottom: 30 }}
+                    dotStyle={styles.dot}
+                    activeDotStyle={styles.activeDot}
+                    width={SCREEN_WIDTH}
+                    index={1}
+                    autoplay={true} // 자동 재생 활성화
+                    autoplayTimeout={3} // 3초마다 변경
+                    autoplayDirection={true}
+                >
+                    <View style={[styles.slide, styles.slide1]}>
+                        <Image source={require('../assets/community.png')} style={styles.bannerImage} />
+                    </View>
+                    <View style={[styles.slide, styles.slide2]}>
+                        <Image source={require('../assets/crack.png')} style={styles.bannerImage} />
+                    </View>
+                    <View style={[styles.slide, styles.slide3]}>
+                        <Image source={require('../assets/shelter.png')} style={styles.bannerImage} />
+                    </View>
+                </Swiper>
+            </View>
+        </View >
+    );
 };
 
 
