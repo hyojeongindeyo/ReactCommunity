@@ -214,9 +214,15 @@ export default function PostDetail({ route, navigation }) {
         setScrapCount(scrapCount + 1); // 스크랩 수 증가
       }
     } catch (error) {
-      console.error('스크랩 오류:', error);
+      // 서버로부터의 오류 메시지 확인
+      const errorMessage = error.response?.data?.error;
+      if (errorMessage === '자신이 작성한 글은 스크랩할 수 없습니다.') {
+        Alert.alert("알림", "내가 작성한 글은 스크랩할 수 없습니다."); // 사용자에게 안내 메시지 표시
+      } else {
+        console.error('스크랩 오류:', error);
+      }
     }
-  };
+  };  
 
   return (
     <View style={styles.container}>
