@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import PostDetail from '../community/PostDetail';
 import axios from 'axios';
 import config from '../config';
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
@@ -232,6 +233,8 @@ function MyPostsScreen({ navigation }) {
 function ScrappedPostsScreen({ navigation }) {
   const [scrappedPosts, setScrappedPosts] = useState([]); // 스크랩한 글 목록 상태
   const [loading, setLoading] = useState(true); // 로딩 상태
+  const [isScraped, setIsScraped] = useState(false);
+
 
   useEffect(() => {
     fetchScrappedPosts(); // 스크랩된 글을 가져오는 함수
@@ -240,19 +243,45 @@ function ScrappedPostsScreen({ navigation }) {
   const fetchScrappedPosts = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/scrap/read/myscrap`, { withCredentials: true });
-      setScrappedPosts(response.data);
+      const updatedPosts = response.data.map(post => ({
+        ...post,
+        isScraped: true, // 스크랩된 글이므로 true로 설정
+      }));
+      setScrappedPosts(updatedPosts);
       setLoading(false);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error('내가 작성한 글이 없습니다.');
-      } else if (error.response && error.response.status === 401) {
-        console.error('사용자 인증 실패');
-      } else {
-        console.error('내가 작성한 글 불러오기 실패:', error);
-      }
+      console.error('내가 작성한 글 불러오기 실패:', error);
       setLoading(false);
     }
   };
+  
+  const handleScrap = async (postId) => {
+    try {
+      let updatedPosts;
+      
+      const postToUpdate = scrappedPosts.find(post => post.id === postId);
+      
+      if (postToUpdate.isScraped) {
+        // 스크랩 해제 요청
+        await axios.delete(`${config.apiUrl}/scrap/${postId}`, { withCredentials: true });
+        // 해제된 게시글을 배열에서 제거
+        updatedPosts = scrappedPosts.filter(post => post.id !== postId);
+      } else {
+        // 스크랩 추가 요청
+        await axios.post(`${config.apiUrl}/scrap`, { post_id: postId }, { withCredentials: true });
+        // 상태를 업데이트
+        updatedPosts = scrappedPosts.map(post =>
+          post.id === postId ? { ...post, isScraped: true } : post
+        );
+      }
+  
+      setScrappedPosts(updatedPosts);
+    } catch (error) {
+      console.error('스크랩 오류:', error);
+    }
+  };
+  
+  
 
   if (loading) {
     return <Text>로딩 중...</Text>;
@@ -261,24 +290,27 @@ function ScrappedPostsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.postsContainer}>
-        {scrappedPosts.length === 0 ? (
-          <Text>스크랩한 글이 없습니다.</Text>
-        ) : (
-          scrappedPosts.map((post, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.postItem}
-              onPress={() => navigation.navigate('PostDetail', { post })}
-            >
-              <View style={styles.titleContainer}>
-                <Text style={styles.postTitle}>{post.title}</Text>
-                <Ionicons name="star" size={16} color="#FFF500" />
-              </View>
-              <Text style={styles.postMessage}>{post.message}</Text>
-            </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
+  {scrappedPosts.length === 0 ? (
+    <Text>스크랩한 글이 없습니다.</Text>
+  ) : (
+    scrappedPosts.map((post, index) => (
+      <TouchableOpacity
+        key={index}
+        style={styles.postItem}
+        onPress={() => navigation.navigate('PostDetail', { post })}
+      >
+        <View style={styles.titleContainer}>
+          <Text style={styles.postTitle}>{post.title}</Text>
+          <TouchableOpacity onPress={() => handleScrap(post.id)} style={styles.scrapButton}>
+            <FontAwesome name={post.isScraped ? 'star' : 'star-o'} size={20} color={post.isScraped ? 'gold' : 'black'} />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.postMessage}>{post.message}</Text>
+      </TouchableOpacity>
+    ))
+  )}
+</ScrollView>
+
     </View>
   );
 }
