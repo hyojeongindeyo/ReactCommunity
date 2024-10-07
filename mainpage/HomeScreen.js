@@ -27,6 +27,12 @@ const App = ({ navigation }) => {
   useEffect(() => {
     fetchUserSession();
     fetchPosts(); // 게시물 데이터 가져오기 호출
+
+    // 5초마다 fetchPosts 호출
+    const intervalId = setInterval(fetchPosts, 5000);
+
+    // 컴포넌트 언마운트 시 interval 제거
+    return () => clearInterval(intervalId);
   }, []);
 
   // 게시물 데이터 가져오기
