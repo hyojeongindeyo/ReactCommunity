@@ -239,12 +239,17 @@ function ScrappedPostsScreen({ navigation }) {
 
   const fetchScrappedPosts = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/scrap/read/myscrap`);
-      const data = response.data;
-      setScrappedPosts(data.scrappedPosts || []); // 상태 업데이트
+      const response = await axios.get(`${config.apiUrl}/scrap/read/myscrap`, { withCredentials: true });
+      setScrappedPosts(response.data);
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching scrapped posts:', error);
-    } finally {
+      if (error.response && error.response.status === 404) {
+        console.error('내가 작성한 글이 없습니다.');
+      } else if (error.response && error.response.status === 401) {
+        console.error('사용자 인증 실패');
+      } else {
+        console.error('내가 작성한 글 불러오기 실패:', error);
+      }
       setLoading(false);
     }
   };
