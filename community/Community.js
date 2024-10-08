@@ -4,6 +4,8 @@ import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
 import config from '../config'; // SafetyInfo.js와 동일한 config 파일 사용
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
+
 
 function Community({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -21,7 +23,16 @@ function Community({ navigation }) {
   const [nearbySafetyResults, setNearbySafetyResults] = useState([]); // 내 주변 안전소식 검색 결과
   const [safetyInfoResults, setSafetyInfoResults] = useState([]); // 안전 정보 검색 결과
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
-  const [userLocation, setUserLocation] = useState(null); // 사용자 위치 상태 추가
+  const [userLocation, setUserLocation] = useState(''); // 위치 정보를 저장할 상태 변수
+  const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물을 저장할 상태 변수
+  const [posts, setPosts] = useState([]); // posts 상태 정의
+  const [loadingLocation, setLoadingLocation] = useState(true);
+  const [location, setLocation] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+
+
+
 
   const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const today = new Date();
@@ -33,60 +44,120 @@ function Community({ navigation }) {
     date.setDate(startOfWeek.getDate() + i);
     return date.getDate();
   });
+  
+
+  // 위치 가져오기 및 데이터 호출
+  useEffect(() => {
+    fetchUserSession();
+    fetchPosts(); // 게시물 데이터 가져오기 호출
+
+    // 5초마다 fetchPosts 호출
+    const intervalId = setInterval(fetchPosts, 5000);
+
+    // 컴포넌트 언마운트 시 interval 제거
+    return () => clearInterval(intervalId);
+  }, []);
+  
+
+  // 게시물 데이터 가져오기
+// 게시물 데이터 가져오기
+const fetchPosts = async () => {
+  try {
+    const response = await axios.get(`${config.apiUrl}/posts`);
+    
+    // 데이터 정렬 (최신 글 먼저)
+    const sortedPosts = response.data.sort((a, b) => {
+      return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+    
+    // 정렬된 게시물 로그 확인
+    // console.log("Sorted Posts:", sortedPosts); 
+    
+    setPosts(sortedPosts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+  }
+};
+
+  const fetchUserSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user session:', error);
+    }
+  };
 
   const filters = ['전체', 'HOT', '교통', '시위', '재해', '주의'];
 
   useEffect(() => {
     const fetchLocation = async () => {
+      setLoadingLocation(true); // 위치 정보 로드 시작 시 로딩 상태 활성화
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         console.error('Permission to access location was denied');
+        setLoadingLocation(false);
         return;
       }
 
       try {
-        let location = await Location.getCurrentPositionAsync({
+        // 빠르게 위치를 얻기 위해 정확도를 낮춤
+        let loc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced
         });
 
+        setLocation(loc.coords); // 위치 상태 업데이트
+
         const address = await Location.reverseGeocodeAsync({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
         });
 
         if (address.length > 0) {
           const { city, district } = address[0];
           const userAddress = `${city} ${district}`;
-          setUserLocation(userAddress);  // 시(city)와 동(district) 정보 설정
+          setUserLocation(userAddress); // 시(city)와 동(district) 정보 설정
+          await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
         }
       } catch (error) {
         console.error('Error fetching location:', error);
+      } finally {
+        setLoadingLocation(false); // 위치 정보 로드 완료 후 로딩 상태 해제
       }
     };
 
-    fetchLocation(); // 위치 정보 가져오기 호출
+    // 캐시된 위치 먼저 가져오기
+    const getCachedLocation = async () => {
+      const cachedLocation = await AsyncStorage.getItem('userLocation');
+      if (cachedLocation) {
+        setUserLocation(cachedLocation);
+      }
+    };
+
+    getCachedLocation(); // 캐시된 위치 먼저 가져오기
+    fetchLocation(); // 새 위치 정보 요청
   }, []);
 
-  // 실제 게시물 데이터를 가져오기
-  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get(`${config.apiUrl}/posts`); // 실제 API로 교체
-        setPosts(response.data);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
-    };
+    if (userLocation && posts.length > 0) {
+      const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
+      const filtered = posts
+        .filter(post => post.location_address === formattedUserLocation)
+        .sort((a, b) => {
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        }); // 필터링된 게시물도 최신순으로 정렬
+  
+      setFilteredPosts(filtered);
+      // console.log('Filtered Posts after location update:', filtered); // 필터링된 게시물 확인
+    }
+  }, [userLocation, posts]);
+  
 
-    fetchPosts();
-  }, []);
-
-  // 각 카테고리별로 첫 번째 게시물만 가져오기
   const getCategoryPosts = (category) => {
-    return posts.find(post => post.category === category) || null;
+    return filteredPosts.find(post => post.category === category) || null;
   };
+  
 
   // 타임스탬프 포맷팅 함수 (NearbySafety.js 참고)
   const formatTimestamp = (timestamp) => {
@@ -310,20 +381,22 @@ function Community({ navigation }) {
         </TouchableOpacity>
 
         <View style={styles.safe}>
-          {['교통', '시위', '재해', '주의'].map((category, index) => {
-            const post = getCategoryPosts(category);
+  {/* 내 주변 안전소식 */}
+  {['교통', '시위', '재해', '주의'].map((category, index) => {
+    const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category); // 필터링된 게시물에서 해당 카테고리 게시물 찾기
+    
+    return (
+      <TouchableOpacity key={index} style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}>
+        <Text style={styles.safetitle}>{category}</Text>
+        <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
+          {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
+        </Text>
+        <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
 
-            return (
-              <TouchableOpacity key={index} onPress={() => handlePostPress(post)}>
-                <Text style={styles.safeText}>
-                  [{category}] {post ? (post.message.length > 30 ? `${post.message.slice(0, 30)}...` : post.message) : `${category}에 대한 게시물이 아직 없습니다.`}
-                </Text>
-                <Text style={styles.postTime}>{post ? formatTimestamp(post.timestamp) : '-'}</Text>
-                {index < 3 && <View style={styles.horizontalLine}></View>}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
 
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>
@@ -1041,3 +1114,4 @@ const styles = StyleSheet.create({
 });
 
 export default Community;
+
