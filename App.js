@@ -43,13 +43,15 @@ const HomeStack = () => (
   </Stack.Navigator>
 );
 
-const MainScreen = () => (
+const MainScreen = ({ handleLogout }) => (
   <Tab.Navigator
     tabBar={(props) => <BottomTabBar {...props} />}
     screenOptions={{ headerShown: false }}
   >
     <Tab.Screen name="Home" component={HomeStack} />
-    <Tab.Screen name="Mypage" component={Mypage} />
+    <Tab.Screen name="Mypage">
+      {props => <Mypage {...props} handleLogout={handleLogout} />}
+    </Tab.Screen>
     <Tab.Screen name="Camera" component={Camera} />
     <Tab.Screen name="Community" component={CommunityStack} />
     <Tab.Screen name="Shelter" component={Shelter} />
@@ -64,13 +66,19 @@ const App = () => {
     setIsLoggedIn(true); // 로그인 상태를 true로 변경
   };
 
+  const handleLogout = () => {
+    setIsLoggedIn(false); // 로그아웃 시 로그인 상태를 false로 변경
+  };
+
   return (
     <PostsProvider>
       <CommentsProvider>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             {isLoggedIn ? (
-              <Stack.Screen name="Main" component={MainScreen} />
+              <Stack.Screen name="Main">
+                {props => <MainScreen {...props} handleLogout={handleLogout} />}
+              </Stack.Screen>
             ) : (
               <>
                 <Stack.Screen name="Login">

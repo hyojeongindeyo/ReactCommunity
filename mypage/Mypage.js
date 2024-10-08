@@ -15,7 +15,7 @@ import config from '../config';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
 
-function MainScreen({ navigation }) {
+function MainScreen({ navigation, handleLogout }) {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
   const [nickname, setNickname] = useState('');  // 닉네임 상태 추가
@@ -35,9 +35,25 @@ function MainScreen({ navigation }) {
     fetchUserSession();
   }, []);
 
-  const handleLogout = () => {
-    setLogoutModalVisible(false);
+  const handleLogoutClick = async () => {
+    try {
+      await axios.post(`${config.apiUrl}/logout`, {}, { withCredentials: true });
+      setLogoutModalVisible(false);
+      handleLogout(); // handleLogout을 직접 호출
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
+
+//   const handleLogout = async () => {
+//     try {
+//         await axios.post(`${config.apiUrl}/logout`, {}, { withCredentials: true });
+//         setLogoutModalVisible(false);
+//         props.handleLogout(); // 로그아웃 시 상위 App 컴포넌트의 handleLogout 호출
+//     } catch (error) {
+//         console.error('로그아웃 실패:', error);
+//     }
+// };
 
   const handleDeleteAccount = () => {
     setDeleteAccountModalVisible(false);
@@ -73,7 +89,7 @@ function MainScreen({ navigation }) {
         <LogoutModal
           visible={logoutModalVisible}
           onClose={() => setLogoutModalVisible(false)}
-          onLogout={handleLogout}
+          onLogout={handleLogoutClick}
         />
         <Text style={styles.message} onPress={() => setDeleteAccountModalVisible(true)}>회원 탈퇴</Text>
         <DeleteAccountModal
@@ -358,14 +374,15 @@ function InquiryScreen({ navigation }) {
   );
 }
 
-export default function Mypage() {
+export default function Mypage({ handleLogout }) {
   return (
     <Stack.Navigator initialRouteName="Main">
       <Stack.Screen
         name="Main"
-        component={MainScreen}
         options={{ headerShown: false }}
-      />
+      >
+        {props => <MainScreen {...props} handleLogout={handleLogout} />}
+      </Stack.Screen>
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
