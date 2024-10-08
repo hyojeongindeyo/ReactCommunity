@@ -390,7 +390,7 @@ const fetchPosts = async () => {
                   <View style={styles.safetyContent}>
                     <Text style={styles.safetitle}>[{category}]</Text>
                     <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
-                      {filteredPost ? filteredPost.message : `${category}에 대한 게시물이 아직 없습니다.`}
+                      {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
                     </Text>
                   </View>
                   <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>

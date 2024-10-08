@@ -38,6 +38,8 @@ const HomeStack = () => (
     <Stack.Screen name="NearbySafety" component={NearbySafety} />
     <Stack.Screen name="PostDetail" component={PostDetail} />
     <Stack.Screen name="WritePost" component={WritePost} />
+    <Stack.Screen name="UpdatePost" component={UpdatePost} />
+
   </Stack.Navigator>
 );
 
