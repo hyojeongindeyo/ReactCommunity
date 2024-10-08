@@ -381,22 +381,25 @@ const fetchPosts = async () => {
         </TouchableOpacity>
 
         <View style={styles.safe}>
-  {/* 내 주변 안전소식 */}
-  {['교통', '시위', '재해', '주의'].map((category, index) => {
-    const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category); // 필터링된 게시물에서 해당 카테고리 게시물 찾기
-    
-    return (
-      <TouchableOpacity key={index} style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}>
-        <Text style={styles.safetitle}>{category}</Text>
-        <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
-          {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
-        </Text>
-        <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>
-      </TouchableOpacity>
-    );
-  })}
-</View>
+          {['교통', '시위', '재해', '주의'].map((category, index) => {
+            const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category);
 
+            return (
+              <View key={index}>
+                <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}>
+                  <View style={styles.safetyContent}>
+                    <Text style={styles.safetitle}>[{category}]</Text>
+                    <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
+                      {filteredPost ? filteredPost.message : `${category}에 대한 게시물이 아직 없습니다.`}
+                    </Text>
+                  </View>
+                  <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>
+                </TouchableOpacity>
+                {index < 3 && <View style={styles.separator} />} 
+              </View>
+            );
+          })}
+        </View>
 
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>
@@ -860,7 +863,7 @@ const styles = StyleSheet.create({
   boldLine: {
     height: 3,
     backgroundColor: '#E7E7E7',
-    marginVertical: 20,
+    marginVertical: 10,
   },
   infoHeader: {
     fontSize: 16,
@@ -889,11 +892,46 @@ const styles = StyleSheet.create({
   selectedCategoryText: {
     color: '#fff',
   },
+  safe: {
+    marginBottom: 5,
+  },
+  safebox: {
+    padding: 3,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  safetyContent: {
+    flexDirection: 'row', // 제목과 본문을 수평으로 배치
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  safetitle: {
+    fontSize: 14,
+    fontWeight: 'bold', // 굵은 글씨
+    color: '#000', // 기본 색상으로 변경
+  },
+  safebody: {
+    fontSize: 14,
+    marginLeft: 5, // 제목과 본문 사이 여백 추가
+    flex: 1, // 남은 공간을 차지하도록 설정
+    fontWeight: 'bold', // 내용도 굵은 글씨로 설정
+  },
+  safetime: {
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'left', // 좌측 정렬
+    marginTop: 5, // 위쪽 여백 추가
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#ddd', // 구분선 색상
+    marginVertical: 5, // 위아래 여백 추가
+  },
   infoCardsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     flexWrap: 'wrap',
-    marginTop: 10,
+    //marginTop: 5,
   },
   infoCardContainer: {
     width: '48%',
