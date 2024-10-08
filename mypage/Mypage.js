@@ -45,6 +45,15 @@ function MainScreen({ navigation, handleLogout }) {
     }
   };
 
+  const handleDeleteAccountClick = async () => {
+    try {
+      await axios.delete(`${config.apiUrl}/user/delete`, { withCredentials: true });
+      handleLogout(); // 로그아웃 함수 호출하여 로그인 화면으로 이동
+    } catch (error) {
+      console.error("회원 탈퇴 실패:", error);
+    }
+  };
+
 //   const handleLogout = async () => {
 //     try {
 //         await axios.post(`${config.apiUrl}/logout`, {}, { withCredentials: true });
@@ -55,9 +64,9 @@ function MainScreen({ navigation, handleLogout }) {
 //     }
 // };
 
-  const handleDeleteAccount = () => {
-    setDeleteAccountModalVisible(false);
-  };
+  // const handleDeleteAccount = () => {
+  //   setDeleteAccountModalVisible(false);
+  // };
 
   return (
     <View style={styles.container}>
@@ -95,7 +104,7 @@ function MainScreen({ navigation, handleLogout }) {
         <DeleteAccountModal
           visible={deleteAccountModalVisible}
           onClose={() => setDeleteAccountModalVisible(false)}
-          onDelete={handleDeleteAccount}
+          onDelete={handleDeleteAccountClick}
         />
       </ScrollView>
 
