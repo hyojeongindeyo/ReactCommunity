@@ -83,7 +83,7 @@ export default function NearbySafety({ navigation, route }) {
   useEffect(() => {
     if (userLocation && posts) {
       const formattedUserLocation = userLocation.replace(' ', ', ');  // 위치 형식 맞추기
-  
+
       const filtered = posts.filter(post => {
         const isMatchingLocation = post.location_address === formattedUserLocation;
         if (selectedCategory === 'HOT') {
@@ -96,13 +96,13 @@ export default function NearbySafety({ navigation, route }) {
           return isMatchingLocation && isMatchingCategory;
         }
       });
-  
+
       // 최신순으로 정렬 (timestamp를 기준으로 내림차순 정렬)
       const sortedPosts = filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  
+
       setFilteredPosts(sortedPosts);  // 필터링 및 정렬된 게시물 설정
     }
-  }, [userLocation, posts, selectedCategory]);  
+  }, [userLocation, posts, selectedCategory]);
 
   // 날짜 포맷팅 함수
   const formatDate = (date) => {
@@ -160,6 +160,21 @@ export default function NearbySafety({ navigation, route }) {
 
   const getHotPost = () => {
     return posts.sort((a, b) => b.views - a.views)[0] || null;
+  };
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case '교통':
+        return '#C0E6F6'; // 교통은 파란색
+      case '시위':
+        return '#F6C0C0'; // 시위는 빨간색
+      case '재해':
+        return '#C0F6C6'; // 재해는 녹색
+      case '주의':
+        return '#F6D8C0'; // 주의는 주황색
+      default:
+        return '#F3F3F3'; // 기본 색상
+    }
   };
 
   return (
@@ -231,9 +246,12 @@ export default function NearbySafety({ navigation, route }) {
                     {/* 텍스트 블록 (제목, 본문, 날짜) */}
                     <View style={styles.textContainer}>
                       {/* 제목 */}
-                      <Text style={styles.postText}>
-                        [{post.category}] {post.title}
-                      </Text>
+                      <View style={styles.titlecontainer}>
+                        <Text style={styles.titleText}>{post.title}</Text>
+                        <View style={[styles.listContainer, { backgroundColor: getCategoryColor(post.category) }]}>
+                          <Text style={styles.listText}>{post.category}</Text>
+                        </View>
+                      </View>
 
                       {/* 본문 */}
                       <Text style={styles.postMessage}>
@@ -620,5 +638,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginLeft: 5, // 말풍선 아이콘과 댓글 수 텍스트 사이의 간격
+  },
+  titlecontainer: {
+    flexDirection: 'row', // 수평 방향으로 배치
+    alignItems: 'center', // 세로 가운데 정렬
+    marginBottom: 4, // 아래쪽 여백
+  },
+  titleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    // flex: 1, // 필요에 따라 주석처리
+  },
+  listContainer: {
+    borderRadius: 10, // 카테고리 배경 둥글게
+    padding: 3, // 카테고리 안쪽 여백
+    paddingLeft: 7,
+    paddingRight: 7,
+    marginLeft: 5, // 제목과 카테고리 사이의 간격을 없앰
+    opacity: 0.8,
+  },
+  listText: {
+    color: 'black',
+    // fontWeight: 'nomal',
+    // marginLeft: 5,
+    fontSize: 13,
   },
 });
