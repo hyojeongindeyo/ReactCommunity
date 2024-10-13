@@ -44,7 +44,7 @@ function Community({ navigation }) {
     date.setDate(startOfWeek.getDate() + i);
     return date.getDate();
   });
-  
+
 
   // 위치 가져오기 및 데이터 호출
   useEffect(() => {
@@ -57,27 +57,27 @@ function Community({ navigation }) {
     // 컴포넌트 언마운트 시 interval 제거
     return () => clearInterval(intervalId);
   }, []);
-  
+
 
   // 게시물 데이터 가져오기
-// 게시물 데이터 가져오기
-const fetchPosts = async () => {
-  try {
-    const response = await axios.get(`${config.apiUrl}/posts`);
-    
-    // 데이터 정렬 (최신 글 먼저)
-    const sortedPosts = response.data.sort((a, b) => {
-      return new Date(b.timestamp) - new Date(a.timestamp);
-    });
-    
-    // 정렬된 게시물 로그 확인
-    // console.log("Sorted Posts:", sortedPosts); 
-    
-    setPosts(sortedPosts);
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-  }
-};
+  // 게시물 데이터 가져오기
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/posts`);
+
+      // 데이터 정렬 (최신 글 먼저)
+      const sortedPosts = response.data.sort((a, b) => {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+
+      // 정렬된 게시물 로그 확인
+      // console.log("Sorted Posts:", sortedPosts); 
+
+      setPosts(sortedPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
 
   const fetchUserSession = async () => {
     try {
@@ -147,17 +147,17 @@ const fetchPosts = async () => {
         .sort((a, b) => {
           return new Date(b.timestamp) - new Date(a.timestamp);
         }); // 필터링된 게시물도 최신순으로 정렬
-  
+
       setFilteredPosts(filtered);
       // console.log('Filtered Posts after location update:', filtered); // 필터링된 게시물 확인
     }
   }, [userLocation, posts]);
-  
+
 
   const getCategoryPosts = (category) => {
     return filteredPosts.find(post => post.category === category) || null;
   };
-  
+
 
   // 타임스탬프 포맷팅 함수 (NearbySafety.js 참고)
   const formatTimestamp = (timestamp) => {
@@ -322,21 +322,36 @@ const fetchPosts = async () => {
   const getHotPost = () => {
     // console.log("Current user location:", userLocation);
     const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
-  
+
     // if (!formattedUserLocation || filteredPosts.length === 0) {
     //   console.log("No hot posts available");
     //   return null;
     // }
-    
+
     // 현재 위치에 맞는 게시물만 필터링
     const hotPosts = filteredPosts.filter(post => post.location_address === formattedUserLocation);
     // console.log("Hot posts for location:", hotPosts);
-  
+
     // 필터된 게시물 중 조회수가 가장 높은 게시물 선택
     return hotPosts.sort((a, b) => b.views - a.views)[0] || null;
   };
-  
-  
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case '교통':
+        return '#C0E6F6'; // 교통은 파란색
+      case '시위':
+        return '#F6C0C0'; // 시위는 빨간색
+      case '재해':
+        return '#C0F6C6'; // 재해는 녹색
+      case '주의':
+        return '#F6D8C0'; // 주의는 주황색
+      default:
+        return '#F3F3F3'; // 기본 색상
+    }
+  };
+
+
 
   return (
     <View style={styles.container}>
@@ -403,15 +418,19 @@ const fetchPosts = async () => {
               <View key={index}>
                 <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}>
                   <View style={styles.safetyContent}>
-                    <Text style={styles.safetitle}>[{category}]</Text>
-                    <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
+                    <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
                       {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
                     </Text>
+                    <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                      <Text style={styles.safecategory}>{category}</Text>
+                    </View>
                   </View>
                   <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>
                 </TouchableOpacity>
-                {index < 3 && <View style={styles.separator} />} 
+                {index < 3 && <View style={styles.separator} />}
               </View>
+
+
             );
           })}
         </View>
@@ -917,18 +936,19 @@ const styles = StyleSheet.create({
   },
   safetyContent: {
     flexDirection: 'row', // 제목과 본문을 수평으로 배치
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     alignItems: 'center',
   },
-  safetitle: {
-    fontSize: 14,
-    fontWeight: 'bold', // 굵은 글씨
-    color: '#000', // 기본 색상으로 변경
+  safecategory: {
+    color: 'black',
+    // fontWeight: 'nomal',
+    // marginLeft: 5,
+    fontSize: 13,
   },
-  safebody: {
-    fontSize: 14,
-    marginLeft: 5, // 제목과 본문 사이 여백 추가
-    flex: 1, // 남은 공간을 차지하도록 설정
+  safetitle: {
+    fontSize: 15,
+    // marginLeft: 5, // 제목과 본문 사이 여백 추가
+    // flex: 1, // 남은 공간을 차지하도록 설정
     fontWeight: 'bold', // 내용도 굵은 글씨로 설정
   },
   safetime: {
@@ -1163,6 +1183,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+  },
+  listContainer: {
+    borderRadius: 10, // 카테고리 배경 둥글게
+    padding: 3, // 카테고리 안쪽 여백
+    paddingLeft: 7,
+    paddingRight: 7,
+    marginLeft: 5, // 제목과 카테고리 사이의 간격을 없앰
+    opacity: 0.8,
   },
 });
 
