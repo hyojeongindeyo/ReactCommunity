@@ -416,19 +416,37 @@ function Community({ navigation }) {
 
             return (
               <View key={index}>
-                <TouchableOpacity style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}>
-                  <View style={styles.safetyContent}>
-                    <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
-                      {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
-                    </Text>
-                    <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
-                      <Text style={styles.safecategory}>{category}</Text>
+                {filteredPost ? (
+                  <TouchableOpacity
+                    style={styles.safebox}
+                    onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
+                  >
+                    <View style={styles.safetyContent}>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
+                        {filteredPost.title}
+                      </Text>
+                      <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View>
                     </View>
+                    <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.safebox}>
+                    <View style={styles.safetyContent}>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
+                        {`${category}에 대한 게시물이 아직 없습니다.`}
+                      </Text>
+                      <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View>
+                    </View>
+                    {/* <Text style={styles.safetime}>-</Text> */}
                   </View>
-                  <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>
-                </TouchableOpacity>
+                )}
                 {index < 3 && <View style={styles.separator} />}
               </View>
+
 
 
             );
