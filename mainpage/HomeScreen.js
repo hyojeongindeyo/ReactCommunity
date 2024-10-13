@@ -178,10 +178,14 @@ const App = ({ navigation }) => {
         <View style={styles.safe}>
           {/* 내 주변 안전소식 */}
           {['교통', '시위', '재해', '주의'].map((category, index) => {
-            const post = getCategoryPost(category); // 카테고리별 게시물 가져오기
             const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category); // 필터링된 게시물에서 해당 카테고리 게시물 찾기
             return (
-              <TouchableOpacity key={index} style={styles.safebox} onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}>
+              <TouchableOpacity
+                key={index}
+                style={styles.safebox}
+                onPress={() => filteredPost && navigation.navigate('PostDetail', { post: filteredPost })} // 조건부로 네비게이션
+                disabled={!filteredPost} // filteredPost가 없으면 버튼 비활성화
+              >
                 <Text style={styles.safetitle}>{category}</Text>
                 <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
                   {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
@@ -191,6 +195,7 @@ const App = ({ navigation }) => {
             );
           })}
         </View>
+
         <StatusBar style="auto" />
       </View>
 
