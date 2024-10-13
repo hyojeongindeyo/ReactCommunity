@@ -320,8 +320,23 @@ const fetchPosts = async () => {
   };
 
   const getHotPost = () => {
-    return posts.sort((a, b) => b.views - a.views)[0] || null;
+    // console.log("Current user location:", userLocation);
+    const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
+  
+    // if (!formattedUserLocation || filteredPosts.length === 0) {
+    //   console.log("No hot posts available");
+    //   return null;
+    // }
+    
+    // 현재 위치에 맞는 게시물만 필터링
+    const hotPosts = filteredPosts.filter(post => post.location_address === formattedUserLocation);
+    // console.log("Hot posts for location:", hotPosts);
+  
+    // 필터된 게시물 중 조회수가 가장 높은 게시물 선택
+    return hotPosts.sort((a, b) => b.views - a.views)[0] || null;
   };
+  
+  
 
   return (
     <View style={styles.container}>
