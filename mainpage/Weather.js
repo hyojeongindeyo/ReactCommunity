@@ -52,17 +52,19 @@ const Weather = ({ latitude, longitude, city }) => {
   } else if (weather.weather[0].description.includes('맑음')) {
     emoji = '☀️';
   } else if (weather.weather[0].description.includes('흐림')) {
-    emoji = '☁️';
+    emoji = '🌥️';
   } else if (weather.weather[0].description.includes('눈')) {
     emoji = '❄️';
   } else if (weather.weather[0].description.includes('박무')) {
-    emoji = '🌫️';
+    emoji = '💦';
+  } else if (weather.weather[0].description.includes('구름')) {
+    emoji = '☁️'
   }
   
 
   return (
     <View style={styles.container}>
-      <Text>{emoji} {weather.main.temp}°C, {weather.weather[0].description}</Text>
+      <Text>{emoji} {Math.round(weather.main.temp)}°  {weather.weather[0].description}</Text>
     </View>
   );
 };
@@ -70,7 +72,7 @@ const Weather = ({ latitude, longitude, city }) => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 3,
   },
 });
 

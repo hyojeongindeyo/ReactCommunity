@@ -39,18 +39,18 @@ const App = ({ navigation }) => {
 
   useEffect(() => {
     const fetchRandomTip = async () => {
-        try {
-            const response = await axios.get(`${config.apiUrl}/random-tip`); // API 호출
-            console.log('받은 팁:', response.data); // 받은 팁을 콘솔에 출력
-            setSafetyTip(response.data); // 전체 데이터 객체로 설정
-          } catch (error) {
-            console.error('팁을 가져오는 데 실패했습니다:', error);
-            setError('팁을 가져오는 데 실패했습니다.');
-        }
+      try {
+        const response = await axios.get(`${config.apiUrl}/random-tip`); // API 호출
+        console.log('받은 팁:', response.data); // 받은 팁을 콘솔에 출력
+        setSafetyTip(response.data); // 전체 데이터 객체로 설정
+      } catch (error) {
+        console.error('팁을 가져오는 데 실패했습니다:', error);
+        setError('팁을 가져오는 데 실패했습니다.');
+      }
     };
 
     fetchRandomTip(); // 컴포넌트가 마운트될 때 호출
-}, []);
+  }, []);
 
 
 
@@ -166,22 +166,64 @@ const App = ({ navigation }) => {
           <Text style={styles.tip}>{safetyTip.tip}</Text>
         </View>
 
+        <Text style={styles.pyeongT}>
+              {userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}
+            </Text>
+
         {/* 날씨 정보 */}
-        <View style={styles.weather}>
-          <Text style={styles.locationText}>현재 위치: {userLocation}</Text>
-          <View style={styles.weatherwrap}>
-            <View style={styles.imageContainer}>
-              <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
-              <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
-            </View>
-            {location && (
-              <View style={styles.weatherContent}>
+        <View style={styles.rowcontainer}>
+          {/* 50% 왼쪽: 사진 */}
+          <View style={styles.leftContainer}>
+            
+            <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
+            <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
+          </View>
+
+          {/* 50% 오른쪽: 날씨, 평안, 배너 */}
+          <View style={styles.rightContainer}>
+            {/* 날씨 정보 */}
+            <View style={styles.weather}>
+              <Text style={styles.locationText}>현재 위치: {userLocation}</Text>
+              {location && (
+
                 <Weather latitude={location.latitude} longitude={location.longitude} city={city} />
-              </View>
-            )}
-            <Text style={styles.pyeongT}>{userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}</Text>
+
+              )}
+            </View>
+
+            {/* <Text style={styles.pyeongT}>
+      {userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}
+    </Text> */}
+
+            {/* 배너 */}
+            <View style={styles.banners}>
+              <Swiper
+                style={styles.swiperContainer}
+                showsButtons={false}
+                loop={true}
+                paginationStyle={{ bottom: 0 }}
+                dotStyle={styles.dot}
+                activeDotStyle={styles.activeDot}
+                width={SCREEN_WIDTH / 2}
+                index={1}
+                autoplay={true}
+                autoplayTimeout={3}
+                autoplayDirection={true}
+              >
+                <View style={[styles.slide, styles.slide1]}>
+                  <Image source={require('../assets/banner_community.png')} style={styles.bannerImage} />
+                </View>
+                <View style={[styles.slide, styles.slide2]}>
+                  <Image source={require('../assets/banner_crack.png')} style={styles.bannerImage} />
+                </View>
+                <View style={[styles.slide, styles.slide3]}>
+                  <Image source={require('../assets/banner_shelter.png')} style={styles.bannerImage} />
+                </View>
+              </Swiper>
+            </View>
           </View>
         </View>
+
 
         <View style={styles.horizontalLine}></View>
         <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
@@ -224,7 +266,7 @@ const App = ({ navigation }) => {
           style={styles.swiperContainer}
           showsButtons={false}
           loop={true}
-          paginationStyle={{ bottom: 30 }}
+          // paginationStyle={{ bottom: 1 }}
           dotStyle={styles.dot}
           activeDotStyle={styles.activeDot}
           width={SCREEN_WIDTH}
@@ -334,31 +376,82 @@ const styles = StyleSheet.create({
     alignSelf: "center"
   },
   locationText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
+    marginBottom: 0, // 아래쪽 마진을 제거합니다
+    paddingTop: 0, // 위쪽 패딩을 제거합니다
     // alignItems: "right",
-    paddingTop: 20,
-    marginBottom: 10,
+    // paddingTop: 20,
+    // marginBottom: 10,
   },
   weather: {
-    paddingLeft: 10,
-    width: '100%'
+    // paddingLeft: 10,
+    width: '100%',
+    // paddingTop: '10%'
   },
   // weather content style 설정
-  weatherContent: {
-    position: "absolute",
-    paddingLeft: '45%',
+  rowcontainer: {
+    flexDirection: 'row', // 양옆으로 나란히 배치
+    width: '100%',
+    // height: '100%',
+  },
+  leftContainer: {
+    width: '40%', // 화면의 왼쪽 50% 차지
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rightContainer: {
+    width: '60%', // 화면의 오른쪽 50% 차지
+    // paddingLeft: 10, // 오른쪽에 약간의 여백 추가
+    justifyContent: 'center',
+    alignItems: 'center',
+    // paddingTop: '20%',
+    // padding: 0,
+  },
+  pyeong: {
+    width: '80%', // 큰 이미지
+    marginBottom: 10,
+  },
+  bag: {
+    width: '40%', // 작은 가방 이미지
+    position: 'absolute',
+    // top: '50%',
+    // top: 0,
+    top: '50%',
+    right: '10%',
+    height: '50%',
 
   },
-  weatherwrap: {
-    flexDirection: "row",
+  weatherContent: {
+    // marginBottom: 10,
+    // padding: 0,
   },
   pyeongT: {
     fontSize: 16,
     fontWeight: 'bold',
-    position: 'absolute',
-    paddingLeft: '45%',
+    marginBottom: 8,
+    marginTop: 20,
   },
+
+  banners: {
+    width: '100%',
+    height: 100, // 배너의 높이를 충분히 설정합니다.
+    // marginTop: '%',
+    padding: 0, // 여기가 여백의 원인일 수 있음
+
+
+    // overflow: 'hidden', // 오버플로우를 숨깁니다.
+  },
+
+  bannerImage: {
+    alignSelf: 'center', // 이미지를 부모 컨테이너 내에서 가운데 정렬
+    resizeMode: "contain", // 이미지를 잘리지 않게 조절합니다.
+    width: '100%', // 배너 너비를 100%로 설정합니다.
+    marginTop: 10,
+    height: '90%',
+    // height: '100%', // 배너 높이를 100%로 설정합니다.
+  },
+
 
 
 
@@ -367,19 +460,19 @@ const styles = StyleSheet.create({
     alignContent: "center",
     width: '40%'
   },
-  pyeong: {
-    paddingTop: 10,
-    marginTop: 5,
-    width: '100%'
-  },
-  bag: {
-    width: '50%',
-    height: '50%',
-    position: 'absolute',
-    top: '56%',
-    left: '33%',
-    width: '100%',
-  },
+  // pyeong: {
+  //   paddingTop: 10,
+  //   marginTop: 5,
+  //   width: '100%'
+  // },
+  // bag: {
+  //   width: '50%',
+  //   height: '30%',
+  //   position: 'absolute',
+  //   top: '56%',
+  //   left: '33%',
+  //   width: '100%',
+  // },
   horizontalLine: {
     paddingTop: '5%',
     borderBottomWidth: 3,
@@ -439,29 +532,36 @@ const styles = StyleSheet.create({
   // 배너
 
 
-  banners: {
-    width: '100%',
-    height: '16%',
-    marginTop: '5%'
+  // banners: {
+  //   width: '100%',
+  //   height: '16%',
+  //   marginTop: '5%'
 
-  },
-  bannerImage: {
-    alignSelf: 'center', // 이미지를 부모 컨테이너 내에서 가운데 정렬
+  // },
+  // bannerImage: {
+  //   alignSelf: 'center', // 이미지를 부모 컨테이너 내에서 가운데 정렬
 
-    resizeMode: "contain",
-    width: '90%',
-  },
+  //   resizeMode: "contain",
+  //   width: '90%',
+  // },
   buttonText: {
     alignItems: "center",
     fontSize: 30,
   },
 
+  dot: {
+    backgroundColor: 'rgba(0, 0, 0, .2)', // 도트 색상
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3, // 여기가 여백의 원인일 수 있음
+  },
   activeDot: {
-    backgroundColor: '#92B2AE', // 활성화된 도트의 색상
-    width: 8, // 활성화된 도트의 너비
-    height: 8, // 활성화된 도트의 높이
-    borderRadius: 4, // 활성화된 도트의 모서리 반경
-    marginHorizontal: 3, // 도트 사이의 간격
+    backgroundColor: '#92B2AE',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 3,
   },
 
 
