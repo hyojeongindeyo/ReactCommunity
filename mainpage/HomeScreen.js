@@ -21,6 +21,8 @@ const App = ({ navigation }) => {
   const scrollViewRef = useRef(null);
   const [userLocation, setUserLocation] = useState(''); // 위치 정보를 저장할 상태 변수
   const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물을 저장할 상태 변수
+  const [safetyTip, setSafetyTip] = useState({}); // 초기값을 빈 객체로 설정
+  const [error, setError] = useState(null);
 
 
   // 위치 가져오기 및 데이터 호출
@@ -34,6 +36,23 @@ const App = ({ navigation }) => {
     // 컴포넌트 언마운트 시 interval 제거
     return () => clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    const fetchRandomTip = async () => {
+        try {
+            const response = await axios.get(`${config.apiUrl}/random-tip`); // API 호출
+            console.log('받은 팁:', response.data); // 받은 팁을 콘솔에 출력
+            setSafetyTip(response.data); // 전체 데이터 객체로 설정
+          } catch (error) {
+            console.error('팁을 가져오는 데 실패했습니다:', error);
+            setError('팁을 가져오는 데 실패했습니다.');
+        }
+    };
+
+    fetchRandomTip(); // 컴포넌트가 마운트될 때 호출
+}, []);
+
+
 
   // 게시물 데이터 가져오기
   const fetchPosts = async () => {
@@ -141,10 +160,10 @@ const App = ({ navigation }) => {
           <Image source={require('../assets/tips.png')} style={styles.tipImage} resizeMode="contain" />
           <View style={styles.tipTitles}>
             <Text style={styles.tipstitle}>[오늘의 평안팁]</Text>
-            <Text style={styles.condition}>폭염주의보</Text>
+            <Text style={styles.condition}>{safetyTip.category}</Text>
           </View>
           <View style={styles.verticalLine}></View>
-          <Text style={styles.tip}>외출 시 물 챙기기</Text>
+          <Text style={styles.tip}>{safetyTip.tip}</Text>
         </View>
 
         {/* 날씨 정보 */}
