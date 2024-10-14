@@ -238,7 +238,7 @@ const App = ({ navigation }) => {
 
         <View style={styles.safe}>
           {/* 내 주변 안전소식 */}
-          {['교통', '시위', '재해', '주의'].map((category, index) => {
+          {['교통', '화재', '재해', '주의'].map((category, index) => {
             const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category); // 필터링된 게시물에서 해당 카테고리 게시물 찾기
             return (
               <TouchableOpacity

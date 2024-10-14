@@ -132,7 +132,7 @@ export default function UpdatePost({ navigation, route }) {
                         <View style={styles.categoryContainer}>
                             <Text style={styles.label}>카테고리</Text>
                             <View style={styles.categories}>
-                                {['교통', '시위', '재해', '주의'].map((category, index) => (
+                                {['교통', '화재', '재해', '주의'].map((category, index) => (
                                     <TouchableOpacity
                                         key={index}
                                         style={[styles.categoryButton, selectedCategory === category && styles.selectedCategoryButton]}

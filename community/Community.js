@@ -170,7 +170,7 @@ function Community({ navigation }) {
 
   // 카테고리 데이터 설정 (객체)
   const categoriesData = {
-    NearbySafety: ['내 주변 안전소식', '전체', 'HOT', '교통', '시위', '재해', '주의'],
+    NearbySafety: ['내 주변 안전소식', '전체', 'HOT', '교통', '화재', '재해', '주의'],
     SafetyInfo: ['안전 정보', '전체', '자연', '사회', '생활'],
   };
 
@@ -340,7 +340,7 @@ function Community({ navigation }) {
     switch (category) {
       case '교통':
         return '#C0E6F6'; // 교통은 파란색
-      case '시위':
+      case '화재':
         return '#F6C0C0'; // 시위는 빨간색
       case '재해':
         return '#C0F6C6'; // 재해는 녹색
@@ -411,7 +411,7 @@ function Community({ navigation }) {
         </TouchableOpacity>
 
         <View style={styles.safe}>
-          {['교통', '시위', '재해', '주의'].map((category, index) => {
+          {['교통', '화재', '재해', '주의'].map((category, index) => {
             const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category);
 
             return (

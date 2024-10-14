@@ -179,7 +179,7 @@ export default function NearbySafety({ navigation, route }) {
     switch (category) {
       case '교통':
         return '#C0E6F6'; // 교통은 파란색
-      case '시위':
+      case '화재':
         return '#F6C0C0'; // 시위는 빨간색
       case '재해':
         return '#C0F6C6'; // 재해는 녹색
@@ -235,7 +235,7 @@ export default function NearbySafety({ navigation, route }) {
 
           {/* 카테고리 버튼 */}
           <View style={styles.categoryContainer}>
-            {['전체', 'HOT', '교통', '시위', '재해', '주의'].map((category) => (
+            {['전체', 'HOT', '교통', '화재', '재해', '주의'].map((category) => (
               <TouchableOpacity
                 key={category}
                 onPress={() => setSelectedCategory(category)}  // 선택된 카테고리 설정
