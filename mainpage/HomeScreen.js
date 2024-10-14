@@ -260,32 +260,7 @@ const App = ({ navigation }) => {
         <StatusBar style="auto" />
       </View>
 
-      <View style={styles.banners}>
-        {/* 배너 */}
-        <Swiper
-          style={styles.swiperContainer}
-          showsButtons={false}
-          loop={true}
-          // paginationStyle={{ bottom: 1 }}
-          dotStyle={styles.dot}
-          activeDotStyle={styles.activeDot}
-          width={SCREEN_WIDTH}
-          index={1}
-          autoplay={true} // 자동 재생 활성화
-          autoplayTimeout={3} // 3초마다 변경
-          autoplayDirection={true}
-        >
-          <View style={[styles.slide, styles.slide1]}>
-            <Image source={require('../assets/community.png')} style={styles.bannerImage} />
-          </View>
-          <View style={[styles.slide, styles.slide2]}>
-            <Image source={require('../assets/crack.png')} style={styles.bannerImage} />
-          </View>
-          <View style={[styles.slide, styles.slide3]}>
-            <Image source={require('../assets/shelter.png')} style={styles.bannerImage} />
-          </View>
-        </Swiper>
-      </View>
+      
     </View >
   );
 };
