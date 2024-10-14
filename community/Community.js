@@ -170,7 +170,7 @@ function Community({ navigation }) {
 
   // 카테고리 데이터 설정 (객체)
   const categoriesData = {
-    NearbySafety: ['내 주변 안전소식', '전체', 'HOT', '교통', '화재', '재해', '주의'],
+    NearbySafety: ['내 주변 안전소식', '전체', '교통', '화재', '재해', '주의'],
     SafetyInfo: ['안전 정보', '전체', '재해', '화재', '생활', '주의'],
   };
 

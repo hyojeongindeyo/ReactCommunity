@@ -189,6 +189,13 @@ export default function NearbySafety({ navigation, route }) {
         return '#F3F3F3'; // 기본 색상
     }
   };
+  const categoryEmojis = {
+    전체: '🌎',
+    교통: '🚔',
+    화재: '🧯',
+    재해: '🌪️',
+    주의: '⚠️',
+  };
 
   return (
     <View style={styles.container}>
@@ -210,7 +217,11 @@ export default function NearbySafety({ navigation, route }) {
           {/* HOT 게시물 상단 표시 - 현재 비워둠 */}
           <View style={styles.hotBox}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.hotTitle}>[HOT]</Text>
+              <Text style={styles.hotTitle}>
+                {categoryEmojis[selectedCategory]} HOT
+              </Text>
+
+
               {/* HOT 옆에 제목 배치, 위치 조정 */}
               {getHotPost() ? (
                 <TouchableOpacity onPress={() => navigation.navigate('PostDetail', { post: getHotPost() })}>
@@ -219,9 +230,12 @@ export default function NearbySafety({ navigation, route }) {
                   </Text>
                 </TouchableOpacity>
               ) : (
-                <Text style={styles.hotMessage}>HOT 게시물은 아직 없습니다.</Text>
+
+                <Text style={styles.hotMessage}>    -</Text>
               )}
+
             </View>
+
             {getHotPost() && (
               <TouchableOpacity onPress={() => navigation.navigate('PostDetail', { post: getHotPost() })}>
                 {/* 본문에서 굵은 글씨 제거 */}
@@ -235,7 +249,7 @@ export default function NearbySafety({ navigation, route }) {
 
           {/* 카테고리 버튼 */}
           <View style={styles.categoryContainer}>
-            {['전체', 'HOT', '교통', '화재', '재해', '주의'].map((category) => (
+            {['전체', '교통', '화재', '재해', '주의'].map((category) => (
               <TouchableOpacity
                 key={category}
                 onPress={() => setSelectedCategory(category)}  // 선택된 카테고리 설정
@@ -412,11 +426,12 @@ const styles = StyleSheet.create({
     color: '#A51919',
     fontWeight: 'bold',
     marginBottom: 5,
+    fontSize: 16,
   },
   hotMessage: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333',
-    marginBottom: 10,
+    marginBottom: 5,
     fontWeight: 'bold',
   },
   hotTimestamp: {
