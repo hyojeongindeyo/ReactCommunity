@@ -23,9 +23,26 @@ const SafetyInfo = ({ navigation, route }) => {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0); // 현재 배너 인덱스
   const [randomBanners, setRandomBanners] = useState([]); // 랜덤 배너 목록
   const scrollViewRef = useRef(null); // ScrollView의 ref 생성
-  const categories = ['전체', '자연', '사회', '생활'];
+  const categories = ['전체', '재해', '주의', '생활', '화재'];
   const [searchResults, setSearchResults] = useState([]); // 검색 결과 상태 추가
   const [searchPerformed, setSearchPerformed] = useState(false);
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case '교통':
+        return '#C0E6F6'; // 교통은 파란색
+      case '화재':
+        return '#F6C0C0'; // 시위는 빨간색
+      case '재해':
+        return '#C0F6C6'; // 재해는 녹색
+      case '주의':
+        return '#F6D8C0'; // 주의는 주황색
+      case '생활':
+        return '#DBBBDF'; // 
+      default:
+        return '#F3F3F3'; // 기본 색상
+    }
+  };
 
   useEffect(() => {
     if (filter) {
@@ -238,8 +255,8 @@ useEffect(() => {
                   </View>
                   <View style={styles.infoFooter}>
                     <Text style={styles.infoDate}>{info.date}</Text>
-                    <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryBadgeText}>{info.category}</Text>
+                    <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(info.category) }]}>
+                      <Text style={[styles.categoryBadgeText]}>{info.category}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -493,7 +510,7 @@ const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     fontSize: 12,
-    color: '#999',
+    color: 'black',
   },
   modalOverlay: {
     flex: 1,

@@ -171,7 +171,7 @@ function Community({ navigation }) {
   // 카테고리 데이터 설정 (객체)
   const categoriesData = {
     NearbySafety: ['내 주변 안전소식', '전체', 'HOT', '교통', '화재', '재해', '주의'],
-    SafetyInfo: ['안전 정보', '전체', '자연', '사회', '생활'],
+    SafetyInfo: ['안전 정보', '전체', '재해', '화재', '생활', '주의'],
   };
 
   // 메뉴 아이템 생성 함수
@@ -346,10 +346,13 @@ function Community({ navigation }) {
         return '#C0F6C6'; // 재해는 녹색
       case '주의':
         return '#F6D8C0'; // 주의는 주황색
+      case '생활':
+        return '#DBBBDF'; // 
       default:
         return '#F3F3F3'; // 기본 색상
     }
   };
+
 
 
 
@@ -501,7 +504,8 @@ function Community({ navigation }) {
               </View>
               <View style={styles.infoFooter}>
                 <Text style={styles.infoDate}>{info.date}</Text>
-                <View style={styles.categoryBadge}>
+                <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(info.category) }]}>
+
                   <Text style={styles.categoryBadgeText}>{info.category}</Text>
                 </View>
               </View>
@@ -1039,14 +1043,15 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   categoryBadge: {
-    backgroundColor: '#e0e0e0',
+    // backgroundColor: '#e0e0e0',
     borderRadius: 10,
     paddingVertical: 2,
     paddingHorizontal: 6,
   },
   categoryBadgeText: {
     fontSize: 12,
-    color: '#999',
+    color: 'black',
+
   },
   historyContainer: {
     width: '100%',
