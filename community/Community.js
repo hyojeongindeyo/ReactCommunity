@@ -194,6 +194,12 @@ function Community({ navigation }) {
     return items;
   };
 
+  useEffect(() => {
+    if (infoModalVisible) {
+      setCurrentImageIndex(0); // 모달이 열리면 즉시 첫 번째 이미지로 설정
+    }
+  }, [infoModalVisible]);
+  
   // 효율적으로 생성된 메뉴 아이템
   const menuItems = generateMenuItems();
 
