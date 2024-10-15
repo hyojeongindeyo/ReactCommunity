@@ -158,6 +158,12 @@ const SafetyInfo = ({ navigation, route }) => {
     setSearchQuery(''); // 검색어 초기화
   };
 
+  useEffect(() => {
+    if (infoModalVisible) {
+      setCurrentImageIndex(0); // 모달이 열리면 즉시 첫 번째 이미지로 설정
+    }
+  }, [infoModalVisible]);
+  
 // 모달이 처음 열릴 때 searchResults와 searchPerformed 초기화
 useEffect(() => {
   if (searchModalVisible) {
