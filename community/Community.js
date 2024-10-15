@@ -159,12 +159,22 @@ function Community({ navigation }) {
   };
 
 
-  // 타임스탬프 포맷팅 함수 (NearbySafety.js 참고)
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'} ${String(date.getHours() % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-    return formattedDate;
+    try {
+      const date = new Date(timestamp);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 필요
+      const year = String(date.getFullYear() % 100).padStart(2, '0'); // 두 자리 연도
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
+    } catch (error) {
+      console.error('Error formatting timestamp:', error);
+      return timestamp;
+    }
   };
+  
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
 
@@ -199,7 +209,7 @@ function Community({ navigation }) {
       setCurrentImageIndex(0); // 모달이 열리면 즉시 첫 번째 이미지로 설정
     }
   }, [infoModalVisible]);
-  
+
   // 효율적으로 생성된 메뉴 아이템
   const menuItems = generateMenuItems();
 

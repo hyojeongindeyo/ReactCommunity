@@ -106,8 +106,8 @@ export default function NearbySafety({ navigation, route }) {
 
   // 날짜 포맷팅 함수
   const formatDate = (date) => {
-    return moment(date).format('YYYY.MM.DD A hh:mm');
-  };
+    return moment(date).format('YY/MM/DD HH:mm'); // 연도를 두 자리로, 시간을 24시간제로 표시
+  };  
 
   // 게시글 작성 후 게시글 목록을 다시 불러오는 useEffect
   useEffect(() => {
@@ -242,7 +242,7 @@ export default function NearbySafety({ navigation, route }) {
                 <Text style={[styles.hotMessage, { fontWeight: 'normal' }]}>
                   {getHotPost().message.length > 30 ? `${getHotPost().message.slice(0, 30)}...` : getHotPost().message}
                 </Text>
-                <Text style={styles.hotTimestamp}>{moment(getHotPost().timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
+                <Text style={styles.hotTimestamp}>{moment(getHotPost().timestamp).format('YY/MM/DD HH:mm')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -368,7 +368,7 @@ export default function NearbySafety({ navigation, route }) {
                               {post.message.length > 50 ? `${post.message.slice(0, 50)}...` : post.message}
                             </Text>
                             <Text style={styles.searchResultTimestamp}>
-                              {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+                              {moment(post.timestamp).format('YY/MM/DD HH:mm')}
                             </Text>
                           </View>
                         </TouchableOpacity>
