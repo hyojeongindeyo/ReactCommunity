@@ -10,7 +10,7 @@ import PostDetail from '../community/PostDetail';
 import UpdatePost from '../community/UpdatePost';
 import axios from 'axios';
 import config from '../config';
-
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
@@ -307,7 +307,11 @@ function ScrappedPostsScreen({ navigation }) {
     }
   };
   
-  
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchScrappedPosts();
+    }, [])
+  );
 
   if (loading) {
     return <Text>로딩 중...</Text>;
