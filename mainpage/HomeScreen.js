@@ -137,12 +137,18 @@ const App = ({ navigation }) => {
   const formatTimestamp = (timestamp) => {
     try {
       const date = new Date(timestamp);
-      return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'} ${String(date.getHours() % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 필요
+      const year = String(date.getFullYear() % 100).padStart(2, '0'); // 두 자리 연도
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
     } catch (error) {
       console.error('Error formatting timestamp:', error);
       return timestamp;
     }
-  };
+  };  
 
   return (
     <View style={styles.allItems}>

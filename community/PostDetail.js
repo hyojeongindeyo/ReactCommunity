@@ -240,11 +240,11 @@ export default function PostDetail({ route, navigation }) {
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
         <Text style={styles.timestamp}>
-          작성 시간: {moment(post.timestamp).format('YYYY.MM.DD A hh:mm')}
+          작성 시간: {moment(post.timestamp).format('YY/MM/DD HH:mm')}
         </Text>
         {post.updated_timestamp && ( // 수정 시간이 존재할 경우에만 표시
           <Text style={styles.timestamp}>
-            수정 시간: {moment(post.updated_timestamp).format('YYYY.MM.DD A hh:mm')}
+            수정 시간: {moment(post.updated_timestamp).format('YY/MM/DD HH:mm')}
           </Text>
         )}
         <Text style={styles.timestamp}>
@@ -324,7 +324,7 @@ export default function PostDetail({ route, navigation }) {
               <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
 
               {/* 댓글 작성 시간 표시 */}
-              <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YYYY.MM.DD A hh:mm')}</Text>
+              <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
 
               {/* 점점점 버튼 추가 */}
               {userData && comment.user_id === userData.id && (
