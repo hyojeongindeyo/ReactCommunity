@@ -59,6 +59,8 @@ const Weather = ({ latitude, longitude, city }) => {
     emoji = '💦';
   } else if (weather.weather[0].description.includes('구름')) {
     emoji = '☁️'
+  } else if (weather.weather[0].description.includes('안개')) {
+    emoji = '🌫️'
   }
   
 
