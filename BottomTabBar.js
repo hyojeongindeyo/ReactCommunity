@@ -15,23 +15,27 @@ export default function BottomTabBar() {
         mypage: '#BDC3C7',
     });
 
+    const resetNavigation = (screenName) => {
+        setIconColors(prevColors => ({
+            home: screenName === 'Home' ? '#92B2AE' : '#BDC3C7',
+            shelter: screenName === 'Shelter' ? '#92B2AE' : '#BDC3C7',
+            camera: screenName === 'Camera' ? '#92B2AE' : '#BDC3C7',
+            talk: screenName === 'Community' ? '#92B2AE' : '#BDC3C7',
+            mypage: screenName === 'Mypage' ? '#92B2AE' : '#BDC3C7',
+        }));
 
+        navigation.reset({
+            index: 0,
+            routes: [{ name: screenName }],
+        });
+    };
 
     return (
         <View style={styles.bottomBar}>
             <TouchableOpacity 
                 style={styles.iconContainer} 
                 onPress={() => {
-                    // 홈 아이콘을 누르면 색상이 변경됨
-                    setIconColors(prevColors => ({
-                        ...prevColors,
-                        home: '#92B2AE',
-                        shelter: '#BDC3C7',
-                        camera: '#BDC3C7',
-                        talk: '#BDC3C7',
-                        mypage: '#BDC3C7',
-                    }));
-                    navigation.navigate('Home');
+                    resetNavigation('Home'); // 홈 화면으로 리셋
                 }}
             >
                 <Entypo name="home" size={30} color={iconColors.home} />
@@ -41,16 +45,7 @@ export default function BottomTabBar() {
             <TouchableOpacity 
                 style={styles.iconContainer} 
                 onPress={() => {
-                    setIconColors(prevColors => ({
-                        ...prevColors,
-                        home: '#BDC3C7',
-                        shelter: '#92B2AE',
-                        camera: '#BDC3C7',
-                        talk: '#BDC3C7',
-                        mypage: '#BDC3C7',
-                    }));
-                    console.log("Shelter pressed");
-                    navigation.navigate('Shelter');
+                    resetNavigation('Shelter'); // 대피소 화면으로 리셋
                 }}
             >
                 <FontAwesome6 name="map-location-dot" size={30} color={iconColors.shelter} />
@@ -60,16 +55,7 @@ export default function BottomTabBar() {
             <TouchableOpacity 
                 style={styles.iconContainer} 
                 onPress={() => {
-                    setIconColors(prevColors => ({
-                        ...prevColors,
-                        home: '#BDC3C7',
-                        shelter: '#BDC3C7',
-                        camera: '#92B2AE',
-                        talk: '#BDC3C7',
-                        mypage: '#BDC3C7',
-                    }));
-                    console.log("Camera pressed");
-                    navigation.navigate('Camera');
+                    resetNavigation('Camera'); // 카메라 화면으로 리셋
                 }}
             >
                 <Entypo name="camera" size={30} color={iconColors.camera} />
@@ -79,43 +65,22 @@ export default function BottomTabBar() {
             <TouchableOpacity 
                 style={styles.iconContainer} 
                 onPress={() => {
-                    setIconColors(prevColors => ({
-                        ...prevColors,
-                        home: '#BDC3C7',
-                        shelter: '#BDC3C7',
-                        camera: '#BDC3C7',
-                        talk: '#92B2AE',
-                        mypage: '#BDC3C7',
-                    }));
-                    console.log("Talk pressed");
-                    navigation.navigate('Community');
+                    resetNavigation('Community'); // 커뮤니티 화면으로 리셋
                 }}
             >
                 <MaterialCommunityIcons name="post-outline" size={30} color={iconColors.talk} />
                 <Text style={[styles.iconText, { color: iconColors.talk }]}>커뮤니티</Text>
             </TouchableOpacity>
 
-            
             <TouchableOpacity 
                 style={styles.iconContainer} 
                 onPress={() => {
-                    setIconColors(prevColors => ({
-                        ...prevColors,
-                        home: '#BDC3C7',
-                        shelter: '#BDC3C7',
-                        camera: '#BDC3C7',
-                        talk: '#BDC3C7',
-                        mypage: '#92B2AE',
-                    }));
-                    console.log("Mypage pressed");
-                    navigation.navigate('Mypage');
+                    resetNavigation('Mypage'); // 내 평안 화면으로 리셋
                 }}
             >
                 <Ionicons name="person" size={30} color={iconColors.mypage} />
                 <Text style={[styles.iconText, { color: iconColors.mypage }]}>내 평안</Text>
             </TouchableOpacity>
-
-            
         </View>
     );
 }

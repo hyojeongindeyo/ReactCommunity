@@ -377,12 +377,12 @@ const styles = StyleSheet.create({
     // height: '100%',
   },
   leftContainer: {
-    width: '40%', // 화면의 왼쪽 50% 차지
+    width: '50%', // 화면의 왼쪽 50% 차지
     justifyContent: 'center',
     alignItems: 'center',
   },
   rightContainer: {
-    width: '60%', // 화면의 오른쪽 50% 차지
+    width: '50%', // 화면의 오른쪽 50% 차지
     // paddingLeft: 10, // 오른쪽에 약간의 여백 추가
     justifyContent: 'center',
     alignItems: 'center',
@@ -390,15 +390,17 @@ const styles = StyleSheet.create({
     // padding: 0,
   },
   pyeong: {
-    width: '80%', // 큰 이미지
+    width: '50%', // 큰 이미지
     marginBottom: 10,
+    // height: '50%'
+    
   },
   bag: {
     width: '40%', // 작은 가방 이미지
     position: 'absolute',
     // top: '50%',
     // top: 0,
-    top: '50%',
+    top: '30%',
     right: '10%',
     height: '50%',
 
