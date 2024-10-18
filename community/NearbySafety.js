@@ -274,10 +274,11 @@ export default function NearbySafety({ navigation, route }) {
                     <View style={styles.textContainer}>
                       {/* 제목 */}
                       <View style={styles.titlecontainer}>
-                        <Text style={styles.titleText}>{post.title}</Text>
-                        <View style={[styles.listContainer, { backgroundColor: getCategoryColor(post.category) }]}>
+                      <View style={[styles.listContainer, { backgroundColor: getCategoryColor(post.category) }]}>
                           <Text style={styles.listText}>{post.category}</Text>
                         </View>
+                        <Text style={styles.titleText}>{post.title}</Text>
+                        
                       </View>
 
                       {/* 본문 */}
@@ -682,7 +683,8 @@ const styles = StyleSheet.create({
     padding: 3, // 카테고리 안쪽 여백
     paddingLeft: 7,
     paddingRight: 7,
-    marginLeft: 5, // 제목과 카테고리 사이의 간격을 없앰
+    marginLeft: 2, // 제목과 카테고리 사이의 간격을 없앰
+    marginRight: 4,
     opacity: 0.8,
   },
   listText: {

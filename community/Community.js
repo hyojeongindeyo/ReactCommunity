@@ -441,24 +441,28 @@ function Community({ navigation }) {
                     onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
                   >
                     <View style={styles.safetyContent}>
-                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
-                        {filteredPost.title}
-                      </Text>
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
                         <Text style={styles.safecategory}>{category}</Text>
                       </View>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>{filteredPost.title}</Text>
+                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View> */}
                     </View>
                     <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.safebox}>
                     <View style={styles.safetyContent}>
-                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
-                        {`${category}에 대한 게시물이 아직 없습니다.`}
-                      </Text>
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
                         <Text style={styles.safecategory}>{category}</Text>
                       </View>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
+                        {`${category}에 대한 게시물이 아직 없습니다.`}
+                      </Text>
+                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View> */}
                     </View>
                     {/* <Text style={styles.safetime}>-</Text> */}
                   </View>
@@ -470,7 +474,7 @@ function Community({ navigation }) {
 
             );
           })}
-        </View>
+          </View>
 
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>
@@ -1228,7 +1232,8 @@ const styles = StyleSheet.create({
     padding: 3, // 카테고리 안쪽 여백
     paddingLeft: 7,
     paddingRight: 7,
-    marginLeft: 5, // 제목과 카테고리 사이의 간격을 없앰
+    marginLeft: 2, // 제목과 카테고리 사이의 간격을 없앰
+    marginRight: 4,
     opacity: 0.8,
   },
 });

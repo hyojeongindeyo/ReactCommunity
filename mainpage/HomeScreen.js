@@ -150,6 +150,23 @@ const App = ({ navigation }) => {
     }
   };  
 
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case '교통':
+        return '#C0E6F6'; // 교통은 파란색
+      case '화재':
+        return '#F6C0C0'; // 시위는 빨간색
+      case '재해':
+        return '#C0F6C6'; // 재해는 녹색
+      case '주의':
+        return '#F6D8C0'; // 주의는 주황색
+      case '생활':
+        return '#DBBBDF'; // 
+      default:
+        return '#F3F3F3'; // 기본 색상
+    }
+  };
+
   return (
     <View style={styles.allItems}>
       <View style={styles.header}>
@@ -243,22 +260,48 @@ const App = ({ navigation }) => {
         </TouchableOpacity>
 
         <View style={styles.safe}>
-          {/* 내 주변 안전소식 */}
           {['교통', '화재', '재해', '주의'].map((category, index) => {
-            const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category); // 필터링된 게시물에서 해당 카테고리 게시물 찾기
+            const filteredPost = filteredPosts.find(filteredPost => filteredPost.category === category);
+
             return (
-              <TouchableOpacity
-                key={index}
-                style={styles.safebox}
-                onPress={() => filteredPost && navigation.navigate('PostDetail', { post: filteredPost })} // 조건부로 네비게이션
-                disabled={!filteredPost} // filteredPost가 없으면 버튼 비활성화
-              >
-                <Text style={styles.safetitle}>{category}</Text>
-                <Text style={styles.safebody} numberOfLines={1} ellipsizeMode='tail'>
-                  {filteredPost ? filteredPost.title : `${category}에 대한 게시물이 아직 없습니다.`}
-                </Text>
-                <Text style={styles.safetime}>{filteredPost ? formatTimestamp(filteredPost.timestamp) : '-'}</Text>
-              </TouchableOpacity>
+              <View key={index}>
+                {filteredPost ? (
+                  <TouchableOpacity
+                    style={styles.safebox}
+                    onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
+                  >
+                    <View style={styles.safetyContent}>
+                      <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>{filteredPost.title}</Text>
+                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View> */}
+                    </View>
+                    <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.safebox}>
+                    <View style={styles.safetyContent}>
+                      <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
+                        {`${category}에 대한 게시물이 아직 없습니다.`}
+                      </Text>
+                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
+                        <Text style={styles.safecategory}>{category}</Text>
+                      </View> */}
+                    </View>
+                    {/* <Text style={styles.safetime}>-</Text> */}
+                  </View>
+                )}
+                {index < 3 && <View style={styles.separator} />}
+              </View>
+
+
+
             );
           })}
         </View>
@@ -480,7 +523,10 @@ const styles = StyleSheet.create({
 
 
   safe: {
-    width: '100%',
+    marginBottom: 5,
+  },
+  safeItem: {
+    marginVertical: 5,
   },
 
   safetyText: {
@@ -500,20 +546,47 @@ const styles = StyleSheet.create({
   },
 
   safebox: {
-    backgroundColor: "#f3f3f3",
-    justifyContent: 'center',
-    // height: '30%',
-    padding: '5%',
-    borderRadius: 20,
-    marginTop: '2%',
-    flexDirection: "row",
-    alignItems: "center"
+    padding: 3,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  safetyContent: {
+    flexDirection: 'row', // 제목과 본문을 수평으로 배치
+    // justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  safecategory: {
+    color: 'black',
+    // fontWeight: 'nomal',
+    // marginLeft: 5,
+    fontSize: 13,
+  },
+  safetitle: {
+    fontSize: 15,
+    // marginLeft: 5, // 제목과 본문 사이 여백 추가
+    // flex: 1, // 남은 공간을 차지하도록 설정
+    fontWeight: 'bold', // 내용도 굵은 글씨로 설정
   },
   safetime: {
-    color: '#8A9094',
-    fontWeight: 200,
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'left', // 좌측 정렬
+    marginTop: 5, // 위쪽 여백 추가
   },
-
+  separator: {
+    height: 1,
+    backgroundColor: '#ddd', // 구분선 색상
+    marginVertical: 5, // 위아래 여백 추가
+  },
+  listContainer: {
+    borderRadius: 10, // 카테고리 배경 둥글게
+    padding: 3, // 카테고리 안쪽 여백
+    paddingLeft: 7,
+    paddingRight: 7,
+    marginLeft: 2, // 제목과 카테고리 사이의 간격을 없앰
+    marginRight: 3,
+    opacity: 0.8,
+  },
 
 
   // 배너
