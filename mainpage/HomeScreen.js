@@ -219,7 +219,7 @@ const App = ({ navigation }) => {
     </Text> */}
 
             {/* 배너 */}
-            <View style={styles.banners}>
+            {/* <View style={styles.banners}>
               <Swiper
                 style={styles.swiperContainer}
                 showsButtons={false}
@@ -243,7 +243,20 @@ const App = ({ navigation }) => {
                   <Image source={require('../assets/banner_shelter.png')} style={styles.bannerImage} />
                 </View>
               </Swiper>
+            </View> */}
+            {/* 가방 클릭 시 말풍선 내부 아이템 표시 */}
+          {/* {showBagItems && (
+            <View style={styles.bubble}>
+              <Text style={styles.bubbleText}>평안이의 가방 속</Text>
+              <View style={styles.itemContainer}>
+              
+              </View>
             </View>
+          )} */}
+          <View style={styles.inpyeongbag}>
+            <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
+          </View>
+
           </View>
         </View>
 
@@ -587,6 +600,7 @@ const styles = StyleSheet.create({
     marginRight: 3,
     opacity: 0.8,
   },
+  
 
 
   // 배너
@@ -623,6 +637,20 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginHorizontal: 3,
   },
+  inpyeongbag :{
+    backgroundColor: '#D9D9D9', 
+    // padding: 40,
+    // margin: 0,
+    borderRadius: 15,
+    width: '100%',
+    height: '50%',
+    marginTop: 10,
+  }, 
+  inpyeongtext: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+
 
 
 

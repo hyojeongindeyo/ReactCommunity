@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
 import { MaterialIcons, Ionicons,FontAwesome } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
+import * as Location from 'expo-location';
 import moment from 'moment';
 import { CommentsContext } from './CommentsContext';
 import axios from 'axios';
@@ -16,7 +17,10 @@ export default function PostDetail({ route, navigation }) {
   const [newComment, setNewComment] = useState('');
   const [imageAspectRatio, setImageAspectRatio] = useState(1); // 기본 비율 설정
   const [scrapCount, setScrapCount] = useState(0); // 스크랩 수 상태 변수 추가
-
+  const [location, setLocation] = useState(null);
+  const [city, setCity] = useState('');
+  const [district, setDistrict] = useState('');
+  
   useEffect(() => {
     console.log("수정된 데이터:", post);
   }, [post]);
@@ -58,6 +62,33 @@ export default function PostDetail({ route, navigation }) {
     fetchComments();
   }, [post.id]);
 
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.error('Location permission not granted');
+          return;
+        }
+  
+        let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        let address = await Location.reverseGeocodeAsync({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        });
+  
+        if (address.length > 0) {
+          setCity(address[0].city || '');
+          setDistrict(address[0].district || '');
+        }
+      } catch (error) {
+        console.error('Error fetching location:', error);
+      }
+    };
+  
+    fetchLocation(); // 컴포넌트가 마운트될 때 위치 정보 가져오기
+  }, []);
+  
   const increaseViews = async () => {
     try {
       await axios.post(`${config.apiUrl}/posts/${post.id}/increaseViews`);
@@ -230,7 +261,15 @@ export default function PostDetail({ route, navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>{post.title}</Text>
+        <View style={{ alignItems: 'center' }}>
+          {city && district && (
+            <Text style={styles.location}>
+              {city}, {district} 안전 소식
+            </Text>
+          )}
+          <Text style={styles.title}>{post.title}</Text>
+        </View>
+
         <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
           <FontAwesome name={isScraped ? 'star' : 'star-o'} size={20} color={isScraped ? 'gold' : 'black'} />
           <Text style={{ marginLeft: 3 }}>{scrapCount}</Text>
@@ -364,13 +403,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: '5%',
     paddingTop: '10%',
-    paddingBottom: '5%',
+    paddingBottom: '3%',
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    flex: 1,
     textAlign: 'center',
+    marginTop: 5,
+  },
+  location: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 15,
   },
   iconButton: {
     padding: '2%',
