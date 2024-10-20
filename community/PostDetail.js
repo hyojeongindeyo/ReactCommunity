@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image } from 'react-native';
-import { MaterialIcons, Ionicons,FontAwesome } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
 import * as Location from 'expo-location';
 import moment from 'moment';
 import { CommentsContext } from './CommentsContext';
 import axios from 'axios';
 import config from '../config';
+import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
+
 
 export default function PostDetail({ route, navigation }) {
   const { post } = route.params;
@@ -20,7 +22,8 @@ export default function PostDetail({ route, navigation }) {
   const [location, setLocation] = useState(null);
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
-  
+  const [modalVisible, setModalVisible] = useState(false);
+
   useEffect(() => {
     console.log("수정된 데이터:", post);
   }, [post]);
@@ -70,13 +73,13 @@ export default function PostDetail({ route, navigation }) {
           console.error('Location permission not granted');
           return;
         }
-  
+
         let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
         let address = await Location.reverseGeocodeAsync({
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
         });
-  
+
         if (address.length > 0) {
           setCity(address[0].city || '');
           setDistrict(address[0].district || '');
@@ -85,17 +88,17 @@ export default function PostDetail({ route, navigation }) {
         console.error('Error fetching location:', error);
       }
     };
-  
+
     fetchLocation(); // 컴포넌트가 마운트될 때 위치 정보 가져오기
   }, []);
-  
+
   const increaseViews = async () => {
     try {
       await axios.post(`${config.apiUrl}/posts/${post.id}/increaseViews`);
     } catch (error) {
       console.error('조회수 증가 실패:', error);
     }
-  };  
+  };
 
   const fetchUserSession = async () => {
     try {
@@ -134,12 +137,12 @@ export default function PostDetail({ route, navigation }) {
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
       postComment(newComment, userData.id); // 새 댓글과 사용자 ID를 전달
-  
+
       // 댓글 작성 후 다시 댓글 목록을 가져옴
       axios.get(`${config.apiUrl}/comments/${post.id}`)
         .then(response => {
           console.log("최신 댓글을 가져왔습니다:", response.data); // 최신 댓글 로그
-  
+
           // 댓글 상태를 다시 업데이트
           setComments({
             ...comments,
@@ -149,7 +152,7 @@ export default function PostDetail({ route, navigation }) {
         .catch(error => {
           console.error('최신 댓글 가져오기 오류:', error);
         });
-  
+
       setNewComment(''); // 입력란 비우기
     }
   };
@@ -157,59 +160,38 @@ export default function PostDetail({ route, navigation }) {
     // 댓글 작성 API 호출
     axios.post(`${config.apiUrl}/comments`, {
       post_id: post.id,
-      comment_text: commentText
+      comment_text: commentText,
     }, { withCredentials: true })
-    .then(response => {
-      console.log("댓글이 작성되었습니다:", response.data);
-      
-      // 사용자의 미션 확인
-      return axios.get(`${config.apiUrl}/user/missions/${userId}`); // 사용자 미션 가져오기
-    })
-    .then(response => {
-      const missions = response.data.missions;
-      const missionIdToCheck = 1; // 댓글 작성 미션 ID (실제 미션 ID를 넣으세요)
-  
-      if (!missions.includes(missionIdToCheck)) {
-        // 미션을 가지고 있지 않은 경우 미션 완료 API 호출
+      .then(response => {
+        console.log("댓글이 작성되었습니다:", response.data);
+
+        // 댓글 작성 후 미션 완료 API 호출
         return axios.post(`${config.apiUrl}/complete-mission`, {
           userId: userId,
-          missionId: missionIdToCheck
+          missionId: 1 // 댓글 작성 미션 ID
         });
-      } else {
-        console.log("이미 미션을 완료하셨습니다.");
-        throw new Error("Already completed mission"); // 이미 완료된 경우 에러를 던집니다.
-      }
-    })
-    .then(response => {
-      console.log(response.data.message); // 미션 완료 메시지
-  
-      // 미션 완료 후 팝업창 띄우기 (네, 아니오 버튼 포함)
-      Alert.alert(
-        "미션 완료", // 팝업 제목
-        "축하합니다! 미션이 완료되었습니다. 가방 확인하러 가기", // 팝업 내용
-        [
-          {
-            text: "아니오", // 아니오 버튼
-            onPress: () => console.log("사용자가 '아니오'를 선택했습니다."),
-            style: "cancel" // 취소 버튼 스타일
-          },
-          {
-            text: "네", // 네 버튼
-            onPress: () => {
-              console.log("사용자가 '네'를 선택했습니다.");
-              navigation.replace('HomeScreen', { showModal: true }); // Main 화면으로 이동하면서 모달 표시 여부 전달
-            },
-          }
-        ]
-      );
-    })
-    .catch(error => {
-      if (error.message !== "Already completed mission") {
+      })
+      .then(response => {
+        console.log(response.data.message); // 미션 완료 메시지
+
+        // 모달 표시
+        setModalVisible(true);
+      })
+      .catch(error => {
         console.error('오류:', error.response ? error.response.data : error);
-      }
-    });
+      });
   };
-  
+
+  const handleClose = () => {
+    setModalVisible(false);
+  };
+
+  const handleConfirm = () => {
+    console.log("사용자가 '네'를 선택했습니다.");
+    handleClose();
+    navigation.replace('HomeScreen', { showModal: true });
+  };
+
 
   const handleCommentOptions = (commentId) => {
     Alert.alert(
@@ -303,7 +285,7 @@ export default function PostDetail({ route, navigation }) {
         console.error('스크랩 오류:', error);
       }
     }
-  };  
+  };
 
   return (
     <View style={styles.container}>
@@ -339,6 +321,11 @@ export default function PostDetail({ route, navigation }) {
         <Text style={styles.timestamp}>
           작성자: {post.user_nickname} {/* 작성자 닉네임 표시 */}
         </Text>
+        <CustomModal
+          visible={modalVisible}
+          onClose={handleClose}
+          onConfirm={handleConfirm}
+        />
 
 
 
@@ -587,7 +574,7 @@ const styles = StyleSheet.create({
   commentCountContainer: {
     flexDirection: 'row',  // 한 줄로 배치
     alignItems: 'center',  // 수직 중앙 정렬
-        // 간격 조절
+    // 간격 조절
   },
   commentCountText: {
     fontSize: 14,          // 댓글 수의 글씨 크기를 12로 설정

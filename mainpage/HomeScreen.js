@@ -59,7 +59,7 @@ const App = ({ navigation, route }) => {
 
     fetchRandomTip(); // 컴포넌트가 마운트될 때 호출
   }, []);
-  
+
   useEffect(() => {
     if (route.params?.showModal) {
       setModalVisible(true);
@@ -71,17 +71,17 @@ const App = ({ navigation, route }) => {
       const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
       console.log('User session data:', response.data);
       const userId = response.data.id; // 사용자 ID 가져오기
-  
+
       // 사용자 미션 가져오기
       const missionsResponse = await axios.get(`${config.apiUrl}/user/missions/${userId}`, { withCredentials: true });
       console.log('User Missions:', missionsResponse.data); // 미션 데이터 출력
       setUserMissions(missionsResponse.data.missions || []); // 미션 상태 설정
-  
+
       // // 모달 표시 여부를 설정
       // if (route.params?.showModal) {
       //   setModalVisible(true);
       // }
-  
+
     } catch (error) {
       if (error.response) {
         console.error('데이터 오류:', error.response.data);
@@ -91,7 +91,7 @@ const App = ({ navigation, route }) => {
       setUserMissions([]);
     }
   };
-  
+
   // 컴포넌트가 마운트될 때 fetchMissionSession 호출
   React.useEffect(() => {
     fetchMissionSession();
@@ -102,7 +102,7 @@ const App = ({ navigation, route }) => {
       fetchMissionSession(); // 모달이 열릴 때마다 미션을 다시 가져옵니다.
     }
   }, [modalVisible]);
-  
+
 
 
 
@@ -266,45 +266,8 @@ const App = ({ navigation, route }) => {
               )}
             </View>
 
-            {/* <Text style={styles.pyeongT}>
-      {userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}
-    </Text> */}
 
-            {/* 배너 */}
-            {/* <View style={styles.banners}>
-              <Swiper
-                style={styles.swiperContainer}
-                showsButtons={false}
-                loop={true}
-                paginationStyle={{ bottom: 0 }}
-                dotStyle={styles.dot}
-                activeDotStyle={styles.activeDot}
-                width={SCREEN_WIDTH / 2}
-                index={1}
-                autoplay={true}
-                autoplayTimeout={3}
-                autoplayDirection={true}
-              >
-                <View style={[styles.slide, styles.slide1]}>
-                  <Image source={require('../assets/banner_community.png')} style={styles.bannerImage} />
-                </View>
-                <View style={[styles.slide, styles.slide2]}>
-                  <Image source={require('../assets/banner_crack.png')} style={styles.bannerImage} />
-                </View>
-                <View style={[styles.slide, styles.slide3]}>
-                  <Image source={require('../assets/banner_shelter.png')} style={styles.bannerImage} />
-                </View>
-              </Swiper>
-            </View> */}
-            {/* 가방 클릭 시 말풍선 내부 아이템 표시 */}
-            {/* {showBagItems && (
-            <View style={styles.bubble}>
-              <Text style={styles.bubbleText}>평안이의 가방 속</Text>
-              <View style={styles.itemContainer}>
-              
-              </View>
-            </View>
-          )} */}
+          {/* 평안이 가방 모달입니다 */}
             <TouchableOpacity onPress={() => setModalVisible(true)}>
               <View style={styles.inpyeongbag}>
                 <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
