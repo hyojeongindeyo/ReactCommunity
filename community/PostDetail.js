@@ -133,33 +133,83 @@ export default function PostDetail({ route, navigation }) {
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      axios.post(`${config.apiUrl}/comments`, {
-        post_id: post.id,
-        comment_text: newComment
-      }, { withCredentials: true })
+      postComment(newComment, userData.id); // 새 댓글과 사용자 ID를 전달
+  
+      // 댓글 작성 후 다시 댓글 목록을 가져옴
+      axios.get(`${config.apiUrl}/comments/${post.id}`)
         .then(response => {
-          // 성공적으로 댓글 작성 후 다시 댓글 목록을 가져옴
-          axios.get(`${config.apiUrl}/comments/${post.id}`)
-            .then(response => {
-              console.log("Fetched updated comments:", response.data); // 최신 댓글 로그
-
-              // 댓글 상태를 다시 업데이트
-              setComments({
-                ...comments,
-                [postId]: response.data
-              });
-            })
-            .catch(error => {
-              console.error('Error fetching updated comments:', error);
-            });
-
-          setNewComment(''); // 입력란 비우기
+          console.log("최신 댓글을 가져왔습니다:", response.data); // 최신 댓글 로그
+  
+          // 댓글 상태를 다시 업데이트
+          setComments({
+            ...comments,
+            [postId]: response.data
+          });
         })
         .catch(error => {
-          console.error('댓글 전송 오류:', error.response ? error.response.data : error);
+          console.error('최신 댓글 가져오기 오류:', error);
         });
+  
+      setNewComment(''); // 입력란 비우기
     }
   };
+  const postComment = (commentText, userId) => {
+    // 댓글 작성 API 호출
+    axios.post(`${config.apiUrl}/comments`, {
+      post_id: post.id,
+      comment_text: commentText
+    }, { withCredentials: true })
+    .then(response => {
+      console.log("댓글이 작성되었습니다:", response.data);
+      
+      // 사용자의 미션 확인
+      return axios.get(`${config.apiUrl}/user/missions/${userId}`); // 사용자 미션 가져오기
+    })
+    .then(response => {
+      const missions = response.data.missions;
+      const missionIdToCheck = 1; // 댓글 작성 미션 ID (실제 미션 ID를 넣으세요)
+  
+      if (!missions.includes(missionIdToCheck)) {
+        // 미션을 가지고 있지 않은 경우 미션 완료 API 호출
+        return axios.post(`${config.apiUrl}/complete-mission`, {
+          userId: userId,
+          missionId: missionIdToCheck
+        });
+      } else {
+        console.log("이미 미션을 완료하셨습니다.");
+        throw new Error("Already completed mission"); // 이미 완료된 경우 에러를 던집니다.
+      }
+    })
+    .then(response => {
+      console.log(response.data.message); // 미션 완료 메시지
+  
+      // 미션 완료 후 팝업창 띄우기 (네, 아니오 버튼 포함)
+      Alert.alert(
+        "미션 완료", // 팝업 제목
+        "축하합니다! 미션이 완료되었습니다. 가방 확인하러 가기", // 팝업 내용
+        [
+          {
+            text: "아니오", // 아니오 버튼
+            onPress: () => console.log("사용자가 '아니오'를 선택했습니다."),
+            style: "cancel" // 취소 버튼 스타일
+          },
+          {
+            text: "네", // 네 버튼
+            onPress: () => {
+              console.log("사용자가 '네'를 선택했습니다.");
+              navigation.replace('HomeScreen', { showModal: true }); // Main 화면으로 이동하면서 모달 표시 여부 전달
+            },
+          }
+        ]
+      );
+    })
+    .catch(error => {
+      if (error.message !== "Already completed mission") {
+        console.error('오류:', error.response ? error.response.data : error);
+      }
+    });
+  };
+  
 
   const handleCommentOptions = (commentId) => {
     Alert.alert(

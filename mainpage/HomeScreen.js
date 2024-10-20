@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { Modal, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import Weather from './Weather'; // Weather 컴포넌트 import
 import Swiper from 'react-native-swiper';
@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncSt
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const App = ({ navigation }) => {
+const App = ({ navigation, route }) => {
   const [posts, setPosts] = useState([]); // posts 상태 정의
   const [userData, setUserData] = useState(null);
   const [city, setCity] = useState('Loading...');
@@ -23,12 +23,20 @@ const App = ({ navigation }) => {
   const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물을 저장할 상태 변수
   const [safetyTip, setSafetyTip] = useState({}); // 초기값을 빈 객체로 설정
   const [error, setError] = useState(null);
+  const [userMissions, setUserMissions] = useState([]);
+
+  const missionImages = {
+    1: require('../assets/tips.png'),
+    //   2: require('./path/to/image2.png'),
+    //   3: require('./path/to/image3.png'),
+  };
 
 
   // 위치 가져오기 및 데이터 호출
   useEffect(() => {
     fetchUserSession();
     fetchPosts(); // 게시물 데이터 가져오기 호출
+    fetchMissionSession();
 
     // 5초마다 fetchPosts 호출
     const intervalId = setInterval(fetchPosts, 5000);
@@ -51,6 +59,50 @@ const App = ({ navigation }) => {
 
     fetchRandomTip(); // 컴포넌트가 마운트될 때 호출
   }, []);
+  
+  useEffect(() => {
+    if (route.params?.showModal) {
+      setModalVisible(true);
+    }
+  }, [route.params?.showModal]);
+
+  const fetchMissionSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      console.log('User session data:', response.data);
+      const userId = response.data.id; // 사용자 ID 가져오기
+  
+      // 사용자 미션 가져오기
+      const missionsResponse = await axios.get(`${config.apiUrl}/user/missions/${userId}`, { withCredentials: true });
+      console.log('User Missions:', missionsResponse.data); // 미션 데이터 출력
+      setUserMissions(missionsResponse.data.missions || []); // 미션 상태 설정
+  
+      // // 모달 표시 여부를 설정
+      // if (route.params?.showModal) {
+      //   setModalVisible(true);
+      // }
+  
+    } catch (error) {
+      if (error.response) {
+        console.error('데이터 오류:', error.response.data);
+      } else {
+        console.error('Error fetching user session:', error.message);
+      }
+      setUserMissions([]);
+    }
+  };
+  
+  // 컴포넌트가 마운트될 때 fetchMissionSession 호출
+  React.useEffect(() => {
+    fetchMissionSession();
+  }, []); // 의존성 배열에 빈 배열을 주어 컴포넌트가 마운트될 때만 호출
+
+  useEffect(() => {
+    if (modalVisible) {
+      fetchMissionSession(); // 모달이 열릴 때마다 미션을 다시 가져옵니다.
+    }
+  }, [modalVisible]);
+  
 
 
 
@@ -142,13 +194,13 @@ const App = ({ navigation }) => {
       const year = String(date.getFullYear() % 100).padStart(2, '0'); // 두 자리 연도
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
-  
+
       return `${year}/${month}/${day} ${hours}:${minutes}`;
     } catch (error) {
       console.error('Error formatting timestamp:', error);
       return timestamp;
     }
-  };  
+  };
 
   const getCategoryColor = (category) => {
     switch (category) {
@@ -190,14 +242,14 @@ const App = ({ navigation }) => {
         </View>
 
         <Text style={styles.pyeongT}>
-              {userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}
-            </Text>
+          {userData ? `${userData.nickname}님의 평안이` : '사용자 정보 로딩 중...'}
+        </Text>
 
         {/* 날씨 정보 */}
         <View style={styles.rowcontainer}>
           {/* 50% 왼쪽: 사진 */}
           <View style={styles.leftContainer}>
-            
+
             <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode="contain" />
             <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode="contain" />
           </View>
@@ -245,7 +297,7 @@ const App = ({ navigation }) => {
               </Swiper>
             </View> */}
             {/* 가방 클릭 시 말풍선 내부 아이템 표시 */}
-          {/* {showBagItems && (
+            {/* {showBagItems && (
             <View style={styles.bubble}>
               <Text style={styles.bubbleText}>평안이의 가방 속</Text>
               <View style={styles.itemContainer}>
@@ -253,9 +305,42 @@ const App = ({ navigation }) => {
               </View>
             </View>
           )} */}
-          <View style={styles.inpyeongbag}>
-            <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
-          </View>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <View style={styles.inpyeongbag}>
+                <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
+              </View>
+            </TouchableOpacity>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => setModalVisible(false)} // 모달 닫기
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>미션 목록</Text>
+                  {userMissions.length > 0 ? (
+                    userMissions.map((missionId) => (
+                      <View key={missionId} style={styles.missionContainer}>
+                        {missionImages[missionId] ? (
+                          <Image source={missionImages[missionId]} style={styles.image} />
+                        ) : (
+                          <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
+                        )}
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => setModalVisible(false)} // 모달 닫기 버튼
+                    style={styles.closeButton}
+                  >
+                    <Text style={styles.closeButtonText}>닫기</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
 
           </View>
         </View>
@@ -322,7 +407,7 @@ const App = ({ navigation }) => {
         <StatusBar style="auto" />
       </View>
 
-      
+
     </View >
   );
 };
@@ -452,8 +537,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     // height: '50%'
     marginLeft: 10,
-    
-    
+
+
   },
   bag: {
     width: '30%', // 작은 가방 이미지
@@ -600,7 +685,7 @@ const styles = StyleSheet.create({
     marginRight: 3,
     opacity: 0.8,
   },
-  
+
 
 
   // 배너
@@ -637,18 +722,34 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginHorizontal: 3,
   },
-  inpyeongbag :{
-    backgroundColor: '#D9D9D9', 
+  inpyeongbag: {
+    backgroundColor: '#D9D9D9',
     // padding: 40,
     // margin: 0,
     borderRadius: 15,
     width: '100%',
     height: '50%',
     marginTop: 10,
-  }, 
+  },
   inpyeongtext: {
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 배경 반투명
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  closeButton: {
+    marginTop: 20,
+    color: 'blue',
   },
 
 
