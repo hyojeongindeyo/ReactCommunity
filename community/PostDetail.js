@@ -189,7 +189,7 @@ export default function PostDetail({ route, navigation }) {
   const handleConfirm = () => {
     console.log("사용자가 '네'를 선택했습니다.");
     handleClose();
-    navigation.replace('Home', { showModal: true });
+    navigation.replace('HomeScreen', { showModal: true });
   };
 
 
