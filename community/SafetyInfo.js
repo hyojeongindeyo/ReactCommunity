@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Alert,  Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import BottomTabBar from '../BottomTabBar';
 import axios from 'axios'; // Axios 임포트
@@ -26,6 +26,7 @@ const SafetyInfo = ({ navigation, route }) => {
   const categories = ['전체', '재해', '주의', '생활', '화재'];
   const [searchResults, setSearchResults] = useState([]); // 검색 결과 상태 추가
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const getCategoryColor = (category) => {
     switch (category) {
@@ -113,12 +114,70 @@ const SafetyInfo = ({ navigation, route }) => {
   const filteredInfos = selectedCategory === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedCategory);
 
   const handleInfoPress = async (info) => {
-    setSelectedInfo(info);
-    setInfoModalVisible(true);
+    setSelectedInfo(info); // 선택된 카드 뉴스를 상태에 저장
+    setInfoModalVisible(true); // 모달을 열어 세부 정보를 표시
     await fetchImages(info.id); // 선택된 정보의 이미지 목록 가져오기
-
-  };
-
+  
+    // 먼저 사용자 미션 정보를 가져와서 확인
+    axios.get(`${config.apiUrl}/user/missions/${userData.id}`)
+      .then(response => {
+        const missions = response.data.missions;
+        const missionIdToCheck = 2; // 안전카드 뉴스 확인 미션 ID
+  
+        if (!missions.includes(missionIdToCheck)) {
+          // 미션을 가지고 있지 않은 경우 미션 완료 API 호출
+          return axios.post(`${config.apiUrl}/complete-mission`, {
+            userId: userData.id,
+            missionId: missionIdToCheck
+          });
+        } else {
+          console.log("이미 미션을 완료하셨습니다.");
+          throw new Error("Already completed mission"); // 이미 완료된 경우 에러를 던짐
+        }
+      })
+      .then(response => {
+        console.log("미션 완료:", response.data.message); // 미션 완료 메시지
+  
+        // 미션 완료 후 팝업창 띄우기 (네, 아니오 버튼 포함)
+        Alert.alert(
+          "미션 완료", // 팝업 제목
+          "축하합니다! 미션이 완료되었습니다. 가방 확인하러 가기", // 팝업 내용
+          [
+            {
+              text: "아니오", // 아니오 버튼
+              onPress: () => console.log("사용자가 '아니오'를 선택했습니다."),
+              style: "cancel" // 취소 버튼 스타일
+            },
+            {
+              text: "네", // 네 버튼
+              onPress: () => {
+                console.log("사용자가 '네'를 선택했습니다.");
+                navigation.navigate('Home'); // Main 화면으로 이동하면서 모달 표시를 위한 상태 전달
+              },
+            }
+          ]
+        );
+      })
+      .catch(error => {
+        if (error.message !== "Already completed mission") {
+          console.error('오류:', error.response ? error.response.data : error);
+        }
+      });
+    };
+  
+  useEffect(() => {
+    const fetchUserSession = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        setUserData(response.data); // 사용자 정보 상태에 저장
+      } catch (error) {
+        console.error('Error fetching user session:', error);
+      }
+    };
+  
+    fetchUserSession();
+  }, []);  
+  
   const fetchImages = async (infoId) => {
     try {
       const response = await axios.get(`${config.apiUrl}/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
