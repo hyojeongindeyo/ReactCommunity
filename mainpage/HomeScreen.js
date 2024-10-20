@@ -26,9 +26,12 @@ const App = ({ navigation, route }) => {
   const [userMissions, setUserMissions] = useState([]);
 
   const missionImages = {
-    1: require('../assets/tips.png'),
-    //   2: require('./path/to/image2.png'),
-    //   3: require('./path/to/image3.png'),
+    1: require('../assets/flashlight.png'),
+    2: require('../assets/whistle.png'),
+    //3: require('../assets/compass.png'),
+    //4: require('../assets/fire_extinguisher.png'),
+    //5: require('../assets/first_aid_kit.png'),
+    //6: require('../assets/water.png'),    
   };
 
 
@@ -714,7 +717,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: 'blue',
   },
-
+  image: {
+    width: 50, // 기본 이미지 크기
+    height: 50,
+    resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
+  },
 
 
 
