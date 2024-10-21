@@ -29,6 +29,7 @@ const CommunityStack = () => (
     <Stack.Screen name="SafetyInfo" component={SafetyInfo} />
     <Stack.Screen name="PostDetail" component={PostDetail} />
     <Stack.Screen name="UpdatePost" component={UpdatePost} />
+    <Stack.Screen name="HomeScreen" component={HomeScreen} />
   </Stack.Navigator>
 );
 

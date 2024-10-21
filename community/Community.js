@@ -5,9 +5,10 @@ import axios from 'axios';
 import config from '../config'; // SafetyInfo.js와 동일한 config 파일 사용
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
+import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
 
 
-function Community({ navigation }) {
+function Community({ navigation, route }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
@@ -29,6 +30,7 @@ function Community({ navigation }) {
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [location, setLocation] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [missionModalVisible, setMissionModalVisible] = useState(false); // 새로운 상태 변수
 
 
 
@@ -167,14 +169,14 @@ function Community({ navigation }) {
       const year = String(date.getFullYear() % 100).padStart(2, '0'); // 두 자리 연도
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
-  
+
       return `${year}/${month}/${day} ${hours}:${minutes}`;
     } catch (error) {
       console.error('Error formatting timestamp:', error);
       return timestamp;
     }
   };
-  
+
 
   const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
 
@@ -264,58 +266,55 @@ function Community({ navigation }) {
     }
   };
 
+
   const handleInfoPress = async (info) => {
-    setSelectedInfo(info); // 선택된 카드 뉴스를 상태에 저장
-    setInfoModalVisible(true); // 모달을 열어 세부 정보를 표시
-    await fetchImages(info.id); // 선택된 정보의 이미지 목록 가져오기
-  
-    // 먼저 사용자 미션 정보를 가져와서 확인
-    axios.get(`${config.apiUrl}/user/missions/${userData.id}`)
-      .then(response => {
+    setSelectedInfo(info);
+    await fetchImages(info.id);
+
+    try {
+        const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
         const missions = response.data.missions;
-        const missionIdToCheck = 2; // 안전카드 뉴스 확인 미션 ID
-  
+        const missionIdToCheck = 2; // 미션 ID
+
+        // 미션이 완료되지 않았으면, 미션 모달을 열기
         if (!missions.includes(missionIdToCheck)) {
-          // 미션을 가지고 있지 않은 경우 미션 완료 API 호출
-          return axios.post(`${config.apiUrl}/complete-mission`, {
-            userId: userData.id,
-            missionId: missionIdToCheck
-          });
+            // 미션을 완료하기 전에 API 호출
+            await axios.post(`${config.apiUrl}/complete-mission`, {
+                userId: userData.id,
+                missionId: missionIdToCheck
+            });
+            console.log("미션 완료");
+            setMissionModalVisible(true); // 미션 완료 시 새로운 모달 표시
         } else {
-          console.log("이미 미션을 완료하셨습니다.");
-          throw new Error("Already completed mission"); // 이미 완료된 경우 에러를 던짐
+            setInfoModalVisible(true); // 기존 모달 표시
+            console.log("이미 미션을 완료하셨습니다.");
+            // 미션 모달을 열 필요가 없으므로 상태를 변경하지 않음
+            setMissionModalVisible(false); // 이 부분은 필요 없습니다.
         }
-      })
-      .then(response => {
-        console.log("미션 완료:", response.data.message); // 미션 완료 메시지
+    } catch (error) {
+        console.error('오류:', error.response ? error.response.data : error);
+    }
+};
+
+// 모달의 상태가 변경될 때마다 확인
+useEffect(() => {
+    console.log('모달 비지블 상태:', missionModalVisible);
+}, [missionModalVisible]);
+
+const missionhandleClose = () => {
+    setMissionModalVisible(false); // 새로운 모달 닫기
+    setInfoModalVisible(false); // 기존 모달 표시
+};
+
+const missionhandleConfirm = () => {
+    console.log("사용자가 '네'를 선택했습니다.");
+    missionhandleClose(); // 모달 닫기
+    navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
+};
+
   
-        // 미션 완료 후 팝업창 띄우기 (네, 아니오 버튼 포함)
-        Alert.alert(
-          "미션 완료", // 팝업 제목
-          "축하합니다! 미션이 완료되었습니다. 가방 확인하러 가기", // 팝업 내용
-          [
-            {
-              text: "아니오", // 아니오 버튼
-              onPress: () => console.log("사용자가 '아니오'를 선택했습니다."),
-              style: "cancel" // 취소 버튼 스타일
-            },
-            {
-              text: "네", // 네 버튼
-              onPress: () => {
-                console.log("사용자가 '네'를 선택했습니다.");
-                navigation.navigate('Home'); // Main 화면으로 이동하면서 모달 표시를 위한 상태 전달
-              },
-            }
-          ]
-        );
-      })
-      .catch(error => {
-        if (error.message !== "Already completed mission") {
-          console.error('오류:', error.response ? error.response.data : error);
-        }
-      });
-    };
-  
+
+
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
@@ -325,9 +324,9 @@ function Community({ navigation }) {
         console.error('Error fetching user session:', error);
       }
     };
-  
+
     fetchUserSession();
-  }, []);  
+  }, []);
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -427,6 +426,7 @@ function Community({ navigation }) {
         return '#F3F3F3'; // 기본 색상
     }
   };
+  ;
 
 
 
@@ -442,6 +442,11 @@ function Community({ navigation }) {
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
+      <CustomModal
+        visible={missionModalVisible}
+        onClose={missionhandleClose}
+        onConfirm={missionhandleConfirm}
+      />
 
       <View style={styles.calendarContainer}>
         <View style={styles.calendar}>
@@ -533,7 +538,7 @@ function Community({ navigation }) {
 
             );
           })}
-          </View>
+        </View>
 
         <View style={styles.boldLine}></View>
         <TouchableOpacity onPress={() => navigation.navigate('SafetyInfo')}>

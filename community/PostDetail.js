@@ -156,31 +156,39 @@ export default function PostDetail({ route, navigation }) {
       setNewComment(''); // 입력란 비우기
     }
   };
-  const postComment = (commentText, userId) => {
-    // 댓글 작성 API 호출
-    axios.post(`${config.apiUrl}/comments`, {
-      post_id: post.id,
-      comment_text: commentText,
-    }, { withCredentials: true })
-      .then(response => {
-        console.log("댓글이 작성되었습니다:", response.data);
-
-        // 댓글 작성 후 미션 완료 API 호출
-        return axios.post(`${config.apiUrl}/complete-mission`, {
+  const postComment = async (commentText, userId) => {
+    try {
+      // 댓글 작성 API 호출
+      const commentResponse = await axios.post(`${config.apiUrl}/comments`, {
+        post_id: post.id,
+        comment_text: commentText,
+      }, { withCredentials: true });
+      
+      console.log("댓글이 작성되었습니다:", commentResponse.data);
+  
+      // 미션 완료 여부 확인
+      const missionStatusResponse = await axios.get(`${config.apiUrl}/user/missions/${userId}`);
+      const isMissionCompleted = missionStatusResponse.data.missions.includes(1); // 댓글 작성 미션 ID가 1인 경우
+  
+      if (!isMissionCompleted) {
+        // 미션 완료 API 호출
+        const completeMissionResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
           userId: userId,
           missionId: 1 // 댓글 작성 미션 ID
         });
-      })
-      .then(response => {
-        console.log(response.data.message); // 미션 완료 메시지
-
+  
+        console.log(completeMissionResponse.data.message); // 미션 완료 메시지
+  
         // 모달 표시
         setModalVisible(true);
-      })
-      .catch(error => {
-        console.error('오류:', error.response ? error.response.data : error);
-      });
-  };
+      } else {
+        console.log("이미 미션이 완료되었습니다.");
+      }
+  
+    } catch (error) {
+      console.error('오류 발생:', error.response ? error.response.data : error);
+    }
+  };  
 
   const handleClose = () => {
     setModalVisible(false);
