@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView, PanResponder, Animated } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import axios from 'axios';
+import config from '../config'; // SafetyInfo.js와 동일한 config 파일 사용
+import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
 
 // JSON 파일을 불러옵니다
 import shelterData from './Shelter.json';
-import { BottomTabBar } from '@react-navigation/bottom-tabs';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -15,7 +17,23 @@ export default function ShelterScreen({ navigation }) {
   const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [shelters, setShelters] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [missionModalVisible, setMissionModalVisible] = useState(false); // 새로운 상태 변수
+
   const scrollViewHeight = useRef(new Animated.Value(SCREEN_HEIGHT / 5)).current;
+
+  useEffect(() => {
+    fetchUserSession();
+  }, []);
+
+  const fetchUserSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user session:', error);
+    }
+  };
 
   // Haversine 공식을 사용하여 두 지점 간의 거리를 계산하는 함수
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -38,43 +56,46 @@ export default function ShelterScreen({ navigation }) {
   useEffect(() => {
     // 위치 권한을 요청하고 현재 위치를 가져옵니다
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        });
 
-      let address = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      if (address.length > 0) {
-        const { city, district, street, streetNumber } = address[0];
-        setAddress(`${city} ${district} ${street} ${streetNumber}`);
-      }
+        // 위치를 기반으로 주소 가져오기
+        let address = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        
+        if (address.length > 0) {
+          const { city, district, street, streetNumber } = address[0];
+          setAddress(`${city} ${district} ${street} ${streetNumber}`);
+        }
 
-      // 사용자 위치 기준으로 가장 가까운 상위 10개 쉼터를 계산합니다
-      const sortedShelters = shelterData.map((shelter) => ({
-        ...shelter,
-        distance: getDistanceFromLatLonInKm(
-          location.coords.latitude,
-          location.coords.longitude,
-          parseFloat(shelter["위도(EPSG4326)"]),
-          parseFloat(shelter["경도(EPSG4326)"])
-        ),
-      }))
+        // 사용자 위치 기준으로 가장 가까운 상위 10개 쉼터를 계산합니다
+        const sortedShelters = shelterData.map((shelter) => ({
+          ...shelter,
+          distance: getDistanceFromLatLonInKm(
+            location.coords.latitude,
+            location.coords.longitude,
+            parseFloat(shelter["위도(EPSG4326)"]),
+            parseFloat(shelter["경도(EPSG4326)"])
+          ),
+        }))
         .sort((a, b) => a.distance - b.distance)
         .slice(0, 10)
-        .map((shelter, index) => ({
+        .map((shelter) => ({
           id: shelter.번호,
           name: shelter.시설명,
           address: shelter["도로명전체주소"],
@@ -83,7 +104,11 @@ export default function ShelterScreen({ navigation }) {
           longitude: parseFloat(shelter["경도(EPSG4326)"]),
         }));
 
-      setShelters(sortedShelters);
+        setShelters(sortedShelters);
+      } catch (error) {
+        console.error('Error getting location:', error);
+        setErrorMsg('Could not fetch location. Please try again.'); // 사용자에게 오류 메시지 표시
+      }
     })();
   }, []);
 
@@ -132,6 +157,49 @@ export default function ShelterScreen({ navigation }) {
     locationText = `위도: ${location.coords.latitude}, 경도: ${location.coords.longitude}`;
   }
 
+  const handleShelterPress = (shelter) => {
+    // 대피소 정보 표시 로직
+    const missionIdToCheck = 3; // 미션 ID
+    completeMission(missionIdToCheck);
+  };
+
+  const completeMission = async (missionId) => {
+    try {
+      // 서버에서 유저의 완료된 미션 목록을 가져옵니다.
+      const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+      const missions = response.data.missions;
+  
+      // 미션 ID가 완료된 목록에 있는지 확인합니다.
+      if (missions.includes(missionId)) {
+        // 이미 완료된 미션일 경우 콘솔에 메시지 출력
+        console.log('이미 미션을 완료했습니다.');
+      } else {
+        // 미션이 완료되지 않았을 경우 미션 완료 API 호출
+        const completeResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
+          userId: userData.id,
+          missionId: missionId,
+        });
+        console.log(`미션 ${missionId} 완료:`, completeResponse.data);
+  
+        // 처음 완료된 미션일 경우 모달 띄우기
+        setMissionModalVisible(true);
+      }
+    } catch (error) {
+      console.error('미션 완료 오류:', error.response ? error.response.data : error);
+    }
+  };
+  
+
+  const missionhandleClose = () => {
+    setMissionModalVisible(false); // 새로운 모달 닫기
+  };
+
+  const missionhandleConfirm = () => {
+    console.log("사용자가 '네'를 선택했습니다.");
+    missionhandleClose(); // 모달 닫기
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } }); // Home 탭으로 이동
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -147,9 +215,15 @@ export default function ShelterScreen({ navigation }) {
               longitude: shelter.longitude,
             }}
             title={shelter.name}
+            onPress={() => handleShelterPress(shelter)} // 클릭 이벤트 추가
           />
         ))}
       </MapView>
+      <CustomModal
+        visible={missionModalVisible}
+        onClose={missionhandleClose}
+        onConfirm={missionhandleConfirm}
+      />
       <View style={styles.infoContainer}>
         <Text style={styles.locationText}>
           {locationText}
