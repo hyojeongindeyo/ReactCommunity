@@ -3,9 +3,12 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Alert, Keyb
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { PostsContext } from './PostsContext'; // PostsContext import
-import axios from 'axios'; // axios import
-import config from '../config'; // config 파일 import
+import { PostsContext } from './PostsContext';
+import axios from 'axios';
+import config from '../config';
+import CustomModal from '../CustomModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function WritePost({ navigation }) {
   const { addPost } = useContext(PostsContext);
@@ -13,36 +16,43 @@ export default function WritePost({ navigation }) {
   const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [userData, setUserData] = useState(null); // 사용자 정보 상태 추가
-  const [location, setLocation] = useState(null); // 위치 정보 상태 추가
-  const [address, setAddress] = useState(null); // 주소 상태 추가
-  const [loading, setLoading] = useState(false); // 로딩 상태 수정
+  const [userData, setUserData] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [missionModalVisible, setMissionModalVisible] = useState(false);
+  const [userLocation, setUserLocation] = useState(''); // 위치 정보를 저장할 상태 변수
+  const [loadingLocation, setLoadingLocation] = useState(false);
+
+
+
+  // useEffect(() => {
+  //   getLocation();
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log('Fetched address:', address);
+  // }, [address]);
 
   useEffect(() => {
+    const fetchUserSession = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        setUserData(response.data); // 사용자 정보 상태에 저장
+      } catch (error) {
+        console.error('Error fetching user session:', error);
+      }
+    };
+
     fetchUserSession();
-    getLocation();
   }, []);
-
-  useEffect(() => {
-    console.log('Fetched address:', address);  // 주소가 제대로 설정되었는지 확인
-  }, [address]);
-
-  const fetchUserSession = async () => {
-    try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
-      setUserData(response.data);
-    } catch (error) {
-      console.error('Error fetching user session:', error);
-      Alert.alert('Error', 'Failed to load user data.');
-    }
-  };
 
   const checkLogin = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
       if (!response.data.user) {
         Alert.alert('로그인이 필요합니다.');
-        navigation.navigate('Login');  // 로그인 페이지로 리다이렉트
+        navigation.navigate('Login');
       }
     } catch (error) {
       console.error('세션 확인 중 오류 발생:', error);
@@ -50,120 +60,213 @@ export default function WritePost({ navigation }) {
   };
 
   useEffect(() => {
-    checkLogin();  // 화면 로드 시 로그인 상태 확인
+    checkLogin();
   }, []);
 
-  const getLocation = async () => {
-    try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-            throw new Error('Permission Denied');
+  useEffect(() => {
+    const fetchLocation = async () => {
+      setLoadingLocation(true); // 위치 정보 로드 시작 시 로딩 상태 활성화
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        setLoadingLocation(false);
+        return;
+      }
+
+      try {
+        // 빠르게 위치를 얻기 위해 정확도를 낮춤
+        let loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        });
+
+        setLocation(loc.coords); // 위치 상태 업데이트
+
+        const address = await Location.reverseGeocodeAsync({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
+        });
+
+        if (address.length > 0) {
+          const { city, district } = address[0];
+          const userAddress = `${city} ${district}`;
+          setUserLocation(userAddress); // 시(city)와 동(district) 정보 설정
+          await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
         }
-
-        const { coords } = await Location.getCurrentPositionAsync({});
-        const address = await getAddressFromCoordinates(coords.latitude, coords.longitude);
-        setAddress(address || 'Seoul, Jongno-gu');  // 주소가 없을 경우 기본값 설정
-
-    } catch (error) {
+      } catch (error) {
         console.error('Error fetching location:', error);
-        setAddress('Seoul, Jongno-gu');
-        Alert.alert('Error', 'Failed to fetch location.');
-    }
-};
+      } finally {
+        setLoadingLocation(false); // 위치 정보 로드 완료 후 로딩 상태 해제
+      }
+    };
 
-const getAddressFromCoordinates = async (latitude, longitude) => {
-  try {
-    const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
-    console.log("Reverse geocode result:", result);  // 결과 확인 로그 추가
-    // 시(city)와 동(district)을 반환, 주소 데이터가 없을 경우 기본값 설정
-    return result && result.city && result.district ? `${result.city}, ${result.district}` : 'Unknown Location';
-  } catch (error) {
-    console.error('Error getting address from coordinates:', error);
-    return 'Unknown Location';  // 기본값 설정
-  }
-};
+    // 캐시된 위치 먼저 가져오기
+    const getCachedLocation = async () => {
+      const cachedLocation = await AsyncStorage.getItem('userLocation');
+      if (cachedLocation) {
+        setUserLocation(cachedLocation);
+      }
+    };
+
+    getCachedLocation(); // 캐시된 위치 먼저 가져오기
+    fetchLocation(); // 새 위치 정보 요청
+  }, []);
+
+  // const getLocation = async () => {
+  //   try {
+  //     const { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       throw new Error('Permission Denied');
+  //     }
+
+  //     const { coords } = await Location.getCurrentPositionAsync({});
+  //     const address = await getAddressFromCoordinates(coords.latitude, coords.longitude);
+  //     setAddress(address || 'Seoul, Jongno-gu');
+
+  //     // 주소가 설정된 후에 게시물 작성 호출
+  //     handlePostSubmit();
+
+  //   } catch (error) {
+  //     console.error('Error fetching location:', error);
+  //     setAddress('Seoul, Jongno-gu');
+  //     Alert.alert('Error', 'Failed to fetch location.');
+  //   }
+  // };
+
+  // const getAddressFromCoordinates = async (latitude, longitude) => {
+  //   try {
+  //     const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
+  //     console.log("Reverse geocode result:", result);
+  //     return result && result.city && result.district ? `${result.city}, ${result.district}` : 'Unknown Location';
+  //   } catch (error) {
+  //     console.error('Error getting address from coordinates:', error);
+  //     return 'Unknown Location';
+  //   }
+  // };
 
   const handleCategorySelect = (category) => {
-    console.log("Selected category:", category);  // 카테고리 선택 로그 추가
+    console.log("Selected category:", category);
     setSelectedCategory(category);
   };
 
   const handlePostSubmit = async () => {
-    // 로그 확인
+    const formattedUserLocation = userLocation.replace(' ', ', '); // 위치 형식 맞추기
     console.log("User Data:", userData);
     console.log('Selected Category:', selectedCategory);
     console.log('Post Title:', postTitle);
     console.log('Post Content:', postContent);
-    console.log('Location Address:', address);  // location_address를 address로 설정
+    console.log('Location Address:', formattedUserLocation);
     console.log('Selected Image:', selectedImage);
-
+  
     if (!userData.id || !selectedCategory || !postTitle.trim() || !postContent.trim()) {
       Alert.alert('All fields are required');
       return;
     }
-
-    if (selectedCategory && postTitle.trim() && postContent.trim() && (address || 'Seoul, Jongno-gu') && userData) {
-        setLoading(true);
-
-        const formData = new FormData();
-        formData.append('category', selectedCategory);
-        formData.append('title', postTitle);
-        formData.append('message', postContent);
-        formData.append('user_id', userData.id); 
-        formData.append('timestamp', new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')); // KST로 변환
-
-        if (selectedImage) {
-            formData.append('image', {
-                uri: selectedImage.startsWith('file://') ? selectedImage : `file://${selectedImage}`, 
-                name: selectedImage.split('/').pop(),
-                type: 'image/jpeg',
-            });
+  
+    if (selectedCategory && postTitle.trim() && postContent.trim() && (formattedUserLocation || 'Seoul, Jongno-gu') && userData) {
+      setLoading(true);
+  
+      const formData = new FormData();
+      formData.append('category', selectedCategory);
+      formData.append('title', postTitle);
+      formData.append('message', postContent);
+      formData.append('user_id', userData.id);
+      formData.append('timestamp', new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' '));
+  
+      if (selectedImage) {
+        formData.append('image', {
+          uri: selectedImage.startsWith('file://') ? selectedImage : `file://${selectedImage}`,
+          name: selectedImage.split('/').pop(),
+          type: 'image/jpeg',
+        });
+      }
+  
+      formData.append('location_address', formattedUserLocation);
+  
+      try {
+        const response = await axios.post(`${config.apiUrl}/posts`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true,
+        });
+        console.log('서버 응답:', response.data);
+  
+        // 미션 완료 상태 확인 및 모달 표시
+        const isMissionCompleted = await completeMission(userData.id);
+        if (!isMissionCompleted) {
+          setMissionModalVisible(true); // 미션이 처음 완료되었을 때만 모달 띄움
+        } else {
+          console.log('이미 미션이 완료되었습니다.'); // 이미 미션이 완료되었을 때는 터미널 로그만 출력
+          navigation.goBack();
         }
-
-        // location_address만 전송
-        formData.append('location_address', address);
-
-        try {
-            const response = await axios.post(`${config.apiUrl}/posts`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-                withCredentials: true,
-            });
-            console.log('서버 응답:', response.data);
-            navigation.goBack();
-        } catch (error) {
-            if (error.response) {
-                console.log('Response error data:', error.response.data);
-                console.log('Response status:', error.response.status);
-                Alert.alert('Error', `Failed to submit post. Server returned: ${error.response.data.error}`);
-            } else if (error.request) {
-                console.log('Request made but no response:', error.request);
-                Alert.alert('Error', 'Request made but no response from server.');
-            } else {
-                console.log('Other error:', error.message);
-                Alert.alert('Error', `Failed to submit post: ${error.message}`);
-            }
-        } finally {
-            setLoading(false);
+  
+      } catch (error) {
+        if (error.response) {
+          console.log('Response error data:', error.response.data);
+          console.log('Response status:', error.response.status);
+          Alert.alert('Error', `Failed to submit post. Server returned: ${error.response.data.error}`);
+        } else if (error.request) {
+          console.log('Request made but no response:', error.request);
+          Alert.alert('Error', 'Request made but no response from server.');
+        } else {
+          console.log('Other error:', error.message);
+          Alert.alert('Error', `Failed to submit post: ${error.message}`);
         }
-    } else {
-        Alert.alert('모든 필드를 채워주세요');
+      } finally {
         setLoading(false);
+      }
+    } else {
+      Alert.alert('모든 필드를 채워주세요');
+      setLoading(false);
     }
-};
+  };
 
+  const completeMission = async (userId) => {
+    const missionIdToCheck = 4; // 미션 ID
+
+    try {
+      // 미션 상태 확인
+      const response = await axios.get(`${config.apiUrl}/user/missions/${userId}`);
+      const missions = response.data.missions;
+  
+      // 미션이 완료되지 않았으면, 미션 완료 처리 후 모달 띄우기
+      if (!missions.includes(missionIdToCheck)) {
+        // 미션을 완료하기 전에 API 호출
+        await axios.post(`${config.apiUrl}/complete-mission`, {
+          userId: userId,
+          missionId: missionIdToCheck,
+        });
+        console.log("미션 완료");
+        setMissionModalVisible(true); // 미션 완료 시 모달 표시
+        return false; // 미션이 처음 완료됨
+      } else {
+        console.log("이미 미션을 완료하셨습니다.");
+        return true; // 이미 완료된 경우 모달 띄우지 않음
+      }
+    } catch (error) {
+      console.error('오류:', error.response ? error.response.data : error);
+      return true; // 오류 발생 시에도 모달 띄우지 않음
+    }
+  };
+
+  const handleClose = () => {
+    setMissionModalVisible(false);
+  };
+
+  const handleConfirm = () => {
+    console.log("사용자가 '네'를 선택했습니다.");
+    handleClose();
+    navigation.replace('HomeScreen', { showModal: true });
+  };
 
   const pickImage = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: false,
-    // aspect: [4, 3],
-    //quality: 1,  // 이미지 품질을 낮춰 크기를 줄임
-  });
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+    });
 
-  if (!result.canceled) {
-    setSelectedImage(result.assets[0].uri); // 이미지 선택 후 URI 설정
-  }
-};
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+    }
+  };
 
 
   return (
@@ -231,6 +334,14 @@ const getAddressFromCoordinates = async (latitude, longitude) => {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
+
+      {/* 글 작성 후 미션 완료 모달 */}
+      <CustomModal
+        visible={missionModalVisible}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+      />
+
     </KeyboardAvoidingView>
   );
 }
@@ -239,7 +350,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    
+
   },
   scrollView: {
     flexGrow: 1,
