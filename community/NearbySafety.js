@@ -8,6 +8,7 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage for caching
 import axios from 'axios'; // axios 임포트
 import config from '../config'; // API URL을 위한 config 임포트
+import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
 
 export default function NearbySafety({ navigation, route }) {
   const { posts, loadPosts } = useContext(PostsContext); // PostsContext에서 posts를 가져옴
@@ -21,12 +22,31 @@ export default function NearbySafety({ navigation, route }) {
   const [searchResults, setSearchResults] = useState([]);
   const { filter } = route.params || { filter: '전체' };
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
+  const [missionModalVisible, setMissionModalVisible] = useState(false); // 새로운 상태 변수
+  const [userData, setUserData] = useState(null); // userData 상태 추가
+
+  // 사용자 세션 정보 가져오기
+  useEffect(() => {
+    fetchUserSession();
+  }, []);
+
+  const fetchUserSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user session:', error);
+    }
+  };
 
   useEffect(() => {
     if (filter) {
       setSelectedCategory(filter);
     }
-  }, [filter]);
+    if (userData) {
+      completeMission(6); // 사용자 세션이 있을 때 미션 완료
+    }
+  }, [filter, userData]);
 
   // 위치 정보 캐싱 함수
   const getCachedLocation = async () => {
@@ -197,6 +217,42 @@ export default function NearbySafety({ navigation, route }) {
     주의: '⚠️',
   };
 
+  // 미션 완료 여부 확인 및 API 호출
+  const completeMission = async (missionId) => {
+    if (!userData) {
+      console.error('사용자 데이터가 없습니다. 로그인 필요');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+      const missions = response.data.missions;
+
+      if (missions.includes(missionId)) {
+        console.log('이미 미션을 완료했습니다.');
+      } else {
+        const completeResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
+          userId: userData.id,
+          missionId: missionId,
+        });
+        console.log(`미션 ${missionId} 완료:`, completeResponse.data);
+        setMissionModalVisible(true); // 처음 완료된 미션일 경우 모달 띄우기
+      }
+    } catch (error) {
+      console.error('미션 완료 오류:', error.response ? error.response.data : error);
+    }
+  };
+
+  const missionhandleClose = () => {
+    setMissionModalVisible(false); // 새로운 모달 닫기
+  };
+
+  const missionhandleConfirm = () => {
+    console.log("사용자가 '네'를 선택했습니다.");
+    missionhandleClose(); // 모달 닫기
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } }); // Home 탭으로 이동
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -208,7 +264,11 @@ export default function NearbySafety({ navigation, route }) {
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
-
+      <CustomModal
+        visible={missionModalVisible}
+        onClose={missionhandleClose}
+        onConfirm={missionhandleConfirm}
+      />
       {loading ? (
         // 위치 정보 로딩 중 로딩 표시
         <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
