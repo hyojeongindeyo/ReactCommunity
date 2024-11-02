@@ -1,25 +1,27 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Ionicons 추가
-import * as MediaLibrary from 'expo-media-library'; // MediaLibrary 추가
+import { Button, StyleSheet, Text, TouchableOpacity, View, Alert, Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as MediaLibrary from 'expo-media-library';
 import axios from 'axios';
-import config from '../config'; // SafetyInfo.js와 동일한 config 파일 사용
-import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
+import config from '../config';
+import CustomModal from '../CustomModal';
 
 export default function App({ navigation }) {
   const [facing, setFacing] = useState('back');
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions(); // 미디어 라이브러리 권한 요청
-  const cameraRef = useRef(null); // 카메라 참조 추가
-  const [missionModalVisible, setMissionModalVisible] = useState(false); // 새로운 상태 변수
+  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
+  const cameraRef = useRef(null);
+  const [missionModalVisible, setMissionModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
-  
+  const YOUR_CLIENT_API_KEY = '{OPENAI_API}';
+  const OPENAI_API_KEY = '{GPIAI_API}';
+
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
         const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
-        setUserData(response.data); // 사용자 정보 상태에 저장
+        setUserData(response.data);
       } catch (error) {
         console.error('Error fetching user session:', error);
       }
@@ -30,7 +32,6 @@ export default function App({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      // 카메라와 미디어 라이브러리 권한 요청
       const { status: cameraStatus } = await requestCameraPermission();
       const { status: mediaStatus } = await requestMediaPermission();
 
@@ -67,55 +68,108 @@ export default function App({ navigation }) {
       try {
         const photo = await cameraRef.current.takePictureAsync();
         console.log("Picture taken!", photo);
-  
-        // 사진 갤러리에 저장
+        
         const asset = await MediaLibrary.createAssetAsync(photo.uri);
-        Alert.alert("사진이 저장되었습니다!", `사진 URI: ${asset.uri}`);
-  
-        // 미션 완료 함수 호출
-        await completeMission(5);
+        console.log("사진이 저장되었습니다!", `사진 URI: ${asset.uri}`); 
+        
+        // Call crack detection function here
+        await checkForCracks(photo.uri);
       } catch (error) {
         console.error("사진 찍기 실패:", error);
         Alert.alert("사진 찍기 실패", "사진을 찍는 데 오류가 발생했습니다.");
       }
     }
-  }  
+  }
+
+  // Function to check for cracks
+  async function checkForCracks(imageUri) {
+    const formData = new FormData();
+    formData.append('image', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'photo.jpg'
+    });
+
+    try {
+      const uploadResponse = await fetch(`https://api.imgbb.com/1/upload?expiration=600&key=${YOUR_CLIENT_API_KEY}`, {
+        method: 'POST',
+        body: formData
+      });
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.data.url;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: "You're an expert at judging cracks in walls. You need to look at the image provided and determine whether the wall in that image has a crack or not. If the image provided is not a photo of a wall or is a hand-drawn picture, answer No" },
+            { role: "user", content: "Is there a crack in this wall image?", image_url: imageUrl }
+          ],
+          max_tokens: 300
+        })
+      });
+
+      const data = await response.json();
+      const resultMessage = data.choices[0].message.content;
+
+      if (resultMessage.includes('yes')) {
+        Alert.alert(
+          "결과",
+          '균열이 있습니다!',
+          [
+            {
+              text: "안전신고 바로가기",
+              onPress: () => Linking.openURL("https://www.safetyreport.go.kr/#safereport/safereport")
+            },
+            { text: "확인", style: "cancel" }
+          ]
+        );
+      } else {
+        Alert.alert("결과", '균열이 없습니다!', [{ text: "확인", style: "cancel" }]);
+      }
+
+      // After checking for cracks, complete the mission
+      await completeMission(5);
+
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('An error occurred while processing the image.');
+    }
+  }
 
   const completeMission = async (missionId) => {
     try {
-      // 서버에서 유저의 완료된 미션 목록을 가져옵니다.
       const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
       const missions = response.data.missions;
-  
-      // 미션 ID가 완료된 목록에 있는지 확인합니다.
+
       if (missions.includes(missionId)) {
-        // 이미 완료된 미션일 경우 콘솔에 메시지 출력
         console.log('이미 미션을 완료했습니다.');
       } else {
-        // 미션이 완료되지 않았을 경우 미션 완료 API 호출
         const completeResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
           userId: userData.id,
           missionId: missionId,
         });
         console.log(`미션 ${missionId} 완료:`, completeResponse.data);
-  
-        // 처음 완료된 미션일 경우 모달 띄우기
         setMissionModalVisible(true);
       }
     } catch (error) {
       console.error('미션 완료 오류:', error.response ? error.response.data : error);
     }
   };
-  
 
   const missionhandleClose = () => {
-    setMissionModalVisible(false); // 새로운 모달 닫기
+    setMissionModalVisible(false);
   };
 
   const missionhandleConfirm = () => {
     console.log("사용자가 '네'를 선택했습니다.");
-    missionhandleClose(); // 모달 닫기
-    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } }); // Home 탭으로 이동
+    missionhandleClose();
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } });
   };
 
   return (
@@ -127,10 +181,10 @@ export default function App({ navigation }) {
           </TouchableOpacity>
         </View>
         <CustomModal
-        visible={missionModalVisible}
-        onClose={missionhandleClose}
-        onConfirm={missionhandleConfirm}
-      />
+          visible={missionModalVisible}
+          onClose={missionhandleClose}
+          onConfirm={missionhandleConfirm}
+        />
         <View style={styles.captureButtonContainer}>
           <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
             <Ionicons name="camera" size={32} color="black" />
@@ -151,32 +205,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
-    position: 'absolute', // 절대 위치 지정
-    top: 40, // 상단에서의 거리
-    right: 20, // 우측에서의 거리
-    backgroundColor: 'transparent', // 배경 투명
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'transparent',
   },
   button: {
     alignItems: 'center',
   },
   captureButtonContainer: {
     position: 'absolute',
-    bottom: 40, // 하단에서의 거리
-    left: '50%', // 가운데 정렬
-    transform: [{ translateX: -25 }], // 버튼 크기만큼 왼쪽으로 이동
+    bottom: 40,
+    left: '50%',
+    transform: [{ translateX: -25 }],
     alignItems: 'center',
   },
   captureButton: {
-    width: 50, // 버튼 너비
-    height: 50, // 버튼 높이
-    borderRadius: 25, // 동그란 버튼
-    backgroundColor: 'white', // 버튼 배경색
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
   },
 });
