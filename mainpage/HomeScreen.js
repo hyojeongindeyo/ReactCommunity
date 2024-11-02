@@ -30,7 +30,7 @@ const App = ({ navigation, route }) => {
     2: require('../assets/whistle.png'),
     3: require('../assets/compass.png'),
     4: require('../assets/fire_extinguisher.png'),
-    //5: require('../assets/first_aid_kit.png'),
+    5: require('../assets/first_aid_kit.png'),
     6: require('../assets/water.png'),    
   };
 

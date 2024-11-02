@@ -21,6 +21,7 @@ export default function ShelterScreen({ navigation }) {
   const [missionModalVisible, setMissionModalVisible] = useState(false); // 새로운 상태 변수
 
   const scrollViewHeight = useRef(new Animated.Value(SCREEN_HEIGHT / 5)).current;
+  const [locationRequestTime, setLocationRequestTime] = useState(Date.now());
 
   useEffect(() => {
     fetchUserSession();
@@ -54,8 +55,7 @@ export default function ShelterScreen({ navigation }) {
   }
 
   useEffect(() => {
-    // 위치 권한을 요청하고 현재 위치를 가져옵니다
-    (async () => {
+    const getLocation = async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
@@ -63,54 +63,79 @@ export default function ShelterScreen({ navigation }) {
           return;
         }
 
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
-        setRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        });
+        // 캐시된 위치 사용
+        let cachedLocation = await Location.getLastKnownPositionAsync({});
+        if (cachedLocation) {
+          setLocation(cachedLocation);
+          setRegion({
+            latitude: cachedLocation.coords.latitude,
+            longitude: cachedLocation.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          });
 
-        // 위치를 기반으로 주소 가져오기
-        let address = await Location.reverseGeocodeAsync({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-        
-        if (address.length > 0) {
-          const { city, district, street, streetNumber } = address[0];
-          setAddress(`${city} ${district} ${street} ${streetNumber}`);
+          let address = await Location.reverseGeocodeAsync({
+            latitude: cachedLocation.coords.latitude,
+            longitude: cachedLocation.coords.longitude,
+          });
+
+          if (address.length > 0) {
+            const { city, district, street, streetNumber } = address[0];
+            setAddress(`${city} ${district} ${street} ${streetNumber}`);
+          }
+
+          // 사용자 위치 기준으로 가장 가까운 상위 10개 쉼터를 계산합니다
+          updateShelters(cachedLocation.coords.latitude, cachedLocation.coords.longitude);
         }
 
-        // 사용자 위치 기준으로 가장 가까운 상위 10개 쉼터를 계산합니다
-        const sortedShelters = shelterData.map((shelter) => ({
-          ...shelter,
-          distance: getDistanceFromLatLonInKm(
-            location.coords.latitude,
-            location.coords.longitude,
-            parseFloat(shelter["위도(EPSG4326)"]),
-            parseFloat(shelter["경도(EPSG4326)"])
-          ),
-        }))
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 10)
-        .map((shelter) => ({
-          id: shelter.번호,
-          name: shelter.시설명,
-          address: shelter["도로명전체주소"],
-          people: parseInt(shelter["최대수용인원"]),
-          latitude: parseFloat(shelter["위도(EPSG4326)"]),
-          longitude: parseFloat(shelter["경도(EPSG4326)"]),
-        }));
+        // 일정 시간 간격으로 새 위치 요청
+        const now = Date.now();
+        if (now - locationRequestTime > 10000) { // 10초
+          let location = await Location.getCurrentPositionAsync({});
+          setLocation(location);
+          setRegion({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          });
 
-        setShelters(sortedShelters);
+          updateShelters(location.coords.latitude, location.coords.longitude);
+          setLocationRequestTime(now);
+        }
+
       } catch (error) {
         console.error('Error getting location:', error);
         setErrorMsg('Could not fetch location. Please try again.'); // 사용자에게 오류 메시지 표시
       }
-    })();
-  }, []);
+    };
+
+    getLocation();
+  }, [locationRequestTime]);
+
+  const updateShelters = (latitude, longitude) => {
+    const sortedShelters = shelterData.map((shelter) => ({
+      ...shelter,
+      distance: getDistanceFromLatLonInKm(
+        latitude,
+        longitude,
+        parseFloat(shelter["위도(EPSG4326)"]),
+        parseFloat(shelter["경도(EPSG4326)"])
+      ),
+    }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 10)
+      .map((shelter) => ({
+        id: shelter.번호,
+        name: shelter.시설명,
+        address: shelter["도로명전체주소"],
+        people: parseInt(shelter["최대수용인원"]),
+        latitude: parseFloat(shelter["위도(EPSG4326)"]),
+        longitude: parseFloat(shelter["경도(EPSG4326)"]),
+      }));
+
+    setShelters(sortedShelters);
+  };
 
   const panResponder = useRef(
     PanResponder.create({
