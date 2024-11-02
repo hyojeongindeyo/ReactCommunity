@@ -6,6 +6,7 @@ import * as MediaLibrary from 'expo-media-library';
 import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal';
+import config from '../config.js';
 
 export default function App({ navigation }) {
   const [facing, setFacing] = useState('back');
@@ -14,8 +15,8 @@ export default function App({ navigation }) {
   const cameraRef = useRef(null);
   const [missionModalVisible, setMissionModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
-  const YOUR_CLIENT_API_KEY = '{OPENAI_API}';
-  const OPENAI_API_KEY = '{GPIAI_API}';
+  const YOUR_CLIENT_API_KEY = config.YOUR_CLIENT_API_KEY;
+  const OPENAI_API_KEY = config.OPENAI_API_KEY;
 
   useEffect(() => {
     const fetchUserSession = async () => {
