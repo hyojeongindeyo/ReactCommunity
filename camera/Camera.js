@@ -1,12 +1,11 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Alert, Linking } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Alert, Linking, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as MediaLibrary from 'expo-media-library';
 import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal';
-import config from '../config.js';
 
 export default function App({ navigation }) {
   const [facing, setFacing] = useState('back');
@@ -15,6 +14,7 @@ export default function App({ navigation }) {
   const cameraRef = useRef(null);
   const [missionModalVisible, setMissionModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false); // 로딩 상태 추가
   const YOUR_CLIENT_API_KEY = config.YOUR_CLIENT_API_KEY;
   const OPENAI_API_KEY = config.OPENAI_API_KEY;
 
@@ -71,9 +71,8 @@ export default function App({ navigation }) {
         console.log("Picture taken!", photo);
         
         const asset = await MediaLibrary.createAssetAsync(photo.uri);
-        console.log("사진이 저장되었습니다!", `사진 URI: ${asset.uri}`); 
+        console.log("사진이 저장되었습니다!", `사진 URI: ${asset.uri}`);
         
-        // Call crack detection function here
         await checkForCracks(photo.uri);
       } catch (error) {
         console.error("사진 찍기 실패:", error);
@@ -82,8 +81,8 @@ export default function App({ navigation }) {
     }
   }
 
-  // Function to check for cracks
   async function checkForCracks(imageUri) {
+    setLoading(true); // 로딩 시작
     const formData = new FormData();
     formData.append('image', {
       uri: imageUri,
@@ -118,6 +117,8 @@ export default function App({ navigation }) {
       const data = await response.json();
       const resultMessage = data.choices[0].message.content;
 
+      setLoading(false); // 로딩 종료
+
       if (resultMessage.includes('yes')) {
         Alert.alert(
           "결과",
@@ -134,10 +135,10 @@ export default function App({ navigation }) {
         Alert.alert("결과", '균열이 없습니다!', [{ text: "확인", style: "cancel" }]);
       }
 
-      // After checking for cracks, complete the mission
       await completeMission(5);
 
     } catch (error) {
+      setLoading(false); // 로딩 종료
       console.error('Error:', error);
       Alert.alert('An error occurred while processing the image.');
     }
@@ -192,6 +193,13 @@ export default function App({ navigation }) {
           </TouchableOpacity>
         </View>
       </CameraView>
+
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={{ marginTop: 10 }}>Waiting for Detection..</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -226,6 +234,16 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
