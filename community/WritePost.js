@@ -24,16 +24,6 @@ export default function WritePost({ navigation }) {
   const [userLocation, setUserLocation] = useState(''); // 위치 정보를 저장할 상태 변수
   const [loadingLocation, setLoadingLocation] = useState(false);
 
-
-
-  // useEffect(() => {
-  //   getLocation();
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log('Fetched address:', address);
-  // }, [address]);
-
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
@@ -110,38 +100,6 @@ export default function WritePost({ navigation }) {
     getCachedLocation(); // 캐시된 위치 먼저 가져오기
     fetchLocation(); // 새 위치 정보 요청
   }, []);
-
-  // const getLocation = async () => {
-  //   try {
-  //     const { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       throw new Error('Permission Denied');
-  //     }
-
-  //     const { coords } = await Location.getCurrentPositionAsync({});
-  //     const address = await getAddressFromCoordinates(coords.latitude, coords.longitude);
-  //     setAddress(address || 'Seoul, Jongno-gu');
-
-  //     // 주소가 설정된 후에 게시물 작성 호출
-  //     handlePostSubmit();
-
-  //   } catch (error) {
-  //     console.error('Error fetching location:', error);
-  //     setAddress('Seoul, Jongno-gu');
-  //     Alert.alert('Error', 'Failed to fetch location.');
-  //   }
-  // };
-
-  // const getAddressFromCoordinates = async (latitude, longitude) => {
-  //   try {
-  //     const [result] = await Location.reverseGeocodeAsync({ latitude, longitude });
-  //     console.log("Reverse geocode result:", result);
-  //     return result && result.city && result.district ? `${result.city}, ${result.district}` : 'Unknown Location';
-  //   } catch (error) {
-  //     console.error('Error getting address from coordinates:', error);
-  //     return 'Unknown Location';
-  //   }
-  // };
 
   const handleCategorySelect = (category) => {
     console.log("Selected category:", category);
@@ -249,6 +207,7 @@ export default function WritePost({ navigation }) {
 
   const handleClose = () => {
     setMissionModalVisible(false);
+    navigation.goBack(); // "아니오"를 눌렀을 때 돌아가도록 설정
   };
 
   const handleConfirm = () => {
