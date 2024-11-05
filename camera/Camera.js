@@ -146,13 +146,13 @@ export default function App({ navigation }) {
 
   const completeMission = async (missionId) => {
     try {
-      const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+      const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
       const missions = response.data.missions;
 
       if (missions.includes(missionId)) {
         console.log('이미 미션을 완료했습니다.');
       } else {
-        const completeResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
+        const completeResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
           userId: userData.id,
           missionId: missionId,
         });
