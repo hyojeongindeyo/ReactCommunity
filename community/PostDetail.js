@@ -120,7 +120,7 @@ export default function PostDetail({ route, navigation }) {
         {
           text: "삭제", onPress: async () => {
             try {
-              await axios.delete(`${config.apiUrl}/posts/${postId}`, { withCredentials: true });
+              await axios.delete(`${config.apiUrl}/posts/delete/${postId}`, { withCredentials: true });
               Alert.alert("삭제 완료", "게시물이 삭제되었습니다.");
               navigation.goBack(); // 삭제 후 이전 화면으로 돌아가기
             } catch (error) {
