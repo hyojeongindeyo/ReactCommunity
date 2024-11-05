@@ -82,7 +82,6 @@ function MainScreen({ navigation, handleLogout }) {
 
         <View style={styles.separator} />
         <Text style={styles.title}>내 정보</Text>
-        <Text style={styles.message} onPress={() => navigation.navigate('Profile')}>프로필</Text>
         <Text style={styles.message} onPress={() => navigation.navigate('ChangePassword')}>비밀번호 변경</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>커뮤니티</Text>
@@ -109,45 +108,6 @@ function MainScreen({ navigation, handleLogout }) {
       </ScrollView>
 
       <StatusBar />
-    </View>
-  );
-}
-
-function ProfileScreen({ navigation }) {
-  const [name, setName] = useState('***');
-  const [id, setId] = useState('**********');
-  const [phone, setPhone] = useState('**********');
-
-  const handleSave = () => {
-    console.log('이름:', name);
-    console.log('아이디:', id);
-    console.log('전화번호:', phone);
-    navigation.goBack();
-  };
-
-  return (
-    <View style={styles.profileContainer}>
-      <TextInput
-        style={styles.input}
-        placeholder="이름"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="아이디"
-        value={id}
-        onChangeText={setId}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="전화번호"
-        value={phone}
-        onChangeText={setPhone}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>수정</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -396,31 +356,6 @@ export default function Mypage({ handleLogout }) {
       >
         {props => <MainScreen {...props} handleLogout={handleLogout} />}
       </Stack.Screen>
-      <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: '프로필',
-          headerStyle: {
-            shadowOpacity: 0,
-            elevation: 0,
-            // paddingTop: 20,
-            // height: 80,
-          },
-          headerTitleStyle: {
-            fontSize: 18,
-            fontWeight: 'bold',
-            alignSelf: 'flex-start',
-          },
-          headerBackTitleVisible: false,
-          headerTintColor: '#000',
-          headerLeft: ({ onPress }) => (
-            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
-              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
-            </TouchableOpacity>
-          ),
-        }}
-      />
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
