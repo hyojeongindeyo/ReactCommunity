@@ -102,7 +102,7 @@ export default function PostDetail({ route, navigation }) {
 
   const fetchUserSession = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user session:', error);
@@ -167,12 +167,12 @@ export default function PostDetail({ route, navigation }) {
       console.log("댓글이 작성되었습니다:", commentResponse.data);
   
       // 미션 완료 여부 확인
-      const missionStatusResponse = await axios.get(`${config.apiUrl}/user/missions/${userId}`);
+      const missionStatusResponse = await axios.get(`${config.apiUrl}/missions/user/${userId}`);
       const isMissionCompleted = missionStatusResponse.data.missions.includes(1); // 댓글 작성 미션 ID가 1인 경우
   
       if (!isMissionCompleted) {
         // 미션 완료 API 호출
-        const completeMissionResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
+        const completeMissionResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
           userId: userId,
           missionId: 1 // 댓글 작성 미션 ID
         });
@@ -256,7 +256,7 @@ export default function PostDetail({ route, navigation }) {
 
   const checkIfScraped = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/scrap/${post.id}`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/scraps/${post.id}`, { withCredentials: true });
       setIsScraped(response.data.isScraped);
     } catch (error) {
       console.error('스크랩 상태 조회 오류:', error);
@@ -266,7 +266,7 @@ export default function PostDetail({ route, navigation }) {
   // 스크랩 수 조회 함수
   const fetchScrapCount = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/scrap/count/${postId}`);
+      const response = await axios.get(`${config.apiUrl}/scraps/count/${postId}`);
       setScrapCount(response.data.scrapCount);
     } catch (error) {
       console.error('스크랩 수 조회 오류:', error);
@@ -276,11 +276,11 @@ export default function PostDetail({ route, navigation }) {
   const handleScrap = async () => {
     try {
       if (isScraped) {
-        await axios.delete(`${config.apiUrl}/scrap/${postId}`, { withCredentials: true });
+        await axios.delete(`${config.apiUrl}/scraps/${postId}`, { withCredentials: true });
         setIsScraped(false);
         setScrapCount(scrapCount - 1); // 스크랩 수 감소
       } else {
-        await axios.post(`${config.apiUrl}/scrap`, { post_id: postId }, { withCredentials: true });
+        await axios.post(`${config.apiUrl}/scraps`, { post_id: postId }, { withCredentials: true });
         setIsScraped(true);
         setScrapCount(scrapCount + 1); // 스크랩 수 증가
       }

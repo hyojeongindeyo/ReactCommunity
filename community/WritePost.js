@@ -37,7 +37,7 @@ export default function WritePost({ navigation }) {
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
         setUserData(response.data); // 사용자 정보 상태에 저장
       } catch (error) {
         console.error('Error fetching user session:', error);
@@ -49,7 +49,7 @@ export default function WritePost({ navigation }) {
 
   const checkLogin = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       if (!response.data.user) {
         Alert.alert('로그인이 필요합니다.');
         navigation.navigate('Login');
@@ -224,13 +224,13 @@ export default function WritePost({ navigation }) {
 
     try {
       // 미션 상태 확인
-      const response = await axios.get(`${config.apiUrl}/user/missions/${userId}`);
+      const response = await axios.get(`${config.apiUrl}/missions/user/${userId}`);
       const missions = response.data.missions;
   
       // 미션이 완료되지 않았으면, 미션 완료 처리 후 모달 띄우기
       if (!missions.includes(missionIdToCheck)) {
         // 미션을 완료하기 전에 API 호출
-        await axios.post(`${config.apiUrl}/complete-mission`, {
+        await axios.post(`${config.apiUrl}/missions/complete-mission`, {
           userId: userId,
           missionId: missionIdToCheck,
         });

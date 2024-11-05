@@ -21,7 +21,7 @@ export default function App({ navigation }) {
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
         setUserData(response.data);
       } catch (error) {
         console.error('Error fetching user session:', error);

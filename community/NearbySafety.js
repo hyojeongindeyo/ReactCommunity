@@ -32,7 +32,7 @@ export default function NearbySafety({ navigation, route }) {
 
   const fetchUserSession = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user session:', error);
@@ -225,13 +225,13 @@ export default function NearbySafety({ navigation, route }) {
     }
 
     try {
-      const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+      const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
       const missions = response.data.missions;
 
       if (missions.includes(missionId)) {
         console.log('이미 미션을 완료했습니다.');
       } else {
-        const completeResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
+        const completeResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
           userId: userData.id,
           missionId: missionId,
         });

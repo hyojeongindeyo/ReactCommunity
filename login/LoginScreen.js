@@ -21,7 +21,7 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
         setLoading(true);
 
         try {
-            const response = await axios.post(`${apiUrl}/login`, {
+            const response = await axios.post(`${apiUrl}/users/login`, {
                 id,
                 password
             });

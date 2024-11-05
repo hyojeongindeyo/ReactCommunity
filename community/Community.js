@@ -83,7 +83,7 @@ function Community({ navigation, route }) {
 
   const fetchUserSession = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user session:', error);
@@ -219,7 +219,7 @@ function Community({ navigation, route }) {
   useEffect(() => {
     const fetchSafetyInfos = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/safetyInfos`);
+        const response = await axios.get(`${config.apiUrl}/safetyinfos`);
         setSafetyInfos(response.data); // 데이터를 state에 저장
         await fetchCoverImages(response.data); // 각 카드의 표지 이미지 가져오기
         setLoading(false); // 데이터 로딩 완료
@@ -247,7 +247,7 @@ function Community({ navigation, route }) {
   // 각 게시물의 표지 이미지를 불러오는 함수
   const fetchCoverImage = async (infoId) => {
     try {
-      const imageResponse = await axios.get(`${config.apiUrl}/cardnews/${infoId}`);
+      const imageResponse = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`);
       return imageResponse.data[0]; // 첫 번째 이미지를 반환
     } catch (error) {
       console.error('Error fetching cover image:', error);
@@ -258,7 +258,7 @@ function Community({ navigation, route }) {
   // 선택된 안전 뉴스 카드의 이미지를 가져오는 함수
   const fetchImages = async (infoId) => {
     try {
-      const response = await axios.get(`${config.apiUrl}/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
+      const response = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
       setImages(response.data); // 가져온 이미지 목록 설정
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -272,14 +272,14 @@ function Community({ navigation, route }) {
     await fetchImages(info.id);
 
     try {
-        const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+        const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
         const missions = response.data.missions;
         const missionIdToCheck = 2; // 미션 ID
 
         // 미션이 완료되지 않았으면, 미션 모달을 열기
         if (!missions.includes(missionIdToCheck)) {
             // 미션을 완료하기 전에 API 호출
-            await axios.post(`${config.apiUrl}/complete-mission`, {
+            await axios.post(`${config.apiUrl}/missions/complete-mission`, {
                 userId: userData.id,
                 missionId: missionIdToCheck
             });
@@ -318,7 +318,7 @@ const missionhandleConfirm = () => {
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
         setUserData(response.data); // 사용자 정보 상태에 저장
       } catch (error) {
         console.error('Error fetching user session:', error);
@@ -351,7 +351,7 @@ const missionhandleConfirm = () => {
           userLocation: formattedUserLocation
         });
 
-        const safetyInfoResponse = await axios.post(`${config.apiUrl}/safetyInfos/search`, { searchQuery }); // 안전 정보 검색을 위한 추가 요청
+        const safetyInfoResponse = await axios.post(`${config.apiUrl}/safetyinfos/search`, { searchQuery }); // 안전 정보 검색을 위한 추가 요청
 
         // 백엔드에서 가져온 검색 결과 설정
         setNearbySafetyResults(postResponse.data); // 내 주변 안전소식 결과 설정

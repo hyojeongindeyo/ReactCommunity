@@ -58,7 +58,7 @@ const SafetyInfo = ({ navigation, route }) => {
   useEffect(() => {
     const fetchSafetyInfos = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/safetyInfos`); // API URL로 변경
+        const response = await axios.get(`${config.apiUrl}/safetyinfos`); // API URL로 변경
         setSafetyInfos(response.data); // API로부터 받은 데이터를 저장
         await fetchCoverImages(response.data); // 이 부분 추가
         setRandomBanners(selectRandomBanners(response.data)); // 랜덤 배너 선택
@@ -100,7 +100,7 @@ const SafetyInfo = ({ navigation, route }) => {
     // 각 게시물의 표지 이미지를 불러오는 함수
     const fetchCoverImage = async (infoId) => {
       try {
-        const imageResponse = await axios.get(`${config.apiUrl}/cardnews/${infoId}`);
+        const imageResponse = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`);
         return imageResponse.data[0]; // 첫 번째 이미지를 반환
       } catch (error) {
         console.error('Error fetching cover image:', error);
@@ -121,14 +121,14 @@ const SafetyInfo = ({ navigation, route }) => {
     await fetchImages(info.id);
 
     try {
-        const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+        const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
         const missions = response.data.missions;
         const missionIdToCheck = 2; // 미션 ID
 
         // 미션이 완료되지 않았으면, 미션 모달을 열기
         if (!missions.includes(missionIdToCheck)) {
             // 미션을 완료하기 전에 API 호출
-            await axios.post(`${config.apiUrl}/complete-mission`, {
+            await axios.post(`${config.apiUrl}/missions/complete-mission`, {
                 userId: userData.id,
                 missionId: missionIdToCheck
             });
@@ -164,7 +164,7 @@ const missionhandleConfirm = () => {
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
         setUserData(response.data); // 사용자 정보 상태에 저장
       } catch (error) {
         console.error('Error fetching user session:', error);
@@ -176,7 +176,7 @@ const missionhandleConfirm = () => {
   
   const fetchImages = async (infoId) => {
     try {
-      const response = await axios.get(`${config.apiUrl}/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
+      const response = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
       setImages(response.data); // 가져온 이미지 목록 설정
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -198,7 +198,7 @@ const missionhandleConfirm = () => {
     if (searchQuery.trim() !== '') {
       try {
         // 백엔드에 검색 요청 보내기
-        const response = await axios.post(`${config.apiUrl}/safetyInfos/search`, { searchQuery });
+        const response = await axios.post(`${config.apiUrl}/safetyinfos/search`, { searchQuery });
         
         // 백엔드에서 가져온 검색 결과를 searchResults로 설정
         setSearchResults(response.data);

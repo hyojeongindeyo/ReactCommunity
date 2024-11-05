@@ -23,7 +23,7 @@ const SignupScreen = ({ navigation }) => {
 
         try {
             
-            const response = await axios.post(`${apiUrl}/signup`, { // 서버의 IP 주소와 포트를 사용하세요
+            const response = await axios.post(`${apiUrl}/users/signup`, { // 서버의 IP 주소와 포트를 사용하세요
                 id,
                 password,
                 email,

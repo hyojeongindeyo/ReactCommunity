@@ -24,6 +24,19 @@ const App = ({ navigation, route }) => {
   const [safetyTip, setSafetyTip] = useState({}); // 초기값을 빈 객체로 설정
   const [error, setError] = useState(null);
   const [userMissions, setUserMissions] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null); // 확대할 이미지의 상태
+  const [enlargeModalVisible, setEnlargeModalVisible] = useState(false); // 이미지 확대 모달
+
+  const handleImagePress = (image) => {
+    setSelectedImage(image);
+    setModalVisible(false);
+    setEnlargeModalVisible(true);
+  };
+
+  const handleCloseEnlargeModal = () => {
+    setEnlargeModalVisible(false);
+    setModalVisible(true);
+  };
 
   const missionImages = {
     1: require('../assets/flashlight.png'),
@@ -31,7 +44,7 @@ const App = ({ navigation, route }) => {
     3: require('../assets/compass.png'),
     4: require('../assets/fire_extinguisher.png'),
     5: require('../assets/first_aid_kit.png'),
-    6: require('../assets/water.png'),    
+    6: require('../assets/water.png'),
   };
 
 
@@ -51,7 +64,7 @@ const App = ({ navigation, route }) => {
   useEffect(() => {
     const fetchRandomTip = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/random-tip`); // API 호출
+        const response = await axios.get(`${config.apiUrl}/tips/random-tip`); // API 호출
         console.log('받은 팁:', response.data); // 받은 팁을 콘솔에 출력
         setSafetyTip(response.data); // 전체 데이터 객체로 설정
       } catch (error) {
@@ -71,12 +84,12 @@ const App = ({ navigation, route }) => {
 
   const fetchMissionSession = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       console.log('User session data:', response.data);
       const userId = response.data.id; // 사용자 ID 가져오기
 
       // 사용자 미션 가져오기
-      const missionsResponse = await axios.get(`${config.apiUrl}/user/missions/${userId}`, { withCredentials: true });
+      const missionsResponse = await axios.get(`${config.apiUrl}/missions/user/${userId}`, { withCredentials: true });
       console.log('User Missions:', missionsResponse.data); // 미션 데이터 출력
       setUserMissions(missionsResponse.data.missions || []); // 미션 상태 설정
 
@@ -121,7 +134,7 @@ const App = ({ navigation, route }) => {
 
   const fetchUserSession = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user session:', error);
@@ -270,12 +283,13 @@ const App = ({ navigation, route }) => {
             </View>
 
 
-          {/* 평안이 가방 모달입니다 */}
+            {/* 평안이 가방 모달입니다 */}
             <TouchableOpacity onPress={() => setModalVisible(true)}>
               <View style={styles.inpyeongbag}>
                 <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
               </View>
             </TouchableOpacity>
+
             <Modal
               animationType="slide"
               transparent={true}
@@ -284,27 +298,71 @@ const App = ({ navigation, route }) => {
             >
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>미션 목록</Text>
-                  {userMissions.length > 0 ? (
-                    userMissions.map((missionId) => (
-                      <View key={missionId} style={styles.missionContainer}>
-                        {missionImages[missionId] ? (
-                          <Image source={missionImages[missionId]} style={styles.image} />
-                        ) : (
-                          <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
-                        )}
-                      </View>
-                    ))
-                  ) : (
-                    <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
-                  )}
+                  <Text style={styles.modalTitle}>평안이의 안전 가방</Text>
                   <TouchableOpacity
                     onPress={() => setModalVisible(false)} // 모달 닫기 버튼
                     style={styles.closeButton}
                   >
+                    <Text style={styles.closeButtonText}>X</Text>
+                  </TouchableOpacity>
+                  {userMissions.length > 0 ? (
+                <>
+                    <View style={styles.rowContainer}>
+                        {userMissions.slice(0, 3).map((missionId) => (
+                            <View key={missionId} style={styles.missionContainer}>
+                                {missionImages[missionId] ? (
+                                    <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId])}>
+                                        <Image source={missionImages[missionId]} style={styles.image} />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+                    <View style={styles.rowContainer}>
+                        {userMissions.slice(3, 6).map((missionId) => (
+                            <View key={missionId} style={styles.missionContainer}>
+                                {missionImages[missionId] ? (
+                                    <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId])}>
+                                        <Image source={missionImages[missionId]} style={styles.image} />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+                </>
+            ) : (
+                <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
+            )}
+                </View>
+              </View>
+            </Modal>
+
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={enlargeModalVisible}
+              onRequestClose={() => setEnlargeModalVisible(false)}
+            >
+              <View style={styles.enlargeModalContainer}>
+                <View style={styles.enlargeModalContent}>
+                  <TouchableOpacity onPress={() => setEnlargeModalVisible(false)} style={styles.enlargeCloseButton}>
                     <Text style={styles.closeButtonText}>닫기</Text>
                   </TouchableOpacity>
+                  <TouchableOpacity onPress={handleCloseEnlargeModal} style={styles.enlargebackButton}>
+                    <Text style={styles.backButtonText}>뒤로 가기</Text>
+                  </TouchableOpacity>
+                  {/* 이미지만 중앙에 배치 */}
+            <View style={styles.imageContainer}>
+                {selectedImage && (
+                    <Image source={selectedImage} style={styles.enlargedImage} />
+                )}
+            </View>
                 </View>
+
               </View>
             </Modal>
 
@@ -585,7 +643,6 @@ const styles = StyleSheet.create({
 
   },
 
-
   safe: {
     marginBottom: 5,
   },
@@ -705,26 +762,99 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 배경 반투명
+    backgroundColor: 'rgba(0, 0, 0, 0.55)', // 배경 반투명
   },
   modalContent: {
     width: 300,
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 10,
+    borderColor: '#92B2AE',
+    borderWidth: 2,
+    // 그림자 스타일
+    shadowColor: '#000', // 그림자 색상
+    shadowOffset: {
+      width: 0,
+      height: 2, // 아래쪽으로 그림자 이동
+    },
+    shadowOpacity: 0.25, // 그림자 투명도
+    shadowRadius: 3.5, // 그림자 퍼짐 정도
+    elevation: 5, // 안드로이드에서 그림자 효과를 주기 위해 사용
+    height: 300,
   },
   closeButton: {
-    marginTop: 20,
     color: 'blue',
+
   },
   image: {
     width: 50, // 기본 이미지 크기
     height: 50,
     resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
   },
+  modalTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#6F8B87',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+  },
+  missionContainer: {
+    width: 60,
+    height: 60,
+  },
+  enlargeModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)', // 배경 반투명
 
-
-
+  },
+  enlargeModalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    borderColor: '#92B2AE',
+    borderWidth: 2,
+    // 그림자 스타일
+    shadowColor: '#000', // 그림자 색상
+    shadowOffset: {
+      width: 0,
+      height: 2, // 아래쪽으로 그림자 이동
+    },
+    shadowOpacity: 0.25, // 그림자 투명도
+    shadowRadius: 3.5, // 그림자 퍼짐 정도
+    elevation: 5, // 안드로이드에서 그림자 효과를 주기 위해 사용
+    height: 300,
+  },
+  enlargedImage: {
+    width: 100, // 기본 이미지 크기
+    height: 100,
+    resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
+  },
+  enlargeCloseButton: { 
+    position: 'absolute', 
+    top: 20, 
+    right: 20 
+  },
+  closeButtonText: { 
+    backgroundColor: 'white', 
+    fontSize: 18 
+  },
+  imageContainer: {
+    flex: 1,
+    justifyContent: 'center', // 이미지만 수직 중앙 정렬
+    alignItems: 'center', // 이미지만 수평 중앙 정렬
+  },
+  enlargedImage: {
+    width: 100, // 기본 이미지 크기
+    height: 100,
+    resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
+  },
 });
 
 export default App;

@@ -24,7 +24,7 @@ function MainScreen({ navigation, handleLogout }) {
     // 로그인된 사용자의 세션 정보를 가져오는 함수
     const fetchUserSession = async () => {
       try {
-        const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+        const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
         setNickname(response.data.nickname);  // 닉네임 상태 업데이트
         console.log('서버 응답:', response.data); // 응답 데이터 확인
       } catch (error) {
@@ -37,7 +37,7 @@ function MainScreen({ navigation, handleLogout }) {
 
   const handleLogoutClick = async () => {
     try {
-      await axios.post(`${config.apiUrl}/logout`, {}, { withCredentials: true });
+      await axios.post(`${config.apiUrl}/users/logout`, {}, { withCredentials: true });
       setLogoutModalVisible(false);
       handleLogout(); // handleLogout을 직접 호출
     } catch (error) {
@@ -47,7 +47,7 @@ function MainScreen({ navigation, handleLogout }) {
 
   const handleDeleteAccountClick = async () => {
     try {
-      await axios.delete(`${config.apiUrl}/user/delete`, { withCredentials: true });
+      await axios.delete(`${config.apiUrl}/users/delete`, { withCredentials: true });
       handleLogout(); // 로그아웃 함수 호출하여 로그인 화면으로 이동
     } catch (error) {
       console.error("회원 탈퇴 실패:", error);
@@ -627,12 +627,14 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.8,
     height: SCREEN_HEIGHT * 0.2,
     top: -10,
+    right: 10,
   },
   bag: {
     width: SCREEN_WIDTH * 0.15,
     height: SCREEN_HEIGHT * 0.1,
-    right: 145,
-    top: 70,
+    right: 105,
+    top: 75,
+
   },
   modeContainer: {
     width: SCREEN_WIDTH,

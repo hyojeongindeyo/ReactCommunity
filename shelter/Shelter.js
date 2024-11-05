@@ -29,7 +29,7 @@ export default function ShelterScreen({ navigation }) {
 
   const fetchUserSession = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/session`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching user session:', error);
@@ -191,7 +191,7 @@ export default function ShelterScreen({ navigation }) {
   const completeMission = async (missionId) => {
     try {
       // 서버에서 유저의 완료된 미션 목록을 가져옵니다.
-      const response = await axios.get(`${config.apiUrl}/user/missions/${userData.id}`);
+      const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
       const missions = response.data.missions;
   
       // 미션 ID가 완료된 목록에 있는지 확인합니다.
@@ -200,7 +200,7 @@ export default function ShelterScreen({ navigation }) {
         console.log('이미 미션을 완료했습니다.');
       } else {
         // 미션이 완료되지 않았을 경우 미션 완료 API 호출
-        const completeResponse = await axios.post(`${config.apiUrl}/complete-mission`, {
+        const completeResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
           userId: userData.id,
           missionId: missionId,
         });
