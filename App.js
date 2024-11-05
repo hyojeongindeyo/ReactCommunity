@@ -17,6 +17,8 @@ import Shelter from './shelter/Shelter.js';
 import LoginScreen from './login/LoginScreen'; // 로그인 페이지
 import SignupScreen from './login/SignupScreen'; // 회원가입 페이지
 import UpdatePost from './community/UpdatePost.js';
+import Toast from 'react-native-toast-message';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -91,7 +93,9 @@ const App = () => {
           </Stack.Navigator>
         </NavigationContainer>
       </CommentsProvider>
+      <Toast />
     </PostsProvider>
+    
   );
 };
 

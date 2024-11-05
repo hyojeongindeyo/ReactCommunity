@@ -1,9 +1,11 @@
 import 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, Image, View, Dimensions, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import axios from 'axios'; // axios를 사용하여 API 호출
 import config from '../config';
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -16,13 +18,32 @@ const SignupScreen = ({ navigation }) => {
     const apiUrl = config.apiUrl;
 
     const handleSignup = async () => {
+        if (!email.includes('@')) {
+            Toast.show({
+                type: 'error',
+                text1: '이메일 형식 오류',
+                text2: '@를 포함한 이메일을 적어주세요',
+                text1Style: { fontSize: 15,  color: 'black' },  // text1 스타일 조정
+                text2Style: { fontSize: 13, color: 'black' },  // text2 스타일 조정
+                visibilityTime: 2000, // 2초 후 자동 사라짐
+            });
+            return;
+        }
+
         if (password !== confirmPassword) {
-            Alert.alert('비밀번호 불일치', '비밀번호가 일치하지 않습니다.');
+            Toast.show({
+                type: 'error',
+                text1: '비밀번호 확인 오류',
+                text2: '비밀번호가 다릅니다.',
+                text1Style: { fontSize: 15,  color: 'black' },  // text1 스타일 조정
+                text2Style: { fontSize: 13, color: 'black' },  // text2 스타일 조정
+                visibilityTime: 2000, // 2초 후 자동 사라짐
+            });
             return;
         }
 
         try {
-            
+
             const response = await axios.post(`${apiUrl}/users/signup`, { // 서버의 IP 주소와 포트를 사용하세요
                 id,
                 password,
@@ -34,7 +55,7 @@ const SignupScreen = ({ navigation }) => {
                 Alert.alert('회원가입 성공', response.data.message);
                 navigation.navigate('Login');
             }
-        }  catch (error) {
+        } catch (error) {
             if (error.response) {
                 // 서버가 응답했지만 상태 코드가 2xx가 아닌 경우
                 console.error('서버 응답 오류:', error.response.data);
