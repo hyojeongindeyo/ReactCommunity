@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Alert, Linking, ActivityIndicator } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Alert, Linking, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as MediaLibrary from 'expo-media-library';
 import axios from 'axios';
@@ -14,7 +14,8 @@ export default function App({ navigation }) {
   const cameraRef = useRef(null);
   const [missionModalVisible, setMissionModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(false); // 로딩 상태 추가
+  const [loading, setLoading] = useState(false);
+  const [previewUri, setPreviewUri] = useState(null);
   const YOUR_CLIENT_API_KEY = config.YOUR_CLIENT_API_KEY;
   const OPENAI_API_KEY = config.OPENAI_API_KEY;
 
@@ -68,11 +69,9 @@ export default function App({ navigation }) {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync();
-        console.log("Picture taken!", photo);
+        setPreviewUri(photo.uri);
         
         const asset = await MediaLibrary.createAssetAsync(photo.uri);
-        console.log("사진이 저장되었습니다!", `사진 URI: ${asset.uri}`);
-        
         await checkForCracks(photo.uri);
       } catch (error) {
         console.error("사진 찍기 실패:", error);
@@ -82,7 +81,7 @@ export default function App({ navigation }) {
   }
 
   async function checkForCracks(imageUri) {
-    setLoading(true); // 로딩 시작
+    setLoading(true);
     const formData = new FormData();
     formData.append('image', {
       uri: imageUri,
@@ -117,7 +116,8 @@ export default function App({ navigation }) {
       const data = await response.json();
       const resultMessage = data.choices[0].message.content;
 
-      setLoading(false); // 로딩 종료
+      setLoading(false);
+      setPreviewUri(null); // 미리보기 해제하여 카메라 활성화
 
       if (resultMessage.includes('yes')) {
         Alert.alert(
@@ -138,7 +138,8 @@ export default function App({ navigation }) {
       await completeMission(5);
 
     } catch (error) {
-      setLoading(false); // 로딩 종료
+      setLoading(false);
+      setPreviewUri(null);
       console.error('Error:', error);
       Alert.alert('An error occurred while processing the image.');
     }
@@ -169,30 +170,33 @@ export default function App({ navigation }) {
   };
 
   const missionhandleConfirm = () => {
-    console.log("사용자가 '네'를 선택했습니다.");
     missionhandleClose();
     navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } });
   };
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Ionicons name="camera-reverse" size={32} color="white" />
-          </TouchableOpacity>
-        </View>
-        <CustomModal
-          visible={missionModalVisible}
-          onClose={missionhandleClose}
-          onConfirm={missionhandleConfirm}
-        />
-        <View style={styles.captureButtonContainer}>
-          <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-            <Ionicons name="camera" size={32} color="black" />
-          </TouchableOpacity>
-        </View>
-      </CameraView>
+      {previewUri ? (
+        <Image source={{ uri: previewUri }} style={styles.camera} />
+      ) : (
+        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+              <Ionicons name="camera-reverse" size={32} color="white" />
+            </TouchableOpacity>
+          </View>
+        </CameraView>
+      )}
+      <CustomModal
+        visible={missionModalVisible}
+        onClose={missionhandleClose}
+        onConfirm={missionhandleConfirm}
+      />
+      <View style={styles.captureButtonContainer}>
+        <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+          <Ionicons name="camera" size={32} color="black" />
+        </TouchableOpacity>
+      </View>
 
       {loading && (
         <View style={styles.loadingOverlay}>
@@ -224,7 +228,7 @@ const styles = StyleSheet.create({
   },
   captureButtonContainer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 100,
     left: '50%',
     transform: [{ translateX: -25 }],
     alignItems: 'center',
@@ -243,8 +247,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
+  }
 });
