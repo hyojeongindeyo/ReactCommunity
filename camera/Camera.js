@@ -6,6 +6,8 @@ import * as MediaLibrary from 'expo-media-library';
 import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal';
+import Toast from 'react-native-toast-message';
+
 
 export default function App({ navigation }) {
   const [facing, setFacing] = useState('back');
@@ -158,7 +160,12 @@ export default function App({ navigation }) {
           missionId: missionId,
         });
         console.log(`미션 ${missionId} 완료:`, completeResponse.data);
-        setMissionModalVisible(true);
+        Toast.show({
+          type: 'success',
+          text1: '미션 완료!',
+          text2: `미션 ${missionId}이(가) 완료되었습니다.`,
+          visibilityTime: 3000,
+      });
       }
     } catch (error) {
       console.error('미션 완료 오류:', error.response ? error.response.data : error);
