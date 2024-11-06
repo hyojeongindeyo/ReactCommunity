@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -53,20 +53,6 @@ function MainScreen({ navigation, handleLogout }) {
       console.error("회원 탈퇴 실패:", error);
     }
   };
-
-//   const handleLogout = async () => {
-//     try {
-//         await axios.post(`${config.apiUrl}/logout`, {}, { withCredentials: true });
-//         setLogoutModalVisible(false);
-//         props.handleLogout(); // 로그아웃 시 상위 App 컴포넌트의 handleLogout 호출
-//     } catch (error) {
-//         console.error('로그아웃 실패:', error);
-//     }
-// };
-
-  // const handleDeleteAccount = () => {
-  //   setDeleteAccountModalVisible(false);
-  // };
 
   return (
     <View style={styles.container}>
@@ -167,16 +153,12 @@ function MyPostsScreen({ navigation }) {
   const [myPosts, setMyPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchMyPosts();
-  }, []);
-
   // 내가 작성한 글 목록 가져오기
-  const fetchMyPosts = async () => {
+  const fetchMyPosts = useCallback(async () => {
+    setLoading(true); // 데이터 로드 시작
     try {
       const response = await axios.get(`${config.apiUrl}/posts/myposts`, { withCredentials: true });
       setMyPosts(response.data);
-      setLoading(false);
     } catch (error) {
       if (error.response && error.response.status === 404) {
         console.error('내가 작성한 글이 없습니다.');
@@ -185,10 +167,19 @@ function MyPostsScreen({ navigation }) {
       } else {
         console.error('내가 작성한 글 불러오기 실패:', error);
       }
-      setLoading(false);
+    } finally {
+      setLoading(false); // 데이터 로드 완료
     }
-  };
+  }, []); // 빈 배열 의존성
 
+  // 화면이 focus될 때마다 내 글 목록 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      fetchMyPosts(); // Fetch posts when screen is focused
+    }, [fetchMyPosts]) // fetchMyPosts를 의존성으로 추가
+  );
+
+  // 로딩 중일 때
   if (loading) {
     return <Text>Loading...</Text>;
   }
@@ -198,7 +189,7 @@ function MyPostsScreen({ navigation }) {
       {myPosts.length > 0 ? (
         myPosts.map((post, index) => (
           <TouchableOpacity
-            key={index}
+            key={post.id} // 고유한 키를 사용
             style={styles.postItem}
             onPress={() => navigation.navigate('PostDetail', { post })}
           >

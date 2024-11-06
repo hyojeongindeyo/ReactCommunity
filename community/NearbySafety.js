@@ -343,7 +343,11 @@ export default function NearbySafety({ navigation, route }) {
 
                       {/* 본문 */}
                       <Text style={styles.postMessage}>
-                        {post.message.length > 30 ? `${post.message.slice(0, 30)}...` : post.message}
+                        {post.message.includes('\n') 
+                          ? `${post.message.split('\n')[0].slice(0, 30)}...` 
+                          : post.message.length > 30 
+                            ? `${post.message.slice(0, 30)}...` 
+                            : post.message}
                       </Text>
 
                       {/* 댓글 수와 타임스탬프를 한 줄에 배치 */}
