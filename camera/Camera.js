@@ -7,6 +7,7 @@ import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal';
 import Toast from 'react-native-toast-message';
+import AlterModal from './AlterModal';
 
 
 export default function App({ navigation }) {
@@ -20,6 +21,11 @@ export default function App({ navigation }) {
   const [previewUri, setPreviewUri] = useState(null);
   const YOUR_CLIENT_API_KEY = config.YOUR_CLIENT_API_KEY;
   const OPENAI_API_KEY = config.OPENAI_API_KEY;
+
+  const [alterModalVisible, setAlterModalVisible] = useState(false);
+  const [alterModalText, setAlterModalText] = useState('');
+  const [alterModalSubText, setAlterModalSubText] = useState('');
+  const [showReportLink, setShowReportLink] = useState(false); 
 
   useEffect(() => {
     const fetchUserSession = async () => {
@@ -109,7 +115,7 @@ export default function App({ navigation }) {
         body: JSON.stringify({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: "You're an expert at judging cracks in walls. You need to look at the image provided and determine whether the wall in that image has a crack or not. If the image provided is not a photo of a wall or is a hand-drawn picture, answer No" },
+            { role: "system", content: "You’re an expert at identifying cracks in walls. Examine the provided image carefully and determine whether the wall in that image has a crack. Only recognize natural or real cracks in the wall, such as those caused by structural damage, weathering, or other physical causes. If the image is not a photograph of a wall or depicts hand-drawn lines or artificial marks (such as pen or pencil drawings), answer 'No.' Do not consider any cracks that appear artificially drawn or fabricated." },
             { role: "user", content: [
               {
                   type: "text",
@@ -133,20 +139,16 @@ export default function App({ navigation }) {
       setPreviewUri(null); // 미리보기 해제하여 카메라 활성화
 
       if (resultMessage.includes('yes')) {
-        Alert.alert(
-          "결과",
-          '균열이 있습니다!',
-          [
-            {
-              text: "안전신고 바로가기",
-              onPress: () => Linking.openURL("https://www.safetyreport.go.kr/#safereport/safereport")
-            },
-            { text: "확인", style: "cancel" }
-          ]
-        );
+        setAlterModalText('균열이 맞습니다.');
+        setShowReportLink(true);
+        setAlterModalSubText('');
       } else {
-        Alert.alert("결과", '균열이 없습니다!', [{ text: "확인", style: "cancel" }]);
+        setAlterModalText('균열이 아닙니다.');
+        setShowReportLink(false);
+        setAlterModalSubText('신고가 필요하지 않습니다.');
       }
+
+      setAlterModalVisible(true);
 
       await completeMission(5);
 
@@ -210,6 +212,13 @@ export default function App({ navigation }) {
         onClose={missionhandleClose}
         onConfirm={missionhandleConfirm}
       />
+      <AlterModal
+        modalVisible={alterModalVisible}
+        onClose={() => setAlterModalVisible(false)}
+        content={alterModalText}
+        subContent={alterModalSubText}
+        showReportLink={showReportLink}
+      />
       <View style={styles.captureButtonContainer}>
         <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
           <Ionicons name="camera" size={32} color="black" />
@@ -219,7 +228,7 @@ export default function App({ navigation }) {
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={{ marginTop: 10 }}>Waiting for Detection..</Text>
+          <Text style={{ marginTop: 10 }}>균열 분석 중..</Text>
         </View>
       )}
     </View>
@@ -234,6 +243,8 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+    width: '100%', 
+    height: '100%',
   },
   buttonContainer: {
     position: 'absolute',
