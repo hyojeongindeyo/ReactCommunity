@@ -98,6 +98,7 @@ export default function App({ navigation }) {
       });
       const uploadData = await uploadResponse.json();
       const imageUrl = uploadData.data.url;
+      console.log(uploadData)
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -106,18 +107,28 @@ export default function App({ navigation }) {
           'Authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             { role: "system", content: "You're an expert at judging cracks in walls. You need to look at the image provided and determine whether the wall in that image has a crack or not. If the image provided is not a photo of a wall or is a hand-drawn picture, answer No" },
-            { role: "user", content: "Is there a crack in this wall image?", image_url: imageUrl }
+            { role: "user", content: [
+              {
+                  type: "text",
+                  text: "Is there a crack in this wall image? please say yes or no"
+              },
+              {
+                  type: "image_url",
+                  image_url: {
+                      url: imageUrl
+                  }
+              }
+          ] }
           ],
           max_tokens: 300
         })
       });
 
       const data = await response.json();
-      const resultMessage = data.choices[0].message.content;
-
+      const resultMessage = data.choices[0].message.content.toLowerCase();
       setLoading(false);
       setPreviewUri(null); // 미리보기 해제하여 카메라 활성화
 
