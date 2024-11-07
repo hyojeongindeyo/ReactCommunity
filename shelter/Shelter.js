@@ -254,9 +254,12 @@ export default function ShelterScreen({ navigation }) {
           {locationText}
         </Text>
       </View>
-      <Animated.View style={[styles.scrollViewContainer, { height: scrollViewHeight }]}>
-        <ScrollView contentContainerStyle={styles.scrollViewContent} {...panResponder.panHandlers}>
-          <View style={styles.dragHandle}></View>
+      <Animated.View style={[styles.scrollViewContainer]}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollViewContent} 
+          {...panResponder.panHandlers}
+        >
+        
           {shelters.map(shelter => (
             <View key={shelter.id} style={styles.shelterInfo}>
               <View style={styles.shelterNamePeople}>
@@ -302,6 +305,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
+    height: SCREEN_HEIGHT / 3.9, // 고정된 높이 설정
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -341,12 +345,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  dragHandle: {
-    width: 40,
-    height: 5,
-    backgroundColor: '#ccc',
-    borderRadius: 2.5,
-    alignSelf: 'center',
-    marginVertical: 8,
-  },
+
 });
