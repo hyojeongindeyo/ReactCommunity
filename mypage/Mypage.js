@@ -155,22 +155,24 @@ function MyPostsScreen({ navigation }) {
 
   // 내가 작성한 글 목록 가져오기
   const fetchMyPosts = useCallback(async () => {
-    setLoading(true); // 데이터 로드 시작
+    setLoading(true);
     try {
       const response = await axios.get(`${config.apiUrl}/posts/myposts`, { withCredentials: true });
       setMyPosts(response.data);
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        console.error('내가 작성한 글이 없습니다.');
+        setMyPosts([]); // 글이 없을 때 빈 배열로 설정
       } else if (error.response && error.response.status === 401) {
         console.error('사용자 인증 실패');
       } else {
         console.error('내가 작성한 글 불러오기 실패:', error);
       }
     } finally {
-      setLoading(false); // 데이터 로드 완료
+      setLoading(false);
     }
-  }, []); // 빈 배열 의존성
+  }, []);
+  
+  
 
   // 화면이 focus될 때마다 내 글 목록 새로고침
   useFocusEffect(
@@ -225,12 +227,17 @@ function ScrappedPostsScreen({ navigation }) {
         isScraped: true, // 스크랩된 글이므로 true로 설정
       }));
       setScrappedPosts(updatedPosts);
-      setLoading(false);
     } catch (error) {
-      console.error('내가 작성한 글 불러오기 실패:', error);
+      if (error.response && error.response.status === 404) {
+        setScrappedPosts([]); // 글이 없을 때 빈 배열로 설정
+      } else {
+        console.error('내가 스크랩한 글 불러오기 실패:', error);
+      }
+    } finally {
       setLoading(false);
     }
   };
+  
   
   const handleScrap = async (postId) => {
     try {
