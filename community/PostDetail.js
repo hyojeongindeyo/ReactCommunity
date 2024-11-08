@@ -163,32 +163,32 @@ export default function PostDetail({ route, navigation }) {
         post_id: post.id,
         comment_text: commentText,
       }, { withCredentials: true });
-      
+
       console.log("댓글이 작성되었습니다:", commentResponse.data);
-  
+
       // 미션 완료 여부 확인
       const missionStatusResponse = await axios.get(`${config.apiUrl}/missions/user/${userId}`);
       const isMissionCompleted = missionStatusResponse.data.missions.includes(1); // 댓글 작성 미션 ID가 1인 경우
-  
+
       if (!isMissionCompleted) {
         // 미션 완료 API 호출
         const completeMissionResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
           userId: userId,
           missionId: 1 // 댓글 작성 미션 ID
         });
-  
+
         console.log(completeMissionResponse.data.message); // 미션 완료 메시지
-  
+
         // 모달 표시
         setModalVisible(true);
       } else {
         console.log("이미 미션이 완료되었습니다.");
       }
-  
+
     } catch (error) {
       console.error('오류 발생:', error.response ? error.response.data : error);
     }
-  };  
+  };
 
   const handleClose = () => {
     setModalVisible(false);
@@ -296,8 +296,8 @@ export default function PostDetail({ route, navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.header}>
@@ -310,7 +310,15 @@ export default function PostDetail({ route, navigation }) {
               {post.location_address} 안전 소식
             </Text>
           )}
-          <Text style={styles.title}>{post.title}</Text>
+          <Text style={styles.timestamp}>
+            {moment(post.timestamp).format('YY/MM/DD HH:mm')}
+          </Text>
+          {/* {post.updated_timestamp && ( // 수정 시간이 존재할 경우에만 표시
+            <Text style={styles.timestamp}>
+              수정 시간: {moment(post.updated_timestamp).format('YY/MM/DD HH:mm')}
+            </Text>
+          )} */}
+          <Text style={styles.timestamp}>{post.user_nickname}</Text>
         </View>
 
         <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
@@ -321,25 +329,13 @@ export default function PostDetail({ route, navigation }) {
       </View>
       <View style={styles.headerSeparator}></View>
       <ScrollView style={styles.content}>
-        <Text style={styles.timestamp}>
-          작성 시간: {moment(post.timestamp).format('YY/MM/DD HH:mm')}
-        </Text>
-        {post.updated_timestamp && ( // 수정 시간이 존재할 경우에만 표시
-          <Text style={styles.timestamp}>
-            수정 시간: {moment(post.updated_timestamp).format('YY/MM/DD HH:mm')}
-          </Text>
-        )}
-        <Text style={styles.timestamp}>
-          작성자: {post.user_nickname} {/* 작성자 닉네임 표시 */}
-        </Text>
         <CustomModal
           visible={modalVisible}
           onClose={handleClose}
           onConfirm={handleConfirm}
         />
-
-
-
+        <Text style={styles.title}>{post.title}</Text>
+        <Text style={styles.postText}>{post.message}</Text>
         {post.image ? (
           <View>
             <Image
@@ -358,8 +354,6 @@ export default function PostDetail({ route, navigation }) {
             />
           </View>
         ) : null}
-
-        <Text style={styles.postText}>{post.message}</Text>
 
         {/* 스크랩 버튼 */}
         {/* <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
@@ -456,14 +450,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 5,
+    // textAlign: 'center',
+    // marginTop: 5,
+    paddingBottom: '5%'
   },
   location: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: '#565656',
     textAlign: 'center',
-    marginTop: 15,
+    paddingTop: 5,
+    paddingBottom: 2,
+    fontWeight: '600'
   },
   iconButton: {
     padding: '2%',
@@ -478,6 +475,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingTop: '5%',
     paddingHorizontal: '5%',
   },
   postText: {
@@ -498,9 +496,10 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 12,
-    color: '#999',
-    textAlign: 'right',
-    marginTop: 3,
+    color: '#8E8E8E',
+    fontWeight: '600',
+    paddingTop: 1,
+    // marginTop: 3,
     // marginVertical: 10,
   },
   separator: {
