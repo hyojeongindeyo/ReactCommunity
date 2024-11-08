@@ -307,7 +307,7 @@ export default function PostDetail({ route, navigation }) {
         <View style={{ alignItems: 'center' }}>
           {city && district && (
             <Text style={styles.location}>
-              {city}, {district} 안전 소식
+              {post.location_address} 안전 소식
             </Text>
           )}
           <Text style={styles.title}>{post.title}</Text>
