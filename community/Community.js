@@ -62,7 +62,6 @@ function Community({ navigation, route }) {
 
 
   // 게시물 데이터 가져오기
-  // 게시물 데이터 가져오기
   const fetchPosts = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/posts`);
@@ -816,7 +815,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 5,
+    // elevation: 1,
   },
   today: {
     backgroundColor: '#fff',
