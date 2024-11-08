@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
 import * as Location from 'expo-location';
@@ -23,6 +23,9 @@ export default function PostDetail({ route, navigation }) {
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [imageWidth, setImageWidth] = useState(null);
+  const [imageHeight, setImageHeight] = useState(null);
+
 
   useEffect(() => {
     console.log("수정된 데이터:", post);
@@ -31,12 +34,19 @@ export default function PostDetail({ route, navigation }) {
   // 이미지 비율 동적 계산
   useEffect(() => {
     if (post.image) {
-      Image.getSize(post.image, (width, height) => {
-        setImageAspectRatio(width / height);  // 가로/세로 비율 설정
-      }, (error) => {
-        console.error("Image load error: ", error);
-        Alert.alert("이미지를 로드할 수 없습니다.");
-      });
+      Image.getSize(
+        post.image,
+        (width, height) => {
+          const screenWidth = Dimensions.get("window").width;
+          const aspectRatio = width / height;
+          setImageWidth(screenWidth);
+          setImageHeight(screenWidth / aspectRatio);  // 화면 너비에 맞춰 높이 조절
+        },
+        (error) => {
+          console.error("Image load error: ", error);
+          Alert.alert("이미지를 로드할 수 없습니다.");
+        }
+      );
     }
   }, [post.image]);
 
@@ -336,24 +346,26 @@ export default function PostDetail({ route, navigation }) {
         />
         <Text style={styles.title}>{post.title}</Text>
         <Text style={styles.postText}>{post.message}</Text>
-        {post.image ? (
-          <View>
+        {
+          post.image && imageWidth && imageHeight ? (
             <Image
               source={{ uri: post.image }}
               style={{
-                width: '100%',
-                height: imageAspectRatio > 1 ? 200 : 250, // 가로 비율에 따라 높이 조정
+                width: imageWidth * 0.9, // 화면 너비의 90%로 설정하여 양옆에 여백 추가
+                height: imageHeight * 0.9, // 높이도 같은 비율로 줄이기
                 resizeMode: 'contain',
-                marginTop: 10,
-                marginBottom: 16, // 이미지 아래 간격 추가
+                // marginHorizontal: '5%', // 좌우 여백
+                marginVertical: 10, // 상하 여백
+                borderRadius: 10, // 모서리를 둥글게
               }}
               onError={(error) => {
                 console.error("Image load error: ", error);
                 Alert.alert("이미지를 로드할 수 없습니다.");
               }}
             />
-          </View>
-        ) : null}
+          ) : null
+        }
+
 
         {/* 스크랩 버튼 */}
         {/* <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
