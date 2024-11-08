@@ -77,8 +77,8 @@ export default function WritePost({ navigation }) {
         });
 
         if (address.length > 0) {
-          const { city, district } = address[0];
-          const userAddress = `${city} ${district}`;
+          const { city, district, street } = address[0];
+          const userAddress = `${city} ${district || street }`;
           setUserLocation(userAddress); // 시(city)와 동(district) 정보 설정
           await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
         }
