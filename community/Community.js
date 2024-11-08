@@ -272,47 +272,47 @@ function Community({ navigation, route }) {
     await fetchImages(info.id);
 
     try {
-        const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
-        const missions = response.data.missions;
-        const missionIdToCheck = 2; // 미션 ID
+      const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
+      const missions = response.data.missions;
+      const missionIdToCheck = 2; // 미션 ID
 
-        // 미션이 완료되지 않았으면, 미션 모달을 열기
-        if (!missions.includes(missionIdToCheck)) {
-            // 미션을 완료하기 전에 API 호출
-            await axios.post(`${config.apiUrl}/missions/complete-mission`, {
-                userId: userData.id,
-                missionId: missionIdToCheck
-            });
-            console.log("미션 완료");
-            setMissionModalVisible(true); // 미션 완료 시 새로운 모달 표시
-        } else {
-            setInfoModalVisible(true); // 기존 모달 표시
-            console.log("이미 미션을 완료하셨습니다.");
-            // 미션 모달을 열 필요가 없으므로 상태를 변경하지 않음
-            setMissionModalVisible(false); // 이 부분은 필요 없습니다.
-        }
+      // 미션이 완료되지 않았으면, 미션 모달을 열기
+      if (!missions.includes(missionIdToCheck)) {
+        // 미션을 완료하기 전에 API 호출
+        await axios.post(`${config.apiUrl}/missions/complete-mission`, {
+          userId: userData.id,
+          missionId: missionIdToCheck
+        });
+        console.log("미션 완료");
+        setMissionModalVisible(true); // 미션 완료 시 새로운 모달 표시
+      } else {
+        setInfoModalVisible(true); // 기존 모달 표시
+        console.log("이미 미션을 완료하셨습니다.");
+        // 미션 모달을 열 필요가 없으므로 상태를 변경하지 않음
+        setMissionModalVisible(false); // 이 부분은 필요 없습니다.
+      }
     } catch (error) {
-        console.error('오류:', error.response ? error.response.data : error);
+      console.error('오류:', error.response ? error.response.data : error);
     }
-};
+  };
 
-// 모달의 상태가 변경될 때마다 확인
-useEffect(() => {
+  // 모달의 상태가 변경될 때마다 확인
+  useEffect(() => {
     console.log('모달 비지블 상태:', missionModalVisible);
-}, [missionModalVisible]);
+  }, [missionModalVisible]);
 
-const missionhandleClose = () => {
+  const missionhandleClose = () => {
     setMissionModalVisible(false); // 새로운 모달 닫기
     setInfoModalVisible(false); // 기존 모달 표시
-};
+  };
 
-const missionhandleConfirm = () => {
+  const missionhandleConfirm = () => {
     console.log("사용자가 '네'를 선택했습니다.");
     missionhandleClose(); // 모달 닫기
     navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
-};
+  };
 
-  
+
 
 
   useEffect(() => {
@@ -476,7 +476,7 @@ const missionhandleConfirm = () => {
             {/* HOT 텍스트 옆에 게시글 제목 추가 */}
             {getHotPost() ? (
               <Text style={styles.postTitle}>
-                {getHotPost().title.length > 30 ? `${getHotPost().title.slice(0, 30)}...` : getHotPost().title}
+                {getHotPost().title.length > 18 ? `${getHotPost().title.slice(0, 18)}...` : getHotPost().title}
               </Text>
             ) : (
               <Text style={styles.postTitle}>HOT 게시물은 아직 없습니다.</Text>
@@ -508,10 +508,11 @@ const missionhandleConfirm = () => {
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
                         <Text style={styles.safecategory}>{category}</Text>
                       </View>
-                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>{filteredPost.title}</Text>
-                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
-                        <Text style={styles.safecategory}>{category}</Text>
-                      </View> */}
+                      <Text style={styles.safetitle}>
+                        {filteredPost.title.length > 20 ? `${filteredPost.title.substring(0, 20)}...` : filteredPost.title}
+                      </Text>
+
+
                     </View>
                     <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
                   </TouchableOpacity>

@@ -396,10 +396,10 @@ const App = ({ navigation, route }) => {
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
                         <Text style={styles.safecategory}>{category}</Text>
                       </View>
-                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>{filteredPost.title}</Text>
-                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
-                        <Text style={styles.safecategory}>{category}</Text>
-                      </View> */}
+                      <Text style={styles.safetitle}>
+                        {filteredPost.title.length > 20 ? `${filteredPost.title.substring(0, 20)}...` : filteredPost.title}
+                      </Text>
+               
                     </View>
                     <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
                   </TouchableOpacity>

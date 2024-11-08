@@ -127,7 +127,7 @@ export default function NearbySafety({ navigation, route }) {
   // 날짜 포맷팅 함수
   const formatDate = (date) => {
     return moment(date).format('YY/MM/DD HH:mm'); // 연도를 두 자리로, 시간을 24시간제로 표시
-  };  
+  };
 
   // 게시글 작성 후 게시글 목록을 다시 불러오는 useEffect
   useEffect(() => {
@@ -286,7 +286,11 @@ export default function NearbySafety({ navigation, route }) {
               {getHotPost() ? (
                 <TouchableOpacity onPress={() => navigation.navigate('PostDetail', { post: getHotPost() })}>
                   <Text style={[styles.hotMessage, { marginLeft: 5, lineHeight: 20, paddingTop: 3 }]}>
-                    {getHotPost().title ? getHotPost().title : '제목 없음'}
+                    {getHotPost().title
+                      ? (getHotPost().title.length > 18
+                        ? `${getHotPost().title.substring(0, 18)}...`
+                        : getHotPost().title)
+                      : '제목 없음'}
                   </Text>
                 </TouchableOpacity>
               ) : (
@@ -334,19 +338,22 @@ export default function NearbySafety({ navigation, route }) {
                     <View style={styles.textContainer}>
                       {/* 제목 */}
                       <View style={styles.titlecontainer}>
-                      <View style={[styles.listContainer, { backgroundColor: getCategoryColor(post.category) }]}>
+                        <View style={[styles.listContainer, { backgroundColor: getCategoryColor(post.category) }]}>
                           <Text style={styles.listText}>{post.category}</Text>
                         </View>
-                        <Text style={styles.titleText}>{post.title}</Text>
-                        
+                        <Text style={styles.titleText}>
+                          {post.title.length > 20 ? `${post.title.substring(0, 20)}...` : post.title}
+                        </Text>
+
+
                       </View>
 
                       {/* 본문 */}
                       <Text style={styles.postMessage}>
-                        {post.message.includes('\n') 
-                          ? `${post.message.split('\n')[0].slice(0, 30)}...` 
-                          : post.message.length > 30 
-                            ? `${post.message.slice(0, 30)}...` 
+                        {post.message.includes('\n')
+                          ? `${post.message.split('\n')[0].slice(0, 30)}...`
+                          : post.message.length > 30
+                            ? `${post.message.slice(0, 30)}...`
                             : post.message}
                       </Text>
 
