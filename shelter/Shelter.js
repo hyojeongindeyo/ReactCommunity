@@ -81,7 +81,15 @@ export default function ShelterScreen({ navigation }) {
 
           if (address.length > 0) {
             const { city, district, street, streetNumber } = address[0];
-            setAddress(`${city} ${district} ${street} ${streetNumber}`);
+
+            // district가 null, undefined 또는 빈 문자열이 아니면 district + street, 아니면 street만 포함
+            const fullAddress = `${city} ${district && district.trim()
+              ? (district === street ? district : `${district} ${street}`)
+              : street} ${streetNumber ? streetNumber : ''}`.trim();
+
+            setAddress(fullAddress); // 완성된 주소 상태 설정
+
+
           }
 
           // 사용자 위치 기준으로 가장 가까운 상위 10개 쉼터를 계산합니다
@@ -193,7 +201,7 @@ export default function ShelterScreen({ navigation }) {
       // 서버에서 유저의 완료된 미션 목록을 가져옵니다.
       const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
       const missions = response.data.missions;
-  
+
       // 미션 ID가 완료된 목록에 있는지 확인합니다.
       if (missions.includes(missionId)) {
         // 이미 완료된 미션일 경우 콘솔에 메시지 출력
@@ -205,7 +213,7 @@ export default function ShelterScreen({ navigation }) {
           missionId: missionId,
         });
         console.log(`미션 ${missionId} 완료:`, completeResponse.data);
-  
+
         // 처음 완료된 미션일 경우 모달 띄우기
         setMissionModalVisible(true);
       }
@@ -213,7 +221,7 @@ export default function ShelterScreen({ navigation }) {
       console.error('미션 완료 오류:', error.response ? error.response.data : error);
     }
   };
-  
+
 
   const missionhandleClose = () => {
     setMissionModalVisible(false); // 새로운 모달 닫기
@@ -255,11 +263,11 @@ export default function ShelterScreen({ navigation }) {
         </Text>
       </View>
       <Animated.View style={[styles.scrollViewContainer]}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollViewContent} 
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
           {...panResponder.panHandlers}
         >
-        
+
           {shelters.map(shelter => (
             <View key={shelter.id} style={styles.shelterInfo}>
               <View style={styles.shelterNamePeople}>
@@ -318,7 +326,7 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     paddingTop: 8,
     paddingHorizontal: 20,
-    
+
   },
   shelterInfo: {
     paddingVertical: 10,
@@ -327,7 +335,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     marginTop: 8,
   },
-  shelterNamePeople : {
+  shelterNamePeople: {
     flexDirection: 'row', // 요소를 수평으로 나란히 정렬
     justifyContent: 'space-between'
   },
