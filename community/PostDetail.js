@@ -304,11 +304,13 @@ export default function PostDetail({ route, navigation }) {
       }
     }
   };
+  
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}  // 오프셋 값
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
@@ -323,22 +325,18 @@ export default function PostDetail({ route, navigation }) {
           <Text style={styles.timestamp}>
             {moment(post.timestamp).format('YY/MM/DD HH:mm')}
           </Text>
-          {/* {post.updated_timestamp && ( // 수정 시간이 존재할 경우에만 표시
-            <Text style={styles.timestamp}>
-              수정 시간: {moment(post.updated_timestamp).format('YY/MM/DD HH:mm')}
-            </Text>
-          )} */}
           <Text style={styles.timestamp}>{post.user_nickname}</Text>
         </View>
-
+  
         <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
           <FontAwesome name={isScraped ? 'star' : 'star-o'} size={20} color={isScraped ? 'gold' : 'black'} />
           <Text style={{ marginLeft: 3 }}>{scrapCount}</Text>
         </TouchableOpacity>
-        {/* <View style={styles.iconhide}><MaterialIcons name="keyboard-arrow-left" size={30} color="black" /></View> */}
       </View>
       <View style={styles.headerSeparator}></View>
-      <ScrollView style={styles.content}>
+  
+      {/* ScrollView에서 전체 내용을 감싸도록 변경 */}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={styles.content}>
         <CustomModal
           visible={modalVisible}
           onClose={handleClose}
@@ -346,35 +344,25 @@ export default function PostDetail({ route, navigation }) {
         />
         <Text style={styles.title}>{post.title}</Text>
         <Text style={styles.postText}>{post.message}</Text>
-        {
-          post.image && imageWidth && imageHeight ? (
-            <Image
-              source={{ uri: post.image }}
-              style={{
-                width: imageWidth * 0.9, // 화면 너비의 90%로 설정하여 양옆에 여백 추가
-                height: imageHeight * 0.9, // 높이도 같은 비율로 줄이기
-                resizeMode: 'contain',
-                // marginHorizontal: '5%', // 좌우 여백
-                marginVertical: 10, // 상하 여백
-                borderRadius: 10, // 모서리를 둥글게
-              }}
-              onError={(error) => {
-                console.error("Image load error: ", error);
-                Alert.alert("이미지를 로드할 수 없습니다.");
-              }}
-            />
-          ) : null
-        }
-
-
-        {/* 스크랩 버튼 */}
-        {/* <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
-          <FontAwesome name={isScraped ? 'star' : 'star-o'} size={16} color={isScraped ? 'gold' : 'black'} />
-          <Text>{isScraped ? '스크랩 취소' : '스크랩'}</Text>
-        </TouchableOpacity> */}
-
-        {/* 삭제 버튼 */}
-        {userData && userData.email === post.user_email && ( // 현재 사용자가 작성한 글인지 확인
+  
+        {post.image && imageWidth && imageHeight ? (
+          <Image
+            source={{ uri: post.image }}
+            style={{
+              width: imageWidth * 0.9, // 화면 너비의 90%로 설정하여 양옆에 여백 추가
+              height: imageHeight * 0.9, // 높이도 같은 비율로 줄이기
+              resizeMode: 'contain',
+              marginVertical: 10, // 상하 여백
+              borderRadius: 10, // 모서리를 둥글게
+            }}
+            onError={(error) => {
+              console.error("Image load error: ", error);
+              Alert.alert("이미지를 로드할 수 없습니다.");
+            }}
+          />
+        ) : null}
+  
+        {userData && userData.email === post.user_email && (
           <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
               <Text style={styles.udText}>삭제</Text>
@@ -388,16 +376,11 @@ export default function PostDetail({ route, navigation }) {
             >
               <Text style={styles.udText}>수정</Text>
             </TouchableOpacity>
-
           </View>
-
         )}
-
-
-
+  
         <View style={styles.separator}></View>
-
-
+  
         <View style={styles.commentsSection}>
           <View style={styles.commentsHeader}>
             <Text style={styles.commentsTitle}>댓글</Text>
@@ -406,20 +389,13 @@ export default function PostDetail({ route, navigation }) {
               <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
             </View>
           </View>
-
-
+  
           {postComments.map((comment, index) => (
             <View key={index} style={styles.commentContainer}>
-              {/* 댓글 작성자의 닉네임 표시 */}
               <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
-
-              {/* 댓글 내용 표시 */}
               <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
-
-              {/* 댓글 작성 시간 표시 */}
               <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
-
-              {/* 점점점 버튼 추가 */}
+  
               {userData && comment.user_id === userData.id && (
                 <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
                   <MaterialIcons name="more-vert" size={20} color="gray" />
@@ -427,22 +403,23 @@ export default function PostDetail({ route, navigation }) {
               )}
             </View>
           ))}
-
-          <View style={styles.commentInputContainer}>
-            <TextInput
-              style={styles.commentInput}
-              placeholder="댓글을 입력하세요"
-              value={newComment}
-              onChangeText={setNewComment}
-            />
-            <TouchableOpacity onPress={handleCommentSubmit} style={styles.commentSubmitButton}>
-              <Text style={styles.commentSubmitButtonText}>등록</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
+  
+      {/* 댓글 입력창은 고정되게 하여 화면 하단에 표시 */}
+      <View style={styles.commentInputContainer}>
+        <TextInput
+          style={styles.commentInput}
+          placeholder="댓글을 입력하세요"
+          value={newComment}
+          onChangeText={setNewComment}
+        />
+        <TouchableOpacity onPress={handleCommentSubmit} style={styles.commentSubmitButton}>
+          <Text style={styles.commentSubmitButtonText}>등록</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
-  );
+  );  
 }
 
 const styles = StyleSheet.create({
@@ -489,6 +466,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: '5%',
     paddingHorizontal: '5%',
+    // marginBottom: 10,
+    // marginBottom: 4,
+
   },
   postText: {
     fontSize: 17,
@@ -521,6 +501,8 @@ const styles = StyleSheet.create({
   },
   commentsSection: {
     marginTop: 20,
+    marginBottom: 30, // 입력창 높이만큼 공간을 남겨둠
+
   },
   commentsTitle: {
     fontSize: 18,
@@ -549,16 +531,26 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   commentInputContainer: {
+    // position: 'absolute', // 화면 하단에 고정
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingBottom : 10,
+    backgroundColor: 'white', // 배경색을 설정하여 입력창이 잘 보이게
+
   },
+  
   commentInput: {
     flex: 1,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 5,
     padding: 10,
+    backgroundColor: '#F8F8F8',
   },
   commentSubmitButton: {
     backgroundColor: '#556D6A',

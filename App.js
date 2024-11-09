@@ -49,7 +49,8 @@ const HomeStack = () => (
 const MainScreen = ({ handleLogout }) => (
   <Tab.Navigator
     tabBar={(props) => <BottomTabBar {...props} />}
-    screenOptions={{ headerShown: false }}
+    screenOptions={{ headerShown: false, tabBarHideOnKeyboard: true, }}
+    
   >
     <Tab.Screen name="Home" component={HomeStack} />
     <Tab.Screen name="Mypage">
