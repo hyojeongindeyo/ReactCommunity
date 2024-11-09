@@ -8,6 +8,7 @@ import LogoutModal from './LogoutModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import PostDetail from '../community/PostDetail';
 import UpdatePost from '../community/UpdatePost';
+import PrivacyPolicyContent from './PrivacyPolicyContent';
 import axios from 'axios';
 import config from '../config';
 import { useFocusEffect } from '@react-navigation/native';
@@ -76,6 +77,7 @@ function MainScreen({ navigation, handleLogout }) {
         <View style={styles.separator} />
         <Text style={styles.title}>설정</Text>
         <Text style={styles.message} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
+        <Text style={styles.message} onPress={() => navigation.navigate('PrivacyPolicy')}>개인정보 처리방침</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>기타</Text>
         <Text style={styles.message} onPress={() => navigation.navigate('Inquiry')}>문의사항</Text>
@@ -322,6 +324,23 @@ function NotificationSettingsScreen() {
   );
 }
 
+function PrivacyPolicyScreen() {
+  return (
+    <ScrollView style={{ padding: 20 }}>
+      <Text style={styles.privacypolicytitle}>{PrivacyPolicyContent.title}</Text>
+
+      {PrivacyPolicyContent.sections.map((section, index) => (
+        <React.Fragment key={index}>
+          <Text style={styles.privacypolicysectionTitle}>{section.title}</Text>
+          {section.content.map((text, idx) => (
+            <Text key={idx} style={styles.privacypolicycontent}>{text}</Text>
+          ))}
+        </React.Fragment>
+      ))}
+    </ScrollView>
+  );
+}
+
 function InquiryScreen({ navigation }) {
   const [inquiry, setInquiry] = useState('');
 
@@ -453,6 +472,29 @@ export default function Mypage({ handleLogout }) {
             elevation: 0,
             // paddingTop: 20,
             // height: 80,
+          },
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            alignSelf: 'flex-start',
+          },
+          headerBackTitleVisible: false,
+          headerTintColor: '#000',
+          headerLeft: ({ onPress }) => (
+            <TouchableOpacity onPress={onPress} style={{ marginLeft: 10 }}>
+              <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{
+          title: '개인정보 처리방침',
+          headerStyle: {
+            shadowOpacity: 0,
+            elevation: 0,
           },
           headerTitleStyle: {
             fontSize: 18,
@@ -697,5 +739,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4, // 본문과 제목 사이 간격
+  },
+  privacypolicytitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  privacypolicysectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 10,
+    color: '#333',
+  },
+  privacypolicycontentText: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 10,
+    color: '#555',
   },
 });
