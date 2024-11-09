@@ -317,11 +317,9 @@ export default function PostDetail({ route, navigation }) {
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
-          {city && district && (
             <Text style={styles.location}>
               {post.location_address} 안전 소식
             </Text>
-          )}
           <Text style={styles.timestamp}>
             {moment(post.timestamp).format('YY/MM/DD HH:mm')}
           </Text>
