@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert, Image, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Keyboard, TextInput, ScrollView, Alert, Image, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
 import * as Location from 'expo-location';
@@ -310,7 +310,7 @@ export default function PostDetail({ route, navigation }) {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}  // 오프셋 값
+      keyboardVerticalOffset={0}  // Offset value
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
@@ -335,8 +335,11 @@ export default function PostDetail({ route, navigation }) {
       </View>
       <View style={styles.headerSeparator}></View>
   
-      {/* ScrollView에서 전체 내용을 감싸도록 변경 */}
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={styles.content}>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }} 
+        style={styles.content} 
+        ref={(ref) => (this.scrollView = ref)}
+      >
         <CustomModal
           visible={modalVisible}
           onClose={handleClose}
@@ -349,11 +352,11 @@ export default function PostDetail({ route, navigation }) {
           <Image
             source={{ uri: post.image }}
             style={{
-              width: imageWidth * 0.9, // 화면 너비의 90%로 설정하여 양옆에 여백 추가
-              height: imageHeight * 0.9, // 높이도 같은 비율로 줄이기
+              width: imageWidth * 0.9,
+              height: imageHeight * 0.9,
               resizeMode: 'contain',
-              marginVertical: 10, // 상하 여백
-              borderRadius: 10, // 모서리를 둥글게
+              marginVertical: 10,
+              borderRadius: 10,
             }}
             onError={(error) => {
               console.error("Image load error: ", error);
@@ -368,10 +371,7 @@ export default function PostDetail({ route, navigation }) {
               <Text style={styles.udText}>삭제</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                console.log("수정할 데이터: ", post); // 수정할 데이터 로그
-                navigation.replace('UpdatePost', { post });
-              }}
+              onPress={() => navigation.replace('UpdatePost', { post })}
               style={[styles.udButton, { marginLeft: 5 }]}
             >
               <Text style={styles.udText}>수정</Text>
@@ -406,7 +406,7 @@ export default function PostDetail({ route, navigation }) {
         </View>
       </ScrollView>
   
-      {/* 댓글 입력창은 고정되게 하여 화면 하단에 표시 */}
+      {/* Fixed comment input box at the bottom */}
       <View style={styles.commentInputContainer}>
         <TextInput
           style={styles.commentInput}
@@ -414,12 +414,20 @@ export default function PostDetail({ route, navigation }) {
           value={newComment}
           onChangeText={setNewComment}
         />
-        <TouchableOpacity onPress={handleCommentSubmit} style={styles.commentSubmitButton}>
+        <TouchableOpacity 
+          onPress={() => {
+            handleCommentSubmit();
+            Keyboard.dismiss();
+            setTimeout(() => this.scrollView.scrollToEnd({ animated: true }), 200);
+          }} 
+          style={styles.commentSubmitButton}
+        >
           <Text style={styles.commentSubmitButtonText}>등록</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
-  );  
+  );
+  
 }
 
 const styles = StyleSheet.create({
