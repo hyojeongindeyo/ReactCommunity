@@ -25,6 +25,10 @@ export default function PostDetail({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [imageWidth, setImageWidth] = useState(null);
   const [imageHeight, setImageHeight] = useState(null);
+  const [replyComment, setReplyComment] = useState(''); // 대댓글 입력 상태
+  const [replyToCommentId, setReplyToCommentId] = useState(null); // 대댓글을 달고자 하는 댓글 ID
+  const [selectedCommentId, setSelectedCommentId] = useState(null); // 댓글 또는 대댓글을 다는 댓글 ID
+
 
 
   useEffect(() => {
@@ -200,6 +204,97 @@ export default function PostDetail({ route, navigation }) {
     }
   };
 
+  const handleReply = (commentId) => {
+    setReplyToCommentId(commentId);  // 대댓글을 다는 댓글 ID 설정
+    setReplyComment('');  // 대댓글 입력란 초기화
+  };
+  // 댓글 목록을 새로 고침하는 함수 정의
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/comments/${post.id}`);
+      setComments({
+        ...comments,
+        [postId]: response.data
+      });
+    } catch (error) {
+      console.error('댓글 목록 업데이트 오류:', error);
+    }
+  };
+
+  const handleReplySubmit = async () => {
+    console.log("입력된 대댓글:", replyComment); // 대댓글 내용 확인
+
+    if (replyComment.trim()) {
+      // 대댓글 작성
+      await postReplyComment(replyComment, userData.id, replyToCommentId);
+      setReplyComment(''); // 입력 필드 초기화
+      setReplyToCommentId(null); // 대댓글 대상 초기화
+
+      // 대댓글 작성 후 댓글 목록 새로 고침
+      fetchComments();
+    }
+  };
+
+
+  // 대댓글 작성 API 호출
+  const postReplyComment = async (replyComment, userId, commentId) => {
+    console.log("대댓글 내용:", replyComment, "작성자 ID:", userId, "댓글 ID:", commentId);
+    try {
+      const response = await axios.post(`${config.apiUrl}/comments/reply`, {
+        post_id: post.id,
+        parent_comment_id: commentId,
+        comment_text: replyComment,
+      }, { withCredentials: true });
+
+      console.log("대댓글 작성 성공:", response.data);
+    } catch (error) {
+      console.error('대댓글 작성 오류:', error.response ? error.response.data : error);
+    }
+  };
+
+  const handleReplyDelete = (replyId) => {
+    Alert.alert(
+      "대댓글 삭제",
+      "정말로 이 대댓글을 삭제하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제", onPress: async () => {
+            try {
+              // 서버에 대댓글 삭제 요청 보내기
+              await axios.delete(`${config.apiUrl}/comments/${replyId}`, { withCredentials: true });
+
+              // 삭제된 대댓글을 상태에서 제거
+              const updatedComments = postComments.map(comment => {
+                if (comment.parent_comment_id === null) { // 부모 댓글만 필터링
+                  return {
+                    ...comment,
+                    replies: comment.replies ? comment.replies.filter(reply => reply.id !== replyId) : [] // replies가 없으면 빈 배열로 처리
+                  };
+                }
+                return comment;
+              });
+              
+
+              setComments({
+                ...comments,
+                [postId]: updatedComments
+              });
+
+              Alert.alert("삭제 완료", "대댓글이 삭제되었습니다.");
+              fetchComments();
+            } catch (error) {
+              console.error('대댓글 삭제 오류:', error);
+              Alert.alert("삭제 실패", "대댓글 삭제에 실패했습니다.");
+            }
+          }
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+
   const handleClose = () => {
     setModalVisible(false);
   };
@@ -304,7 +399,7 @@ export default function PostDetail({ route, navigation }) {
       }
     }
   };
-  
+
 
   return (
     <KeyboardAvoidingView
@@ -317,25 +412,25 @@ export default function PostDetail({ route, navigation }) {
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
-            <Text style={styles.location}>
-              {post.location_address} 안전 소식
-            </Text>
+          <Text style={styles.location}>
+            {post.location_address} 안전 소식
+          </Text>
           <Text style={styles.timestamp}>
             {moment(post.timestamp).format('YY/MM/DD HH:mm')}
           </Text>
           <Text style={styles.timestamp}>{post.user_nickname}</Text>
         </View>
-  
+
         <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
           <FontAwesome name={isScraped ? 'star' : 'star-o'} size={20} color={isScraped ? 'gold' : 'black'} />
           <Text style={{ marginLeft: 3 }}>{scrapCount}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.headerSeparator}></View>
-  
-      <ScrollView 
-        contentContainerStyle={{ flexGrow: 1 }} 
-        style={styles.content} 
+
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        style={styles.content}
         ref={(ref) => (this.scrollView = ref)}
       >
         <CustomModal
@@ -345,7 +440,7 @@ export default function PostDetail({ route, navigation }) {
         />
         <Text style={styles.title}>{post.title}</Text>
         <Text style={styles.postText}>{post.message}</Text>
-  
+
         {post.image && imageWidth && imageHeight ? (
           <Image
             source={{ uri: post.image }}
@@ -362,7 +457,7 @@ export default function PostDetail({ route, navigation }) {
             }}
           />
         ) : null}
-  
+
         {userData && userData.email === post.user_email && (
           <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
@@ -376,9 +471,9 @@ export default function PostDetail({ route, navigation }) {
             </TouchableOpacity>
           </View>
         )}
-  
+
         <View style={styles.separator}></View>
-  
+
         <View style={styles.commentsSection}>
           <View style={styles.commentsHeader}>
             <Text style={styles.commentsTitle}>댓글</Text>
@@ -387,45 +482,81 @@ export default function PostDetail({ route, navigation }) {
               <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
             </View>
           </View>
-  
-          {postComments.map((comment, index) => (
-            <View key={index} style={styles.commentContainer}>
-              <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
-              <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
-              <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
-  
-              {userData && comment.user_id === userData.id && (
-                <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
-                  <MaterialIcons name="more-vert" size={20} color="gray" />
+
+          {postComments
+            .filter(comment => comment.parent_comment_id === null) // 부모 댓글만 필터링
+            .map((comment, index) => (
+              <View key={index} style={styles.commentContainer}>
+                <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
+                <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
+                <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
+
+                <TouchableOpacity
+                  onPress={() => handleReply(comment.id)} // 대댓글 작성
+                  style={styles.replyButton}
+                >
+                  <MaterialIcons name="reply" size={20} color="gray" />
                 </TouchableOpacity>
-              )}
-            </View>
-          ))}
+
+                {userData && comment.user_id === userData.id && (
+                  <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
+                    <MaterialIcons name="more-vert" size={20} color="gray" />
+                  </TouchableOpacity>
+                )}
+
+                {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
+                {postComments
+                  .filter(reply => reply.parent_comment_id === comment.id) // 현재 부모 댓글에 해당하는 자식 댓글만 필터링
+                  .map((reply, replyIndex) => (
+                    <View key={replyIndex} style={styles.replyContainer}>
+                      <Text style={[styles.commentAuthor, { color: 'blue' }]}>{reply.user_nickname || reply.nickname}</Text>
+                      <Text style={[styles.comment, { color: 'blue' }]}>{reply.text || reply.comment_text}</Text>
+                      <Text style={[styles.commentTimestamp, { color: 'blue' }]}>{moment(reply.timestamp).format('YY/MM/DD HH:mm')}</Text>
+                      {userData && reply.user_id === userData.id && (
+                        <TouchableOpacity onPress={() => handleReplyDelete(reply.id)} style={styles.optionsButton}>
+                          <MaterialIcons name="delete" size={20} color="red" />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ))}
+              </View>
+            ))}
+
+
         </View>
       </ScrollView>
-  
+
       {/* Fixed comment input box at the bottom */}
       <View style={styles.commentInputContainer}>
         <TextInput
           style={styles.commentInput}
-          placeholder="댓글을 입력하세요"
-          value={newComment}
-          onChangeText={setNewComment}
+          placeholder={replyToCommentId ? "대댓글을 입력하세요" : "댓글을 입력하세요"} // 조건에 따라 placeholder 변경
+          value={replyToCommentId ? replyComment : newComment} // 대댓글일 경우 replyComment, 일반 댓글일 경우 newComment
+          onChangeText={replyToCommentId ? setReplyComment : setNewComment} // 상태 업데이트 함수 변경
         />
-        <TouchableOpacity 
+
+
+        <TouchableOpacity
           onPress={() => {
-            handleCommentSubmit();
+            if (replyToCommentId) {
+              // 대댓글인 경우
+              handleReplySubmit(); // 대댓글 등록
+            } else {
+              // 댓글인 경우
+              handleCommentSubmit(); // 댓글 등록
+            }
             Keyboard.dismiss();
             setTimeout(() => this.scrollView.scrollToEnd({ animated: true }), 200);
-          }} 
+          }}
           style={styles.commentSubmitButton}
         >
           <Text style={styles.commentSubmitButtonText}>등록</Text>
         </TouchableOpacity>
+
       </View>
     </KeyboardAvoidingView>
   );
-  
+
 }
 
 const styles = StyleSheet.create({
@@ -545,11 +676,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 10,
     paddingLeft: 10,
-    paddingBottom : 10,
+    paddingBottom: 10,
     backgroundColor: 'white', // 배경색을 설정하여 입력창이 잘 보이게
 
   },
-  
+
   commentInput: {
     flex: 1,
     borderWidth: 1,
@@ -571,6 +702,11 @@ const styles = StyleSheet.create({
   optionsButton: {
     position: 'absolute',
     right: 10,
+    top: 10,
+  },
+  replyButton: {
+    position: 'absolute',
+    right: 30,
     top: 10,
   },
   // deleteButton: {
@@ -606,5 +742,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // 양쪽 끝에 요소 배치
     alignItems: 'center',            // 수직 중앙 정렬
     marginBottom: 10,
+  },
+  replyContainer: {
+    marginLeft: 20,          // 부모 댓글로부터 들여쓰기
+    padding: 10,
+    paddingVertical: 5,      // 위아래 패딩 추가
+    // borderLeftWidth: 2,      // 왼쪽에 선 추가해서 구분감 줌
+    // borderLeftColor: '#ccc', // 선 색상 설정
+    backgroundColor: '#f5f5f5', // 배경색 설정 (부드러운 회색)
+    marginTop: 5,
   },
 });
