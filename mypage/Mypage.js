@@ -189,7 +189,7 @@ function MyPostsScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.postsContainer}>
+    <ScrollView style={styles.postsContainer} contentContainerStyle={{ paddingBottom: 80 }}>
       {myPosts.length > 0 ? (
         myPosts.map((post, index) => (
           <TouchableOpacity
@@ -279,7 +279,7 @@ function ScrappedPostsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.postsContainer}>
+      <ScrollView style={styles.postsContainer} contentContainerStyle={{ paddingBottom: 80 }}>
   {scrappedPosts.length === 0 ? (
     <Text>스크랩한 글이 없습니다.</Text>
   ) : (
@@ -326,14 +326,15 @@ function NotificationSettingsScreen() {
 
 function PrivacyPolicyScreen() {
   return (
-    <ScrollView style={{ padding: 20 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
       <Text style={styles.privacypolicytitle}>{PrivacyPolicyContent.title}</Text>
-
+      <Text style={styles.privacypolicyIntroduction}>{PrivacyPolicyContent.introduction}</Text>
+      
       {PrivacyPolicyContent.sections.map((section, index) => (
         <React.Fragment key={index}>
           <Text style={styles.privacypolicysectionTitle}>{section.title}</Text>
           {section.content.map((text, idx) => (
-            <Text key={idx} style={styles.privacypolicycontent}>{text}</Text>
+            <Text key={idx} style={styles.privacypolicycontentText}>{text}</Text>
           ))}
         </React.Fragment>
       ))}
@@ -743,7 +744,15 @@ const styles = StyleSheet.create({
   privacypolicytitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
     color: '#000',
+    paddingHorizontal: 10,
+  },
+  privacypolicyIntroduction: {
+    fontSize: 14,
+    lineHeight: 24,
+    color: '#555',
+    paddingHorizontal: 10,
   },
   privacypolicysectionTitle: {
     fontSize: 16,
@@ -751,11 +760,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     color: '#333',
+    paddingHorizontal: 10,
   },
   privacypolicycontentText: {
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 24,
-    marginBottom: 10,
     color: '#555',
+    paddingHorizontal: 10,
   },
 });
