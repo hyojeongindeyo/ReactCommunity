@@ -1,7 +1,6 @@
-import { StyleSheet } from 'react-native';
-
 const PrivacyPolicyContent = {
   title: "개인정보 처리방침 안내",
+  introduction: "[평안이](이하 '당사')는 사용자의 개인정보를 중요시하며, 관련 법령에 따라 사용자의 개인정보를 보호하기 위해 노력하고 있습니다. 본 개인정보 처리방침은 사용자가 제공하는 개인정보가 어떠한 목적과 방법으로 이용되고 있으며, 개인정보 보호를 위해 당사가 취하고 있는 조치에 대해 설명합니다.",
   sections: [
     {
       title: "1. 수집하는 개인정보 항목",
