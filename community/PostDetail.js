@@ -509,12 +509,12 @@ export default function PostDetail({ route, navigation }) {
                   .filter(reply => reply.parent_comment_id === comment.id) // 현재 부모 댓글에 해당하는 자식 댓글만 필터링
                   .map((reply, replyIndex) => (
                     <View key={replyIndex} style={styles.replyContainer}>
-                      <Text style={[styles.commentAuthor, { color: 'blue' }]}>{reply.user_nickname || reply.nickname}</Text>
-                      <Text style={[styles.comment, { color: 'blue' }]}>{reply.text || reply.comment_text}</Text>
-                      <Text style={[styles.commentTimestamp, { color: 'blue' }]}>{moment(reply.timestamp).format('YY/MM/DD HH:mm')}</Text>
+                      <Text style={styles.commentAuthor}>{reply.user_nickname || reply.nickname}</Text>
+                      <Text style={styles.comment}>{reply.text || reply.comment_text}</Text>
+                      <Text style={styles.commentTimestamp}>{moment(reply.timestamp).format('YY/MM/DD HH:mm')}</Text>
                       {userData && reply.user_id === userData.id && (
                         <TouchableOpacity onPress={() => handleReplyDelete(reply.id)} style={styles.optionsButton}>
-                          <MaterialIcons name="delete" size={20} color="red" />
+                          <MaterialIcons name="more-vert" size={20} color="gray" />
                         </TouchableOpacity>
                       )}
                     </View>
