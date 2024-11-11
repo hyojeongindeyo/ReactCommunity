@@ -48,7 +48,7 @@ android/.idea
 *.pem
 eas.json
 metro.config.js
-app.json
+
 
 
 # Expo에서 생성한 자동 파일
