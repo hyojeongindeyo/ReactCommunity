@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Keyboard, TextInput, ScrollView, Alert, Image, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 // import { Swipeable } from 'react-native-gesture-handler';
@@ -28,7 +28,7 @@ export default function PostDetail({ route, navigation }) {
   const [replyComment, setReplyComment] = useState(''); // 대댓글 입력 상태
   const [replyToCommentId, setReplyToCommentId] = useState(null); // 대댓글을 달고자 하는 댓글 ID
   const [selectedCommentId, setSelectedCommentId] = useState(null); // 댓글 또는 대댓글을 다는 댓글 ID
-
+  const textInputRef = useRef(null);
 
 
   useEffect(() => {
@@ -205,15 +205,13 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleReply = (commentId) => {
-    if (replyToCommentId === commentId) {
-      // 이미 선택한 댓글이면 대댓글 입력창을 닫고 댓글 입력창으로 돌아감
-      setReplyToCommentId(null);
-      setReplyComment(""); // 대댓글 상태 초기화
-    } else {
-      // 대댓글을 작성할 댓글을 선택
-      setReplyToCommentId(commentId);
-      setReplyComment(""); // 기존 대댓글 초기화
-    }
+    setReplyToCommentId(commentId);  // 대댓글을 다는 댓글 ID 설정
+    setReplyComment('');  // 대댓글 입력란 초기화
+  
+    // 키보드 호출 (대댓글 입력창으로 포커스를 맞추기)
+    setTimeout(() => {
+      textInputRef.current.focus(); // 대댓글 입력창에 포커스를 맞춤
+    }, 100); // 딜레이를 준 후 포커스 이동
   };
   
   const fetchComments = async () => {
@@ -536,6 +534,7 @@ export default function PostDetail({ route, navigation }) {
       {/* Fixed comment input box at the bottom */}
       <View style={styles.commentInputContainer}>
         <TextInput
+          ref={textInputRef} // ref를 설정하여 포커스를 제어
           style={styles.commentInput}
           placeholder={replyToCommentId ? "대댓글을 입력하세요" : "댓글을 입력하세요"} // 조건에 따라 placeholder 변경
           value={replyToCommentId ? replyComment : newComment} // 대댓글일 경우 replyComment, 일반 댓글일 경우 newComment
