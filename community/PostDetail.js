@@ -29,7 +29,7 @@ export default function PostDetail({ route, navigation }) {
   const [replyToCommentId, setReplyToCommentId] = useState(null); // 대댓글을 달고자 하는 댓글 ID
   const [selectedCommentId, setSelectedCommentId] = useState(null); // 댓글 또는 대댓글을 다는 댓글 ID
   const textInputRef = useRef(null);
-
+  const scrollViewRef = useRef(null); // ScrollView 참조
 
   useEffect(() => {
     console.log("수정된 데이터:", post);
@@ -207,11 +207,19 @@ export default function PostDetail({ route, navigation }) {
   const handleReply = (commentId) => {
     setReplyToCommentId(commentId);  // 대댓글을 다는 댓글 ID 설정
     setReplyComment('');  // 대댓글 입력란 초기화
-  
+
     // 키보드 호출 (대댓글 입력창으로 포커스를 맞추기)
     setTimeout(() => {
-      textInputRef.current.focus(); // 대댓글 입력창에 포커스를 맞춤
-    }, 100); // 딜레이를 준 후 포커스 이동
+      if (textInputRef.current) {
+        textInputRef.current.focus();  // 대댓글 입력창에 포커스를 맞춤
+      }
+
+      // 대댓글 입력창으로 스크롤 이동
+      if (scrollViewRef.current) {
+        // 스크롤을 대댓글 입력창으로 이동시킴
+        scrollViewRef.current.scrollTo({ x: 0, y: 300, animated: true });  // 300은 스크롤 위치, 필요에 맞게 조정
+      }
+    }, 100);  // 딜레이 후 포커스 이동
   };
   
   const fetchComments = async () => {
@@ -436,7 +444,7 @@ export default function PostDetail({ route, navigation }) {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         style={styles.content}
-        ref={(ref) => (this.scrollView = ref)}
+        ref={scrollViewRef} // ScrollView에 ref 연결
       >
         <CustomModal
           visible={modalVisible}
@@ -491,13 +499,23 @@ export default function PostDetail({ route, navigation }) {
           {postComments
             .filter(comment => comment.parent_comment_id === null) // 부모 댓글만 필터링
             .map((comment, index) => (
-              <View key={index} style={styles.commentContainer}>
+              <View
+                key={index}
+                style={[
+                  styles.commentContainer,
+                  replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
+                ]}
+              >
                 <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
                 <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
                 <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
 
                 <TouchableOpacity
-                  onPress={() => handleReply(comment.id)} // 대댓글 작성
+                  onPress={() => {
+                    handleReply(comment.id);
+                    // 대댓글을 작성하는 부모 댓글이 상단으로 스크롤되도록 설정
+                    scrollViewRef.current.scrollTo({ x: 0, y: index * 100, animated: true });
+                  }}
                   style={styles.replyButton}
                 >
                   <MaterialIcons name="reply" size={20} color="gray" />
@@ -526,43 +544,35 @@ export default function PostDetail({ route, navigation }) {
                   ))}
               </View>
             ))}
-
-
         </View>
       </ScrollView>
 
       {/* Fixed comment input box at the bottom */}
       <View style={styles.commentInputContainer}>
         <TextInput
-          ref={textInputRef} // ref를 설정하여 포커스를 제어
+          ref={textInputRef}
           style={styles.commentInput}
-          placeholder={replyToCommentId ? "대댓글을 입력하세요" : "댓글을 입력하세요"} // 조건에 따라 placeholder 변경
-          value={replyToCommentId ? replyComment : newComment} // 대댓글일 경우 replyComment, 일반 댓글일 경우 newComment
-          onChangeText={replyToCommentId ? setReplyComment : setNewComment} // 상태 업데이트 함수 변경
+          placeholder={replyToCommentId ? "대댓글을 입력하세요" : "댓글을 입력하세요"}
+          value={replyToCommentId ? replyComment : newComment}
+          onChangeText={replyToCommentId ? setReplyComment : setNewComment}
         />
-
-
         <TouchableOpacity
           onPress={() => {
             if (replyToCommentId) {
-              // 대댓글인 경우
-              handleReplySubmit(); // 대댓글 등록
+              handleReplySubmit();
             } else {
-              // 댓글인 경우
-              handleCommentSubmit(); // 댓글 등록
+              handleCommentSubmit();
             }
             Keyboard.dismiss();
-            setTimeout(() => this.scrollView.scrollToEnd({ animated: true }), 200);
+            setTimeout(() => scrollViewRef.current.scrollToEnd({ animated: true }), 200);
           }}
           style={styles.commentSubmitButton}
         >
           <Text style={styles.commentSubmitButtonText}>등록</Text>
         </TouchableOpacity>
-
       </View>
     </KeyboardAvoidingView>
   );
-
 }
 
 const styles = StyleSheet.create({
@@ -757,5 +767,8 @@ const styles = StyleSheet.create({
     // borderLeftColor: '#ccc', // 선 색상 설정
     backgroundColor: '#f5f5f5', // 배경색 설정 (부드러운 회색)
     marginTop: 5,
+  },
+  replyingComment: {
+    backgroundColor: '#f0f8ff',  // 대댓글 작성 중인 부모 댓글의 배경색
   },
 });
