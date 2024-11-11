@@ -205,10 +205,17 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleReply = (commentId) => {
-    setReplyToCommentId(commentId);  // 대댓글을 다는 댓글 ID 설정
-    setReplyComment('');  // 대댓글 입력란 초기화
+    if (replyToCommentId === commentId) {
+      // 이미 선택한 댓글이면 대댓글 입력창을 닫고 댓글 입력창으로 돌아감
+      setReplyToCommentId(null);
+      setReplyComment(""); // 대댓글 상태 초기화
+    } else {
+      // 대댓글을 작성할 댓글을 선택
+      setReplyToCommentId(commentId);
+      setReplyComment(""); // 기존 대댓글 초기화
+    }
   };
-  // 댓글 목록을 새로 고침하는 함수 정의
+  
   const fetchComments = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/comments/${post.id}`);

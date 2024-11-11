@@ -189,7 +189,7 @@ function MyPostsScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.postsContainer} contentContainerStyle={{ paddingBottom: 80 }}>
+    <ScrollView style={styles.postsContainer} contentContainerStyle={{ marginBottom: 80 }}>
       {myPosts.length > 0 ? (
         myPosts.map((post, index) => (
           <TouchableOpacity
@@ -279,7 +279,7 @@ function ScrappedPostsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.postsContainer} contentContainerStyle={{ paddingBottom: 80 }}>
+      <ScrollView style={styles.postsContainer} contentContainerStyle={{ marginBottom: 80 }}>
   {scrappedPosts.length === 0 ? (
     <Text>스크랩한 글이 없습니다.</Text>
   ) : (
@@ -326,7 +326,7 @@ function NotificationSettingsScreen() {
 
 function PrivacyPolicyScreen() {
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ marginBottom: 80 }}>
       <Text style={styles.privacypolicytitle}>{PrivacyPolicyContent.title}</Text>
       <Text style={styles.privacypolicyIntroduction}>{PrivacyPolicyContent.introduction}</Text>
       
