@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Alert,  Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import BottomTabBar from '../BottomTabBar';
+// import BottomTabBar from '../BottomTabBar';
 import axios from 'axios'; // Axios 임포트
 import config from '../config';
 import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
@@ -331,7 +331,7 @@ useEffect(() => {
         </>
       )}
 
-      <BottomTabBar navigation={navigation} />
+      {/* <BottomTabBar navigation={navigation} /> */}
 
       {/* Info Modal */}
       <Modal
@@ -450,6 +450,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    marginBottom: 80,
   },
   header: {
     flexDirection: 'row',
@@ -470,6 +471,7 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     height: 200,
+    width: 400,
   },
   banner: {
     height: '100%',
