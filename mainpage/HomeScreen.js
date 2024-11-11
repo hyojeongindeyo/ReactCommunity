@@ -27,10 +27,14 @@ const App = ({ navigation, route }) => {
   const [error, setError] = useState(null);
   const [userMissions, setUserMissions] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null); // 확대할 이미지의 상태
+  const [selectedName, setSelectedName] = useState(null);
+  const [selectedDescription, setSelectedDescription] = useState(null);
   const [enlargeModalVisible, setEnlargeModalVisible] = useState(false); // 이미지 확대 모달
 
-  const handleImagePress = (image) => {
+  const handleImagePress = (image, name, description) => {
     setSelectedImage(image);
+    setSelectedName(name);
+    setSelectedDescription(description); // 설명 설정
     setModalVisible(false);
     setEnlargeModalVisible(true);
   };
@@ -41,13 +45,38 @@ const App = ({ navigation, route }) => {
   };
 
   const missionImages = {
-    1: require('../assets/flashlight.png'),
-    2: require('../assets/whistle.png'),
-    3: require('../assets/compass.png'),
-    4: require('../assets/fire_extinguisher.png'),
-    5: require('../assets/first_aid_kit.png'),
-    6: require('../assets/water.png'),
+    1: {
+      image: require('../assets/flashlight.png'),
+      name: '손전등',
+      description: 'A flashlight to light up the dark.',
+    },
+    2: {
+      image: require('../assets/whistle.png'),
+      name: '호루라기',
+      description: 'A whistle for signaling.',
+    },
+    3: {
+      image: require('../assets/compass.png'),
+      name: '나침반',
+      description: 'A compass for navigation.',
+    },
+    4: {
+      image: require('../assets/fire_extinguisher.png'),
+      name: '소화기',
+      description: 'A fire extinguisher to put out fires.',
+    },
+    5: {
+      image: require('../assets/first_aid_kit.png'),
+      name: '구급상자',
+      description: 'A kit for treating injuries.',
+    },
+    6: {
+      image: require('../assets/water.png'),
+      name: '물',
+      description: 'Water for hydration.',
+    },
   };
+  
 
 
   // 위치 가져오기 및 데이터 호출
@@ -299,12 +328,15 @@ const App = ({ navigation, route }) => {
               userMissions={userMissions}
               handleImagePress={handleImagePress}
               missionImages={missionImages}
+              
             />
 
             <EnlargeModal
               enlargeModalVisible={enlargeModalVisible}
               setEnlargeModalVisible={setEnlargeModalVisible}
               selectedImage={selectedImage}
+              selectedName={selectedName} // name도 함께 전달
+              selectedDescription={selectedDescription} // name도 함께 전달
               handleCloseEnlargeModal={handleCloseEnlargeModal}
             />
 

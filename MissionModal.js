@@ -24,9 +24,9 @@ const MissionModal = ({ modalVisible, setModalVisible, userMissions, handleImage
                             <View style={styles.rowContainer}>
                                 {userMissions.slice(0, 3).map((missionId) => (
                                     <View key={missionId} style={styles.missionContainer}>
-                                        {missionImages[missionId] ? (
-                                            <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId])}>
-                                                <Image source={missionImages[missionId]} style={styles.image} />
+                                        {missionImages[missionId].image ? (
+                                            <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId].image, missionImages[missionId].name, missionImages[missionId].description)}>
+                                                <Image source={missionImages[missionId].image} style={styles.image} />
                                             </TouchableOpacity>
                                         ) : (
                                             <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
@@ -37,9 +37,9 @@ const MissionModal = ({ modalVisible, setModalVisible, userMissions, handleImage
                             <View style={styles.rowContainer}>
                                 {userMissions.slice(3, 6).map((missionId) => (
                                     <View key={missionId} style={styles.missionContainer}>
-                                        {missionImages[missionId] ? (
-                                            <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId])}>
-                                                <Image source={missionImages[missionId]} style={styles.image} />
+                                        {missionImages[missionId].image ? (
+                                            <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId].image, missionImages[missionId].name, missionImages[missionId].description)}>
+                                                <Image source={missionImages[missionId].image} style={styles.image} />
                                             </TouchableOpacity>
                                         ) : (
                                             <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
