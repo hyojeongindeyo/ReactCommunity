@@ -8,6 +8,8 @@ import Swiper from 'react-native-swiper';
 import axios from 'axios';
 import config from '../config'; // config 파일 import
 import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
+import MissionModal from '../MissionModal'; // MissionModal import
+import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -166,7 +168,7 @@ const App = ({ navigation, route }) => {
 
         if (address.length > 0) {
           const { city, district, street } = address[0];
-          const userAddress = `${city} ${district || street }`;
+          const userAddress = `${city} ${district || street}`;
           setUserLocation(userAddress); // 시(city)와 동(district) 정보 설정
           await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
         }
@@ -290,81 +292,21 @@ const App = ({ navigation, route }) => {
               </View>
             </TouchableOpacity>
 
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => setModalVisible(false)} // 모달 닫기
-            >
-              <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>평안이의 안전 가방</Text>
-                  <TouchableOpacity
-                    onPress={() => setModalVisible(false)} // 모달 닫기 버튼
-                    style={styles.closeButton}
-                  >
-                    <Text style={styles.closeButtonText}>X</Text>
-                  </TouchableOpacity>
-                  {userMissions.length > 0 ? (
-                <>
-                    <View style={styles.rowContainer}>
-                        {userMissions.slice(0, 3).map((missionId) => (
-                            <View key={missionId} style={styles.missionContainer}>
-                                {missionImages[missionId] ? (
-                                    <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId])}>
-                                        <Image source={missionImages[missionId]} style={styles.image} />
-                                    </TouchableOpacity>
-                                ) : (
-                                    <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
-                                )}
-                            </View>
-                        ))}
-                    </View>
-                    <View style={styles.rowContainer}>
-                        {userMissions.slice(3, 6).map((missionId) => (
-                            <View key={missionId} style={styles.missionContainer}>
-                                {missionImages[missionId] ? (
-                                    <TouchableOpacity onPress={() => handleImagePress(missionImages[missionId])}>
-                                        <Image source={missionImages[missionId]} style={styles.image} />
-                                    </TouchableOpacity>
-                                ) : (
-                                    <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
-                                )}
-                            </View>
-                        ))}
-                    </View>
-                </>
-            ) : (
-                <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
-            )}
-                </View>
-              </View>
-            </Modal>
+            {/* 평안이의 안전 가방 모달 */}
+            <MissionModal
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              userMissions={userMissions}
+              handleImagePress={handleImagePress}
+              missionImages={missionImages}
+            />
 
-            <Modal
-              animationType="fade"
-              transparent={true}
-              visible={enlargeModalVisible}
-              onRequestClose={() => setEnlargeModalVisible(false)}
-            >
-              <View style={styles.enlargeModalContainer}>
-                <View style={styles.enlargeModalContent}>
-                  <TouchableOpacity onPress={() => setEnlargeModalVisible(false)} style={styles.enlargeCloseButton}>
-                    <Text style={styles.closeButtonText}>닫기</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={handleCloseEnlargeModal} style={styles.enlargebackButton}>
-                    <Text style={styles.backButtonText}>뒤로 가기</Text>
-                  </TouchableOpacity>
-                  {/* 이미지만 중앙에 배치 */}
-            <View style={styles.imageContainer}>
-                {selectedImage && (
-                    <Image source={selectedImage} style={styles.enlargedImage} />
-                )}
-            </View>
-                </View>
-
-              </View>
-            </Modal>
+            <EnlargeModal
+              enlargeModalVisible={enlargeModalVisible}
+              setEnlargeModalVisible={setEnlargeModalVisible}
+              selectedImage={selectedImage}
+              handleCloseEnlargeModal={handleCloseEnlargeModal}
+            />
 
           </View>
         </View>
@@ -399,7 +341,7 @@ const App = ({ navigation, route }) => {
                       <Text style={styles.safetitle}>
                         {filteredPost.title.length > 20 ? `${filteredPost.title.substring(0, 20)}...` : filteredPost.title}
                       </Text>
-               
+
                     </View>
                     <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
                   </TouchableOpacity>
@@ -758,103 +700,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)', // 배경 반투명
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    borderColor: '#92B2AE',
-    borderWidth: 2,
-    // 그림자 스타일
-    shadowColor: '#000', // 그림자 색상
-    shadowOffset: {
-      width: 0,
-      height: 2, // 아래쪽으로 그림자 이동
-    },
-    shadowOpacity: 0.25, // 그림자 투명도
-    shadowRadius: 3.5, // 그림자 퍼짐 정도
-    elevation: 5, // 안드로이드에서 그림자 효과를 주기 위해 사용
-    height: 300,
-  },
-  closeButton: {
-    color: 'blue',
 
-  },
-  image: {
-    width: 50, // 기본 이미지 크기
-    height: 50,
-    resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
-  },
-  modalTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#6F8B87',
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-  missionContainer: {
-    width: 60,
-    height: 60,
-  },
-  enlargeModalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)', // 배경 반투명
-
-  },
-  enlargeModalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    borderColor: '#92B2AE',
-    borderWidth: 2,
-    // 그림자 스타일
-    shadowColor: '#000', // 그림자 색상
-    shadowOffset: {
-      width: 0,
-      height: 2, // 아래쪽으로 그림자 이동
-    },
-    shadowOpacity: 0.25, // 그림자 투명도
-    shadowRadius: 3.5, // 그림자 퍼짐 정도
-    elevation: 5, // 안드로이드에서 그림자 효과를 주기 위해 사용
-    height: 300,
-  },
-  enlargedImage: {
-    width: 100, // 기본 이미지 크기
-    height: 100,
-    resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
-  },
-  enlargeCloseButton: { 
-    position: 'absolute', 
-    top: 20, 
-    right: 20 
-  },
-  closeButtonText: { 
-    backgroundColor: 'white', 
-    fontSize: 18 
-  },
-  imageContainer: {
-    flex: 1,
-    justifyContent: 'center', // 이미지만 수직 중앙 정렬
-    alignItems: 'center', // 이미지만 수평 중앙 정렬
-  },
-  enlargedImage: {
-    width: 100, // 기본 이미지 크기
-    height: 100,
-    resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
-  },
 });
 
 export default App;
