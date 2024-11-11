@@ -12,6 +12,8 @@ import PrivacyPolicyContent from './PrivacyPolicyContent';
 import axios from 'axios';
 import config from '../config';
 import { useFocusEffect } from '@react-navigation/native';
+import MissionModal from '../MissionModal'; // MissionModal import
+import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
@@ -20,6 +22,10 @@ function MainScreen({ navigation, handleLogout }) {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
   const [nickname, setNickname] = useState('');  // 닉네임 상태 추가
+  const [modalVisible, setModalVisible] = useState(false); // 모달 상태 정의
+  const [userMissions, setUserMissions] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null); // 확대할 이미지의 상태
+  const [enlargeModalVisible, setEnlargeModalVisible] = useState(false); // 이미지 확대 모달
 
   useEffect(() => {
     // 로그인된 사용자의 세션 정보를 가져오는 함수
@@ -35,6 +41,55 @@ function MainScreen({ navigation, handleLogout }) {
 
     fetchUserSession();
   }, []);
+  
+  const fetchMissionSession = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
+      console.log('User session data:', response.data);
+      const userId = response.data.id; // 사용자 ID 가져오기
+
+      // 사용자 미션 가져오기
+      const missionsResponse = await axios.get(`${config.apiUrl}/missions/user/${userId}`, { withCredentials: true });
+      console.log('User Missions:', missionsResponse.data); // 미션 데이터 출력
+      setUserMissions(missionsResponse.data.missions || []); // 미션 상태 설정
+
+      // // 모달 표시 여부를 설정
+      // if (route.params?.showModal) {
+      //   setModalVisible(true);
+      // }
+
+    } catch (error) {
+      if (error.response) {
+        console.error('데이터 오류:', error.response.data);
+      } else {
+        console.error('Error fetching user session:', error.message);
+      }
+      setUserMissions([]);
+    }
+  };
+
+  // 컴포넌트가 마운트될 때 fetchMissionSession 호출
+  React.useEffect(() => {
+    fetchMissionSession();
+  }, []); // 의존성 배열에 빈 배열을 주어 컴포넌트가 마운트될 때만 호출
+
+  useEffect(() => {
+    if (modalVisible) {
+      fetchMissionSession(); // 모달이 열릴 때마다 미션을 다시 가져옵니다.
+    }
+  }, [modalVisible]);
+
+  const handleImagePress = (image) => {
+    setSelectedImage(image);
+    setModalVisible(false);
+    setEnlargeModalVisible(true);
+  };
+
+  const handleCloseEnlargeModal = () => {
+    setEnlargeModalVisible(false);
+    setModalVisible(true);
+  };
+
 
   const handleLogoutClick = async () => {
     try {
@@ -54,6 +109,14 @@ function MainScreen({ navigation, handleLogout }) {
       console.error("회원 탈퇴 실패:", error);
     }
   };
+  const missionImages = {
+    1: require('../assets/flashlight.png'),
+    2: require('../assets/whistle.png'),
+    3: require('../assets/compass.png'),
+    4: require('../assets/fire_extinguisher.png'),
+    5: require('../assets/first_aid_kit.png'),
+    6: require('../assets/water.png'),
+  };
 
   return (
     <View style={styles.container}>
@@ -64,8 +127,26 @@ function MainScreen({ navigation, handleLogout }) {
 
         <View style={styles.imgContainer}>
           <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode='contain' />
-          <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode='contain' />
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode='contain' />
+          </TouchableOpacity>
+
+
         </View>
+        <MissionModal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          userMissions={userMissions}
+          handleImagePress={handleImagePress}
+          missionImages={missionImages}
+        />
+
+        <EnlargeModal
+          enlargeModalVisible={enlargeModalVisible}
+          setEnlargeModalVisible={setEnlargeModalVisible}
+          selectedImage={selectedImage}
+          handleCloseEnlargeModal={handleCloseEnlargeModal}
+        />
 
         <View style={styles.separator} />
         <Text style={styles.title}>내 정보</Text>
@@ -173,8 +254,8 @@ function MyPostsScreen({ navigation }) {
       setLoading(false);
     }
   }, []);
-  
-  
+
+
 
   // 화면이 focus될 때마다 내 글 목록 새로고침
   useFocusEffect(
@@ -239,14 +320,14 @@ function ScrappedPostsScreen({ navigation }) {
       setLoading(false);
     }
   };
-  
-  
+
+
   const handleScrap = async (postId) => {
     try {
       let updatedPosts;
-      
+
       const postToUpdate = scrappedPosts.find(post => post.id === postId);
-      
+
       if (postToUpdate.isScraped) {
         // 스크랩 해제 요청
         await axios.delete(`${config.apiUrl}/scrap/${postId}`, { withCredentials: true });
@@ -260,13 +341,13 @@ function ScrappedPostsScreen({ navigation }) {
           post.id === postId ? { ...post, isScraped: true } : post
         );
       }
-  
+
       setScrappedPosts(updatedPosts);
     } catch (error) {
       console.error('스크랩 오류:', error);
     }
   };
-  
+
   useFocusEffect(
     React.useCallback(() => {
       fetchScrappedPosts();
@@ -280,26 +361,26 @@ function ScrappedPostsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.postsContainer} contentContainerStyle={{ marginBottom: 80 }}>
-  {scrappedPosts.length === 0 ? (
-    <Text>스크랩한 글이 없습니다.</Text>
-  ) : (
-    scrappedPosts.map((post, index) => (
-      <TouchableOpacity
-        key={index}
-        style={styles.postItem}
-        onPress={() => navigation.navigate('PostDetail', { post })}
-      >
-        <View style={styles.titleContainer}>
-          <Text style={styles.postTitle}>{post.title}</Text>
-          <TouchableOpacity onPress={() => handleScrap(post.id)} style={styles.scrapButton}>
-            <FontAwesome name={post.isScraped ? 'star' : 'star-o'} size={20} color={post.isScraped ? 'gold' : 'black'} />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.postMessage}>{post.message}</Text>
-      </TouchableOpacity>
-    ))
-  )}
-</ScrollView>
+        {scrappedPosts.length === 0 ? (
+          <Text>스크랩한 글이 없습니다.</Text>
+        ) : (
+          scrappedPosts.map((post, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.postItem}
+              onPress={() => navigation.navigate('PostDetail', { post })}
+            >
+              <View style={styles.titleContainer}>
+                <Text style={styles.postTitle}>{post.title}</Text>
+                <TouchableOpacity onPress={() => handleScrap(post.id)} style={styles.scrapButton}>
+                  <FontAwesome name={post.isScraped ? 'star' : 'star-o'} size={20} color={post.isScraped ? 'gold' : 'black'} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.postMessage}>{post.message}</Text>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
 
     </View>
   );
@@ -329,7 +410,7 @@ function PrivacyPolicyScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ marginBottom: 80 }}>
       <Text style={styles.privacypolicytitle}>{PrivacyPolicyContent.title}</Text>
       <Text style={styles.privacypolicyIntroduction}>{PrivacyPolicyContent.introduction}</Text>
-      
+
       {PrivacyPolicyContent.sections.map((section, index) => (
         <React.Fragment key={index}>
           <Text style={styles.privacypolicysectionTitle}>{section.title}</Text>
