@@ -48,6 +48,7 @@ android/.idea
 *.pem
 eas.json
 metro.config.js
+app.json
 
 
 
