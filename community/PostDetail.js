@@ -30,6 +30,7 @@ export default function PostDetail({ route, navigation }) {
   const [selectedCommentId, setSelectedCommentId] = useState(null); // 댓글 또는 대댓글을 다는 댓글 ID
   const textInputRef = useRef(null);
   const scrollViewRef = useRef(null); // ScrollView 참조
+  const [commentLayouts, setCommentLayouts] = useState([]);
 
   useEffect(() => {
     console.log("수정된 데이터:", post);
@@ -146,6 +147,15 @@ export default function PostDetail({ route, navigation }) {
       ],
       { cancelable: false }
     );
+  };
+
+  const handleCommentLayout = (event, index) => {
+    const layout = event.nativeEvent.layout;
+    setCommentLayouts((prevLayouts) => {
+      const newLayouts = [...prevLayouts];
+      newLayouts[index] = layout.y;  // 댓글의 Y 위치 저장
+      return newLayouts;
+    });
   };
 
   const handleCommentSubmit = () => {
@@ -497,53 +507,59 @@ export default function PostDetail({ route, navigation }) {
           </View>
 
           {postComments
-            .filter(comment => comment.parent_comment_id === null) // 부모 댓글만 필터링
-            .map((comment, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.commentContainer,
-                  replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
-                ]}
-              >
-                <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
-                <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
-                <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
+  .filter(comment => comment.parent_comment_id === null) // 부모 댓글만 필터링
+  .map((comment, index) => (
+    <View
+      key={index}
+      style={[
+        styles.commentContainer,
+        replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
+      ]}
+      onLayout={(event) => handleCommentLayout(event, index)} // onLayout 이벤트로 위치 추적
+    >
+      <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
+      <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
+      <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
 
-                <TouchableOpacity
-                  onPress={() => {
-                    handleReply(comment.id);
-                    // 대댓글을 작성하는 부모 댓글이 상단으로 스크롤되도록 설정
-                    scrollViewRef.current.scrollTo({ x: 0, y: index * 100, animated: true });
-                  }}
-                  style={styles.replyButton}
-                >
-                  <MaterialIcons name="reply" size={20} color="gray" />
-                </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          handleReply(comment.id);
+          // 부모 댓글의 위치를 추적하여 해당 위치로 스크롤
+          const parentCommentIndex = postComments.findIndex((c) => c.id === comment.id);
+          const parentCommentY = commentLayouts[parentCommentIndex];  // 부모 댓글의 Y 위치
+          if (parentCommentY !== undefined) {
+            // 부모 댓글의 위치로 스크롤 (50px 만큼 위로 스크롤)
+            scrollViewRef.current.scrollTo({ x: 0, y: parentCommentY - 50, animated: true });
+          }
+        }}
+        style={styles.replyButton}
+      >
+        <MaterialIcons name="reply" size={20} color="gray" />
+      </TouchableOpacity>
 
-                {userData && comment.user_id === userData.id && (
-                  <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
-                    <MaterialIcons name="more-vert" size={20} color="gray" />
-                  </TouchableOpacity>
-                )}
+      {userData && comment.user_id === userData.id && (
+        <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
+          <MaterialIcons name="more-vert" size={20} color="gray" />
+        </TouchableOpacity>
+      )}
 
-                {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
-                {postComments
-                  .filter(reply => reply.parent_comment_id === comment.id) // 현재 부모 댓글에 해당하는 자식 댓글만 필터링
-                  .map((reply, replyIndex) => (
-                    <View key={replyIndex} style={styles.replyContainer}>
-                      <Text style={styles.commentAuthor}>{reply.user_nickname || reply.nickname}</Text>
-                      <Text style={styles.comment}>{reply.text || reply.comment_text}</Text>
-                      <Text style={styles.commentTimestamp}>{moment(reply.timestamp).format('YY/MM/DD HH:mm')}</Text>
-                      {userData && reply.user_id === userData.id && (
-                        <TouchableOpacity onPress={() => handleReplyDelete(reply.id)} style={styles.optionsButton}>
-                          <MaterialIcons name="more-vert" size={20} color="gray" />
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  ))}
-              </View>
-            ))}
+      {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
+      {postComments
+        .filter(reply => reply.parent_comment_id === comment.id) // 현재 부모 댓글에 해당하는 자식 댓글만 필터링
+        .map((reply, replyIndex) => (
+          <View key={replyIndex} style={styles.replyContainer}>
+            <Text style={styles.commentAuthor}>{reply.user_nickname || reply.nickname}</Text>
+            <Text style={styles.comment}>{reply.text || reply.comment_text}</Text>
+            <Text style={styles.commentTimestamp}>{moment(reply.timestamp).format('YY/MM/DD HH:mm')}</Text>
+            {userData && reply.user_id === userData.id && (
+              <TouchableOpacity onPress={() => handleReplyDelete(reply.id)} style={styles.optionsButton}>
+                <MaterialIcons name="more-vert" size={20} color="gray" />
+              </TouchableOpacity>
+            )}
+          </View>
+        ))}
+    </View>
+  ))}
         </View>
       </ScrollView>
 
