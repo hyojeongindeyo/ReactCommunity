@@ -555,6 +555,11 @@ export default function PostDetail({ route, navigation }) {
           placeholder={replyToCommentId ? "대댓글을 입력하세요" : "댓글을 입력하세요"}
           value={replyToCommentId ? replyComment : newComment}
           onChangeText={replyToCommentId ? setReplyComment : setNewComment}
+          onFocus={() => {
+            setTimeout(() => {
+              scrollViewRef.current.scrollToEnd({ animated: true });
+            }, 100); // 키보드가 올라올 시간을 고려하여 약간의 지연을 줄 수 있음
+          }}
         />
         <TouchableOpacity
           onPress={() => {
