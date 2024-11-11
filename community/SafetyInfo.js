@@ -48,6 +48,18 @@ const SafetyInfo = ({ navigation, route }) => {
     }
   };
 
+  const bannerImages = {
+    1: require('../assets/banner_typhoon_safety.png'),
+    2: require('../assets/banner_earthquake_plan.png'),
+    3: require('../assets/banner_fire_prevention.png'),
+    4: require('../assets/banner_vehicle_safety.png'),
+    5: require('../assets/banner_heat_precaution.png'),
+    6: require('../assets/banner_flood_preparedness.png'),
+    7: require('../assets/banner_water_safety.png'),
+    8: require('../assets/banner_heat_safety.png'),
+    9: require('../assets/banner_disaster_guide.png'),
+  };
+  
   useEffect(() => {
     if (filter) {
       setSelectedCategory(filter);
@@ -252,11 +264,7 @@ useEffect(() => {
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <CustomModal
-        visible={missionModalVisible}
-        onClose={missionhandleClose}
-        onConfirm={missionhandleConfirm}
-      />
+  
       {/* 로딩 상태일 때 표시 */}
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -265,30 +273,35 @@ useEffect(() => {
       ) : (
         <>
           <View style={styles.bannerContainer}>
-        <ScrollView
-          ref={scrollViewRef} // ScrollView에 ref 연결
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          style={styles.banner}
-          scrollEventThrottle={16} // 이벤트 업데이트 빈도 설정
-        >
-          {randomBanners.map((banner, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.bannerItem,
-                index === 0 ? styles.firstBanner : index === 1 ? styles.secondBanner : styles.thirdBanner,
-              ]}
-              onPress={() => handleBannerPress(banner)}
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              style={styles.banner}
+              scrollEventThrottle={16}
             >
-              <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
-              <Text style={styles.bannerText}>{banner.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
+              {randomBanners.map((banner, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.bannerItem,
+                    index === 0 ? styles.firstBanner : index === 1 ? styles.secondBanner : styles.thirdBanner,
+                  ]}
+                  onPress={() => handleBannerPress(banner)}
+                >
+                  {/* 배너 표지 이미지 변경 */}
+                  {bannerImages[banner.id] && (
+                    <Image
+                      source={bannerImages[banner.id]} // 배너에 해당하는 이미지를 설정
+                      style={styles.bannerImage} // 배너 이미지 스타일
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+  
           <View style={styles.categoryContainer}>
             {categories.map((category) => (
               <TouchableOpacity
@@ -302,18 +315,18 @@ useEffect(() => {
               </TouchableOpacity>
             ))}
           </View>
-
+  
           <ScrollView contentContainerStyle={styles.infoContainer}>
             <View style={styles.infoRow}>
-            {filteredInfos.map((info) => (
+              {filteredInfos.map((info) => (
                 <TouchableOpacity key={info.id} onPress={() => handleInfoPress(info)} style={styles.infoCardContainer}>
                   <View style={styles.infoCard}>
-                    {/* 이미지 배경 설정 */}
+                    {/* 카드 표지 이미지 (이건 그대로 유지) */}
                     {coverImages[info.id] && (
                       <Image
-                        source={{ uri: coverImages[info.id] }} // 카드의 표지 이미지를 표시
+                        source={{ uri: coverImages[info.id] }} // 카드 표지 이미지
                         style={styles.cardImageBackground} // 배경 이미지 스타일
-                        opacity={0.45} 
+                        opacity={0.45}
                       />
                     )}
                     <Text style={styles.infoTitle}>{info.title}</Text>
@@ -321,7 +334,7 @@ useEffect(() => {
                   <View style={styles.infoFooter}>
                     <Text style={styles.infoDate}>{info.date}</Text>
                     <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(info.category) }]}>
-                      <Text style={[styles.categoryBadgeText]}>{info.category}</Text>
+                      <Text style={styles.categoryBadgeText}>{info.category}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -330,9 +343,7 @@ useEffect(() => {
           </ScrollView>
         </>
       )}
-
-      {/* <BottomTabBar navigation={navigation} /> */}
-
+  
       {/* Info Modal */}
       <Modal
         animationType="slide"
@@ -346,104 +357,101 @@ useEffect(() => {
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
               <Text style={styles.modalCloseText}>X</Text>
             </TouchableOpacity>
-            {/* <View style={styles.grayRectangle}> */}
-              {images.length > 0 ? (
-                <>
-                  <Image
-                    key={currentImageIndex}
-                    source={{ uri: images[currentImageIndex] }} // 현재 이미지 URL 사용
-                    style={styles.cardImage}
-                    resizeMode="contain" // 비율을 유지하며 컨테이너 안에 맞춤
-                    onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
-                  />
-                  <View style={styles.imageNavigation}>
-                    <TouchableOpacity onPress={handlePrevImage} disabled={images.length === 0}>
-                      <Text style={styles.navigationText}>이전</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleNextImage} disabled={images.length === 0}>
-                      <Text style={styles.navigationText}>다음</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              ) : (
-                <Text>No images available.</Text>
-              )}
-            </View>
+            {images.length > 0 ? (
+              <>
+                <Image
+                  key={currentImageIndex}
+                  source={{ uri: images[currentImageIndex] }} // 현재 이미지 URL 사용
+                  style={styles.cardImage}
+                  resizeMode="contain"
+                  onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
+                />
+                <View style={styles.imageNavigation}>
+                  <TouchableOpacity onPress={handlePrevImage} disabled={images.length === 0}>
+                    <Text style={styles.navigationText}>이전</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleNextImage} disabled={images.length === 0}>
+                    <Text style={styles.navigationText}>다음</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <Text>No images available.</Text>
+            )}
           </View>
-        {/* </View> */}
+        </View>
       </Modal>
-
-
-      {/* Search Modal */} 
-<Modal
-  animationType="slide"
-  transparent={true}
-  visible={searchModalVisible}
-  onRequestClose={() => setSearchModalVisible(false)}
->
-  <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
-    <View style={styles.searchModalOverlay}>
-      <TouchableWithoutFeedback>
-        <View style={styles.searchModalContent}>
-          <View style={styles.searchHeader}>
-            <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
-              <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="검색어를 입력하세요"
-              placeholderTextColor="#888888"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoFocus
-            />
-            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-              <Text style={styles.searchButtonText}>검색</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={styles.historyContainer}>
-  {searchPerformed && searchResults.length > 0 ? (
-    searchResults.map((info, index) => (
-      <TouchableOpacity
-        key={index}
-        style={styles.searchResultContainer}
-        onPress={() => {
-          setSearchModalVisible(false);
-          handleInfoPress(info); // 카드 뉴스 상세 정보로 이동
-        }}
+  
+      {/* Search Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={searchModalVisible}
+        onRequestClose={() => setSearchModalVisible(false)}
       >
-        <View style={styles.infoCard}>
-          {/* 이미지 배경 설정 */}
-          {coverImages[info.id] && (
-            <Image
-              source={{ uri: coverImages[info.id] }} // 카드의 대표 이미지를 표시
-              style={styles.cardImageBackground} // 배경 이미지 스타일
-              opacity={0.45} 
-            />
-          )}
-          <Text style={styles.infoTitle}>{info.title}</Text>
-        </View>
-        <View style={styles.infoFooter}>
-          <Text style={styles.infoDate}>{info.date}</Text>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryBadgeText}>{info.category}</Text>
+        <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
+          <View style={styles.searchModalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.searchModalContent}>
+                <View style={styles.searchHeader}>
+                  <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
+                    <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="검색어를 입력하세요"
+                    placeholderTextColor="#888888"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoFocus
+                  />
+                  <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                    <Text style={styles.searchButtonText}>검색</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.historyContainer}>
+                  {searchPerformed && searchResults.length > 0 ? (
+                    searchResults.map((info, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.searchResultContainer}
+                        onPress={() => {
+                          setSearchModalVisible(false);
+                          handleInfoPress(info); // 카드 뉴스 상세 정보로 이동
+                        }}
+                      >
+                        <View style={styles.infoCard}>
+                          {/* 이미지 배경 설정 */}
+                          {coverImages[info.id] && (
+                            <Image
+                              source={{ uri: coverImages[info.id] }} // 카드의 대표 이미지를 표시
+                              style={styles.cardImageBackground} // 배경 이미지 스타일
+                              opacity={0.45}
+                            />
+                          )}
+                          <Text style={styles.infoTitle}>{info.title}</Text>
+                        </View>
+                        <View style={styles.infoFooter}>
+                          <Text style={styles.infoDate}>{info.date}</Text>
+                          <View style={styles.categoryBadge}>
+                            <Text style={styles.categoryBadgeText}>{info.category}</Text>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    ))
+                  ) : searchPerformed ? (
+                    <View style={styles.noResultContainer}>
+                      <Text style={styles.noResultText}>해당 검색어에 대한 결과가 없습니다.</Text>
+                    </View>
+                  ) : null}
+                </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
-      </TouchableOpacity>
-    ))
-  ) : searchPerformed ? (
-    <View style={styles.noResultContainer}>
-      <Text style={styles.noResultText}>해당 검색어에 대한 결과가 없습니다.</Text>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
-  ) : null}
-</ScrollView>
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
-    </View>
-  );
+  );  
 };
 
 const styles = StyleSheet.create({
@@ -471,40 +479,24 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     height: 200,
-    width: 400,
+    width: '100%', // 배너가 화면 너비에 맞게 설정
+    marginBottom: 10, // 배너와 다른 요소 간의 간격
   },
   banner: {
     height: '100%',
     backgroundColor: '#e0e0e0',
   },
   bannerItem: {
-    width: SCREEN_WIDTH - 10,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-    marginHorizontal: 5,
+    width: SCREEN_WIDTH,  // 화면 너비에 맞게 배너 크기 설정
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 0,  // 배너 간의 간격을 없애거나 최소화
     borderRadius: 10,
-    padding: 20,
   },
-  firstBanner: {
-    backgroundColor: '#333B54',
-  },
-  secondBanner: {
-    backgroundColor: '#5E6377',
-  },
-  thirdBanner: {
-    backgroundColor: '#718597',
-  },
-  bannerText: {
-    color: 'white',
-    fontSize: 25,
-    fontWeight: 'bold',
-    textAlign: 'left',
-  },
-  bannerSubtitle: {
-    color: 'white',
-    fontSize: 15,
-    textAlign: 'left',
-  },
+  bannerImage: {
+    width: SCREEN_WIDTH,  // 배너 이미지가 화면 너비에 맞게 설정
+    height: '100%',       // 배너의 높이에 맞게 설정
+  },  
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
