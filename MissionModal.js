@@ -13,6 +13,7 @@ const MissionModal = ({ modalVisible, setModalVisible, userMissions, handleImage
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>평안이의 안전 가방</Text>
+                    <Text style={styles.modalsubTitle}>클릭하여 안전물품 정보를 확인하세요</Text>
                     <TouchableOpacity
                         onPress={() => setModalVisible(false)} // 모달 닫기 버튼
                         style={styles.closeButton}
@@ -47,6 +48,7 @@ const MissionModal = ({ modalVisible, setModalVisible, userMissions, handleImage
                                     </View>
                                 ))}
                             </View>
+                            
                         </>
                     ) : (
                         <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
@@ -82,15 +84,20 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5, // 그림자 퍼짐 정도
         elevation: 5, // 안드로이드에서 그림자 효과를 주기 위해 사용
         height: 300,
+        
     },
     closeButton: {
         color: 'blue',
-
+        position: 'absolute', // 절대 위치 설정
+        top: 20, // 모달 상단에서 10px 떨어짐
+        right: 20, // 오른쪽 끝에서 10px 떨어짐
     },
     rowContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginVertical: 10,
+        marginTop : 40,
+        
       },
     imageContainer: {
         flex: 1,
@@ -103,16 +110,25 @@ const styles = StyleSheet.create({
         resizeMode: 'contain', // 이미지를 컨테이너 내에 맞게 조정
     },
     modalTitle: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#6F8B87',
+        fontSize: 20,
+        textAlign: 'center', // 가운데 정렬
+        // flex: 1, // 남은 공간을 차지하도록 설정
+        color:'#6F8B87',
+        fontWeight: "bold"
     },
-    closeButtonText: { 
-        backgroundColor: 'white', 
-        fontSize: 18 
-      },
+    modalsubTitle: {
+        paddingTop: 12,
+        textAlign: 'center',
+        fontSize: 13,
+        color:'#818080',
+        fontWeight: "bold"
 
+    },
+    closeButtonText: {
+        backgroundColor: 'white',
+        fontSize: 20,
+        fontWeight: '500'
+    },
 });
 
 export default MissionModal; // 기본 내보내기 추가
