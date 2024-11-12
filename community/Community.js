@@ -528,6 +528,7 @@ function Community({ navigation, route }) {
                         <Text style={styles.safecategory}>{category}</Text>
                       </View> */}
                     </View>
+                    <Text style={styles.safetime}>소식을 남겨주세요!</Text>
                     {/* <Text style={styles.safetime}>-</Text> */}
                   </View>
                 )}

@@ -373,7 +373,6 @@ const App = ({ navigation, route }) => {
                       <Text style={styles.safetitle}>
                         {filteredPost.title.length > 20 ? `${filteredPost.title.substring(0, 20)}...` : filteredPost.title}
                       </Text>
-
                     </View>
                     <Text style={styles.safetime}>{formatTimestamp(filteredPost.timestamp)}</Text>
                   </TouchableOpacity>
@@ -383,22 +382,17 @@ const App = ({ navigation, route }) => {
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
                         <Text style={styles.safecategory}>{category}</Text>
                       </View>
-                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode='tail'>
+                      <Text style={styles.safetitle} numberOfLines={1} ellipsizeMode="tail">
                         {`${category}에 대한 게시물이 아직 없습니다.`}
                       </Text>
-                      {/* <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
-                        <Text style={styles.safecategory}>{category}</Text>
-                      </View> */}
                     </View>
-                    {/* <Text style={styles.safetime}>-</Text> */}
+                    <Text style={styles.safetime}>소식을 남겨주세요!</Text>
                   </View>
                 )}
                 {index < 3 && <View style={styles.separator} />}
               </View>
-
-
-
             );
+            
           })}
         </View>
 
