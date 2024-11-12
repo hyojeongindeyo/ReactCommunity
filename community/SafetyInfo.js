@@ -257,7 +257,7 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('CommunityHome')}>
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>안전 정보</Text>
