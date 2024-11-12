@@ -256,7 +256,7 @@ export default function NearbySafety({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('CommunityHome')}>
           <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>내 주변 안전 소식</Text>
