@@ -266,10 +266,11 @@ const App = ({ navigation, route }) => {
     }
   };
 
+
   return (
     <View style={styles.allItems}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('MenuPage')}>
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
         <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
@@ -527,7 +528,7 @@ const styles = StyleSheet.create({
   pyeong: {
     width: '50%', // 큰 이미지
     marginBottom: 10,
-    // height: '50%'
+    height: '80%',
     marginLeft: 10,
 
 

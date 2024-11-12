@@ -18,6 +18,7 @@ import LoginScreen from './login/LoginScreen'; // 로그인 페이지
 import SignupScreen from './login/SignupScreen'; // 회원가입 페이지
 import UpdatePost from './community/UpdatePost.js';
 import Toast from 'react-native-toast-message';
+import MenuPage from './menuBar.js';
 
 
 const Tab = createBottomTabNavigator();
@@ -32,6 +33,7 @@ const CommunityStack = () => (
     <Stack.Screen name="PostDetail" component={PostDetail} />
     <Stack.Screen name="UpdatePost" component={UpdatePost} />
     <Stack.Screen name="HomeScreen" component={HomeScreen} />
+    <Stack.Screen name="MenuPage" component={MenuPage} />
   </Stack.Navigator>
 );
 
@@ -42,6 +44,8 @@ const HomeStack = () => (
     <Stack.Screen name="PostDetail" component={PostDetail} />
     <Stack.Screen name="WritePost" component={WritePost} />
     <Stack.Screen name="UpdatePost" component={UpdatePost} />
+    <Stack.Screen name="MenuPage" component={MenuPage} />
+    <Stack.Screen name="SafetyInfo" component={SafetyInfo} />
 
   </Stack.Navigator>
 );
