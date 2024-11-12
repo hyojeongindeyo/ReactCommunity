@@ -323,19 +323,36 @@ const App = ({ navigation, route }) => {
     {/* 아이템 이미지들을 추가 */}
     <View style={styles.itemImagesContainer}>
       {userMissions && userMissions.length > 0 ? (
-        userMissions.slice(0, 3).map((missionId) => (
-          <View key={missionId} style={styles.missionContainer}>
-            {missionImages[missionId] && missionImages[missionId].image ? (
-              // 터치 시 아무 동작도 일어나지 않도록 수정
-              <Image
-                source={missionImages[missionId].image}
-                style={styles.itemImage}
-              />
-            ) : (
-              <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
-            )}
-          </View>
-        ))
+        <>
+            {userMissions.slice(0, 3).map((missionId) => (
+              <View key={missionId} style={styles.missionContainer}>
+                {missionImages[missionId] && missionImages[missionId].image ? (
+                  <Image
+                    source={missionImages[missionId].image}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Text style={styles.noImageText}>
+                    미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                  </Text>
+                )}
+              </View>
+            ))}
+            {userMissions.slice(3, 6).map((missionId) => (
+              <View key={missionId} style={styles.missionContainer}>
+                {missionImages[missionId] && missionImages[missionId].image ? (
+                  <Image
+                    source={missionImages[missionId].image}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Text style={styles.noImageText}>
+                    미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                  </Text>
+                )}
+              </View>
+            ))}
+        </>
       ) : (
         <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
       )}
