@@ -40,8 +40,8 @@ const CommunityStack = () => (
 const HomeStack = () => (
   <Stack.Navigator initialRouteName="HomeScreen" screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeScreen" component={HomeScreen} />
-    <Stack.Screen name="NearbySafety" component={NearbySafety} />
-    <Stack.Screen name="PostDetail" component={PostDetail} />
+    {/* <Stack.Screen name="NearbySafety" component={NearbySafety} /> */}
+    {/* <Stack.Screen name="PostDetail" component={PostDetail} /> */}
     <Stack.Screen name="WritePost" component={WritePost} />
     <Stack.Screen name="UpdatePost" component={UpdatePost} />
     <Stack.Screen name="MenuPage" component={MenuPage} />
@@ -63,6 +63,7 @@ const MainScreen = ({ handleLogout }) => (
     <Tab.Screen name="Camera" component={Camera} />
     <Tab.Screen name="Community" component={CommunityStack} />
     <Tab.Screen name="Shelter" component={Shelter} />
+    
   </Tab.Navigator>
 );
 

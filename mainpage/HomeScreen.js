@@ -76,7 +76,7 @@ const App = ({ navigation, route }) => {
       description: 'Water for hydration.',
     },
   };
-  
+
 
 
   // 위치 가져오기 및 데이터 호출
@@ -270,7 +270,7 @@ const App = ({ navigation, route }) => {
   return (
     <View style={styles.allItems}>
       <View style={styles.header}>
-      <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('MenuPage')}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('MenuPage')}>
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
         <Image source={require('../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
@@ -316,49 +316,49 @@ const App = ({ navigation, route }) => {
 
 
             {/* 평안이 가방 모달입니다 */}
-    {/* 평안이 가방 모달 버튼 */}
-    <TouchableOpacity onPress={() => setModalVisible(true)}>
-  <View style={styles.inpyeongbag}>
-    <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
-    {/* 아이템 이미지들을 추가 */}
-    <View style={styles.itemImagesContainer}>
-      {userMissions && userMissions.length > 0 ? (
-        <>
-            {userMissions.slice(0, 3).map((missionId) => (
-              <View key={missionId} style={styles.missionContainer}>
-                {missionImages[missionId] && missionImages[missionId].image ? (
-                  <Image
-                    source={missionImages[missionId].image}
-                    style={styles.itemImage}
-                  />
-                ) : (
-                  <Text style={styles.noImageText}>
-                    미션 아이디 {missionId}에 대한 이미지가 없습니다.
-                  </Text>
-                )}
+            {/* 평안이 가방 모달 버튼 */}
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <View style={styles.inpyeongbag}>
+                <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
+                {/* 아이템 이미지들을 추가 */}
+                <View style={styles.itemImagesContainer}>
+                  {userMissions && userMissions.length > 0 ? (
+                    <>
+                      {userMissions.slice(0, 3).map((missionId) => (
+                        <View key={missionId} style={styles.missionContainer}>
+                          {missionImages[missionId] && missionImages[missionId].image ? (
+                            <Image
+                              source={missionImages[missionId].image}
+                              style={styles.itemImage}
+                            />
+                          ) : (
+                            <Text style={styles.noImageText}>
+                              미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                            </Text>
+                          )}
+                        </View>
+                      ))}
+                      {userMissions.slice(3, 6).map((missionId) => (
+                        <View key={missionId} style={styles.missionContainer}>
+                          {missionImages[missionId] && missionImages[missionId].image ? (
+                            <Image
+                              source={missionImages[missionId].image}
+                              style={styles.itemImage}
+                            />
+                          ) : (
+                            <Text style={styles.noImageText}>
+                              미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                            </Text>
+                          )}
+                        </View>
+                      ))}
+                    </>
+                  ) : (
+                    <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
+                  )}
+                </View>
               </View>
-            ))}
-            {userMissions.slice(3, 6).map((missionId) => (
-              <View key={missionId} style={styles.missionContainer}>
-                {missionImages[missionId] && missionImages[missionId].image ? (
-                  <Image
-                    source={missionImages[missionId].image}
-                    style={styles.itemImage}
-                  />
-                ) : (
-                  <Text style={styles.noImageText}>
-                    미션 아이디 {missionId}에 대한 이미지가 없습니다.
-                  </Text>
-                )}
-              </View>
-            ))}
-        </>
-      ) : (
-        <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
-      )}
-    </View>
-  </View>
-</TouchableOpacity>
+            </TouchableOpacity>
 
 
             {/* 평안이의 안전 가방 모달 */}
@@ -368,7 +368,7 @@ const App = ({ navigation, route }) => {
               userMissions={userMissions}
               handleImagePress={handleImagePress}
               missionImages={missionImages}
-              
+
             />
 
             <EnlargeModal
@@ -385,7 +385,10 @@ const App = ({ navigation, route }) => {
 
 
         <View style={styles.horizontalLine}></View>
-        <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('NearbySafety', { filter: '전체' })}>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => navigation.navigate('Community', { screen: 'NearbySafety', params: { filter: '전체' } })}
+        >
           <View style={styles.icons}>
             <MaterialIcons name="health-and-safety" size={25} color="rgb(146, 171, 168)" />
           </View>
@@ -404,7 +407,9 @@ const App = ({ navigation, route }) => {
                 {filteredPost ? (
                   <TouchableOpacity
                     style={styles.safebox}
-                    onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
+                    onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post: filteredPost } })}
+
+                    // onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
                   >
                     <View style={styles.safetyContent}>
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
@@ -432,7 +437,7 @@ const App = ({ navigation, route }) => {
                 {index < 3 && <View style={styles.separator} />}
               </View>
             );
-            
+
           })}
         </View>
 
@@ -760,30 +765,30 @@ const styles = StyleSheet.create({
     height: 150, // 가방 영역 크기 늘리기
     marginTop: 10,
     padding: 10,
-},
-inpyeongtext: {
+  },
+  inpyeongtext: {
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 14, // 제목 크기 조정
-},
-itemImagesContainer: {
+  },
+  itemImagesContainer: {
     flexDirection: 'row', // 가로로 아이템 배치
     flexWrap: 'wrap', // 넘치는 아이템은 다음 줄로 넘어가게
     justifyContent: 'center', // 아이템들을 가운데 정렬
     marginTop: 5,
-},
-itemImage: {
+  },
+  itemImage: {
     width: 40, // 이미지 크기 줄이기
     height: 40, // 이미지 크기 줄이기
     margin: 5, // 이미지 간 간격 추가
     borderRadius: 10, // 아이템 이미지 둥글게 처리
     resizeMode: 'contain',
-},
-noItemsText: {
+  },
+  noItemsText: {
     textAlign: 'center',
     color: 'gray',
     fontSize: 12,
-},
+  },
 });
 
 export default App;

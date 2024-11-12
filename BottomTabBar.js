@@ -14,6 +14,7 @@ export default function BottomTabBar({ state }) {
         talk: '#BDC3C7',
         mypage: '#BDC3C7',
     });
+    
 
     useEffect(() => {
         // 현재 활성화된 탭을 추적하여 색상 업데이트
@@ -24,6 +25,7 @@ export default function BottomTabBar({ state }) {
             camera: activeRoute === 'Camera' ? '#92B2AE' : '#BDC3C7',
             talk: activeRoute === 'Community' ? '#92B2AE' : '#BDC3C7',
             mypage: activeRoute === 'Mypage' ? '#92B2AE' : '#BDC3C7',
+            
         }));
         
     }, [state]); // `state`가 변경될 때마다 실행
