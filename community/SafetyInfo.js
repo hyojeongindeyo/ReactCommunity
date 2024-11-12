@@ -239,18 +239,17 @@ useEffect(() => {
   }
 }, [searchModalVisible]);
 
-  const deleteSearchHistoryItem = (index) => {
-    setSearchHistory(prevHistory => prevHistory.filter((_, i) => i !== index));
-  };
-
   const handleNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    if (currentImageIndex < images.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1); // 마지막 이미지가 아닐 때만 넘어가게
+    }
   };
   
+  // "이전" 버튼 클릭 시 처리
   const handlePrevImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1); // 첫 번째 이미지가 아닐 때만 넘어가게
+    }
   };
   
   return (
@@ -367,12 +366,17 @@ useEffect(() => {
                   onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
                 />
                 <View style={styles.imageNavigation}>
-                  <TouchableOpacity onPress={handlePrevImage} disabled={images.length === 0}>
-                    <Text style={styles.navigationText}>이전</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={handleNextImage} disabled={images.length === 0}>
-                    <Text style={styles.navigationText}>다음</Text>
-                  </TouchableOpacity>
+                <TouchableOpacity onPress={handlePrevImage} disabled={currentImageIndex === 0}>
+                  <Text style={styles.navigationText}>이전</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.pageInfo}>
+                  {currentImageIndex + 1} / {images.length}
+                </Text>
+
+                <TouchableOpacity onPress={handleNextImage} disabled={currentImageIndex === images.length - 1}>
+                  <Text style={styles.navigationText}>다음</Text>
+                </TouchableOpacity>
                 </View>
               </>
             ) : (
@@ -561,6 +565,10 @@ const styles = StyleSheet.create({
     color: '#999',
     marginRight: 5,
   },
+  pageInfo: {
+    fontSize: 14,
+    marginHorizontal: 10,
+  },  
   categoryBadge: {
     backgroundColor: '#e0e0e0',
     borderRadius: 10,
