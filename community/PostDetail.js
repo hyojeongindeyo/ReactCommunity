@@ -322,10 +322,16 @@ export default function PostDetail({ route, navigation }) {
     setModalVisible(false);
   };
 
+  // const handleConfirm = () => {
+  //   console.log("사용자가 '네'를 선택했습니다.");
+  //   handleClose();
+  //   navigation.replace('HomeScreen', { showModal: true });
+  // };
+
   const handleConfirm = () => {
     console.log("사용자가 '네'를 선택했습니다.");
-    handleClose();
-    navigation.replace('HomeScreen', { showModal: true });
+    handleClose(); // 모달 닫기
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } }); // Home 탭으로 이동
   };
 
 
