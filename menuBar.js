@@ -58,6 +58,12 @@ const MenuPage = ({ navigation }) => {
                         </Text>
                     </TouchableOpacity>
                 ))}
+                <TouchableOpacity onPress={() => navigation.jumpTo('Camera')}>
+                    <Text style={styles.cameraText}>카메라</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.jumpTo('Mypage')}>
+                    <Text style={styles.cameraText}>내 평안</Text>
+                </TouchableOpacity>
             </ScrollView>
         </View>
     );
