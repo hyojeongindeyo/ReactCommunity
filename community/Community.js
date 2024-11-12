@@ -308,7 +308,9 @@ function Community({ navigation, route }) {
   const missionhandleConfirm = () => {
     console.log("사용자가 '네'를 선택했습니다.");
     missionhandleClose(); // 모달 닫기
-    navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
+    // navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } })
+    
   };
 
 
