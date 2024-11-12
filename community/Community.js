@@ -330,11 +330,15 @@ function Community({ navigation, route }) {
   }, []);
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    if (currentImageIndex < images.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1); // 마지막 이미지가 아닐 때만 넘어가게
+    }
   };
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1); // 첫 번째 이미지가 아닐 때만 넘어가게
+    }
   };
 
   // 검색 처리 함수
@@ -752,10 +756,13 @@ function Community({ navigation, route }) {
                   resizeMode="contain"
                 />
                 <View style={styles.imageNavigation}>
-                  <TouchableOpacity onPress={handlePrevImage}>
+                  <TouchableOpacity onPress={handlePrevImage} disabled={currentImageIndex === 0}>
                     <Text style={styles.navigationText}>이전</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleNextImage}>
+                  <Text style={styles.pageInfo}>
+                    {currentImageIndex + 1} / {images.length}
+                  </Text>
+                  <TouchableOpacity onPress={handleNextImage} disabled={currentImageIndex === images.length - 1}>
                     <Text style={styles.navigationText}>다음</Text>
                   </TouchableOpacity>
                 </View>
@@ -1081,6 +1088,10 @@ const styles = StyleSheet.create({
     width: '48%',
     marginBottom: 30,
   },
+  pageInfo: {
+    fontSize: 14,
+    marginHorizontal: 10,
+  },  
   infoCard: {
     backgroundColor: '#F3F3F3',
     padding: 20,
@@ -1306,4 +1317,3 @@ const styles = StyleSheet.create({
 });
 
 export default Community;
-
