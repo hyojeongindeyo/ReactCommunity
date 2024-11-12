@@ -316,11 +316,33 @@ const App = ({ navigation, route }) => {
 
 
             {/* 평안이 가방 모달입니다 */}
-            <TouchableOpacity onPress={() => setModalVisible(true)}>
-              <View style={styles.inpyeongbag}>
-                <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
-              </View>
-            </TouchableOpacity>
+    {/* 평안이 가방 모달 버튼 */}
+    <TouchableOpacity onPress={() => setModalVisible(true)}>
+  <View style={styles.inpyeongbag}>
+    <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
+    {/* 아이템 이미지들을 추가 */}
+    <View style={styles.itemImagesContainer}>
+      {userMissions && userMissions.length > 0 ? (
+        userMissions.slice(0, 3).map((missionId) => (
+          <View key={missionId} style={styles.missionContainer}>
+            {missionImages[missionId] && missionImages[missionId].image ? (
+              // 터치 시 아무 동작도 일어나지 않도록 수정
+              <Image
+                source={missionImages[missionId].image}
+                style={styles.itemImage}
+              />
+            ) : (
+              <Text style={styles.noImageText}>미션 아이디 {missionId}에 대한 이미지가 없습니다.</Text>
+            )}
+          </View>
+        ))
+      ) : (
+        <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
+      )}
+    </View>
+  </View>
+</TouchableOpacity>
+
 
             {/* 평안이의 안전 가방 모달 */}
             <MissionModal
@@ -716,18 +738,35 @@ const styles = StyleSheet.create({
   },
   inpyeongbag: {
     backgroundColor: '#D9D9D9',
-    // padding: 40,
-    // margin: 0,
-    borderRadius: 15,
-    width: '100%',
-    height: '50%',
+    borderRadius: 10,
+    width: 170,
+    height: 150, // 가방 영역 크기 늘리기
     marginTop: 10,
-  },
-  inpyeongtext: {
+    padding: 10,
+},
+inpyeongtext: {
     textAlign: 'center',
     fontWeight: 'bold',
-  },
-
+    fontSize: 14, // 제목 크기 조정
+},
+itemImagesContainer: {
+    flexDirection: 'row', // 가로로 아이템 배치
+    flexWrap: 'wrap', // 넘치는 아이템은 다음 줄로 넘어가게
+    justifyContent: 'center', // 아이템들을 가운데 정렬
+    marginTop: 5,
+},
+itemImage: {
+    width: 40, // 이미지 크기 줄이기
+    height: 40, // 이미지 크기 줄이기
+    margin: 5, // 이미지 간 간격 추가
+    borderRadius: 10, // 아이템 이미지 둥글게 처리
+    resizeMode: 'contain',
+},
+noItemsText: {
+    textAlign: 'center',
+    color: 'gray',
+    fontSize: 12,
+},
 });
 
 export default App;
