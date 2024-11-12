@@ -1,42 +1,32 @@
-// MenuPage.js
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 
 const MenuPage = ({ navigation }) => {
-    const [selectedFilter, setSelectedFilter] = useState('전체');
-    const [safetyInfos, setSafetyInfos] = useState([]);
-
-
-
-    const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
-
-    // 카테고리 데이터 설정 (객체)
     const categoriesData = {
-      NearbySafety: ['내 주변 안전소식', '전체', '교통', '화재', '재해', '주의'],
-      SafetyInfo: ['안전 정보', '전체', '재해', '화재', '생활', '주의'],
+        NearbySafety: ['전체', '교통', '화재', '재해', '주의'],
+        SafetyInfo: ['전체', '재해', '화재', '생활', '주의'],
     };
-    // 메뉴 아이템 생성 함수
+
     const generateMenuItems = () => {
         let menuId = 1;
         const items = [];
-    
+
         Object.entries(categoriesData).forEach(([navigateTo, titles]) => {
-          titles.forEach((title, index) => {
-            items.push({
-              id: menuId.toString(),
-              title: title,
-              navigateTo: navigateTo,
-              filter: index === 0 ? null : title, // 첫 번째 항목의 필터는 null
+            titles.forEach((title, index) => {
+                items.push({
+                    id: menuId.toString(),
+                    title: title,
+                    navigateTo: navigateTo, // NearbySafety 또는 SafetyInfo로 이동
+                    filter: title, // 필터값 (교통, 화재, 재해 등)
+                });
+                menuId++;
             });
-            menuId++;
-          });
         });
-    
+
         return items;
-      };
+    };
+
     const menuItems = generateMenuItems();
-  
-    
 
     return (
         <View style={styles.container}>
@@ -46,16 +36,38 @@ const MenuPage = ({ navigation }) => {
                         key={item.id}
                         onPress={() => {
                             
-                            if (item.filter === null) {
-                                navigation.navigate(item.navigateTo);
-                            } else {
-                                navigation.navigate(item.navigateTo, { filter: item.filter });
+                            if (item.navigateTo === 'NearbySafety') {
+                                // 'NearbySafety' 클릭 시, 스택을 새로 설정
+                                navigation.reset({
+                                    index: 0,
+                                    routes: [
+                                        {
+                                            name: 'Community',
+                                            params: {
+                                                screen: 'NearbySafety',
+                                                params: { filter: item.filter }, // 필터값을 파라미터로 전달
+                                            },
+                                        },
+                                    ],
+                                });
+                            } else if (item.navigateTo === 'SafetyInfo') {
+                                // 'SafetyInfo' 클릭 시, 스택을 새로 설정
+                                navigation.reset({
+                                    index: 0,
+                                    routes: [
+                                        {
+                                            name: 'Community',
+                                            params: {
+                                                screen: 'SafetyInfo',
+                                                params: { filter: item.filter }, // 필터값을 파라미터로 전달
+                                            },
+                                        },
+                                    ],
+                                });
                             }
                         }}
                     >
-                        <Text style={[styles.menuText, (item.title === '내 근처 안전소식' || item.title === '안전 정보') && styles.boldText]}>
-                            {item.title}
-                        </Text>
+                        <Text style={styles.menuText}>{item.title}</Text>
                     </TouchableOpacity>
                 ))}
                 <TouchableOpacity onPress={() => navigation.jumpTo('Camera')}>
@@ -87,8 +99,9 @@ const styles = StyleSheet.create({
     menuText: {
         fontSize: 18,
     },
-    boldText: {
-        fontWeight: 'bold',
+    cameraText: {
+        fontSize: 18,
+        color: 'blue',
     },
 });
 

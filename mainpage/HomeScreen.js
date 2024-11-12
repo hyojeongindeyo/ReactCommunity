@@ -759,12 +759,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   inpyeongbag: {
-    backgroundColor: '#D9D9D9',
-    borderRadius: 10,
+    backgroundColor: '#F0F0F0', // 더 밝은 그레이로 변경
+    borderRadius: 12, // 둥근 모서리
     width: 170,
-    height: 150, // 가방 영역 크기 늘리기
+    height: 150, // 크기 그대로 유지
     marginTop: 10,
-    padding: 10,
+    padding: 10, // 패딩 추가로 내부 여유 공간 확보
+    shadowColor: '#000', // 그림자 색상
+    shadowOffset: { width: 0, height: 4 }, // 그림자 위치
+    shadowOpacity: 0.1, // 그림자 불투명도 낮춤
+    shadowRadius: 6, // 그림자 모서리 반경
+    elevation: 5, // 안드로이드에서 그림자 효과
   },
   inpyeongtext: {
     textAlign: 'center',
