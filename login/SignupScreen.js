@@ -39,7 +39,7 @@ const SignupScreen = ({ navigation }) => {
             Toast.show({
                 type: 'error',
                 text1: '비밀번호 형식 오류',
-                text2: '비밀번호는 8자리 이상, 영어, 숫자, 특수문자(@$!%*#?&)를 포함해야 합니다.',
+                text2: '8자리 이상, 영어, 숫자, 특수문자(@$!%*#?&) 포함',
                 text1Style: { fontSize: 15, color: 'black' },
                 text2Style: { fontSize: 13, color: 'black' },
                 visibilityTime: 2000,
