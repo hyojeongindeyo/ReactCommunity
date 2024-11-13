@@ -25,8 +25,10 @@ function MainScreen({ navigation, handleLogout }) {
   const [modalVisible, setModalVisible] = useState(false); // 모달 상태 정의
   const [userMissions, setUserMissions] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null); // 확대할 이미지의 상태
+  const [selectedName, setSelectedName] = useState(null);
+  const [selectedDescription, setSelectedDescription] = useState(null);
   const [enlargeModalVisible, setEnlargeModalVisible] = useState(false); // 이미지 확대 모달
-
+  
   useEffect(() => {
     // 로그인된 사용자의 세션 정보를 가져오는 함수
     const fetchUserSession = async () => {
@@ -79,10 +81,12 @@ function MainScreen({ navigation, handleLogout }) {
     }
   }, [modalVisible]);
 
-  const handleImagePress = (image) => {
+  const handleImagePress = (image, name, description) => {
     setSelectedImage(image);
     setModalVisible(false);
     setEnlargeModalVisible(true);
+    setSelectedName(name);
+    setSelectedDescription(description); // 설명 설정
   };
 
   const handleCloseEnlargeModal = () => {
@@ -109,14 +113,39 @@ function MainScreen({ navigation, handleLogout }) {
       console.error("회원 탈퇴 실패:", error);
     }
   };
+ 
   const missionImages = {
-    1: require('../assets/flashlight.png'),
-    2: require('../assets/whistle.png'),
-    3: require('../assets/compass.png'),
-    4: require('../assets/fire_extinguisher.png'),
-    5: require('../assets/first_aid_kit.png'),
-    6: require('../assets/water.png'),
-  };
+    1: {
+      image: require('../assets/flashlight.png'),
+      name: '손전등',
+      description: '어두운 곳을 밝혀주는 손전등이에요. 🌟',
+    },
+    2: {
+      image: require('../assets/whistle.png'),
+      name: '호루라기',
+      description: '위험할 땐 호루라기를 불어요. 🚨',
+    },
+    3: {
+      image: require('../assets/compass.png'),
+      name: '나침반',
+      description: '길을 잃었을 때 유용한 나침반이에요. 🧭',
+    },
+    4: {
+      image: require('../assets/fire_extinguisher.png'),
+      name: '소화기',
+      description: '불이 나면 소화기로 안전하게 끄세요. 🔥',
+    },
+    5: {
+      image: require('../assets/first_aid_kit.png'),
+      name: '구급상자',
+      description: '부상을 치료할 수 있는 구급상자에요. 🚑',
+    },
+    6: {
+      image: require('../assets/water.png'),
+      name: '물',
+      description: '갈증을 해소해주는 시원한 물이에요. 💧',
+    },
+};
 
   return (
     <View style={styles.container}>
@@ -144,7 +173,9 @@ function MainScreen({ navigation, handleLogout }) {
         <EnlargeModal
           enlargeModalVisible={enlargeModalVisible}
           setEnlargeModalVisible={setEnlargeModalVisible}
-          selectedImage={selectedImage}
+          selectedImage={selectedImage} 
+          selectedName={selectedName} // name도 함께 전달
+          selectedDescription={selectedDescription} // name도 함께 전달
           handleCloseEnlargeModal={handleCloseEnlargeModal}
         />
 
