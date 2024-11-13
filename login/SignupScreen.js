@@ -18,6 +18,19 @@ const SignupScreen = ({ navigation }) => {
     const apiUrl = config.apiUrl;
 
     const handleSignup = async () => {
+        // 입력 필드가 하나라도 비어있는지 체크
+        if (!id || !password || !confirmPassword || !email || !nickname) {
+            Toast.show({
+                type: 'error',
+                text1: '필수 정보',
+                text2: '모든 정보를 입력해 주세요.',
+                text1Style: { fontSize: 15, color: 'black' },
+                text2Style: { fontSize: 13, color: 'black' },
+                visibilityTime: 2000, // 2초 후 자동 사라짐
+            });
+            return;  // 하나라도 비어 있으면 함수 종료
+        }
+
         if (!email.includes('@')) {
             Toast.show({
                 type: 'error',
@@ -59,15 +72,15 @@ const SignupScreen = ({ navigation }) => {
             if (error.response) {
                 // 서버가 응답했지만 상태 코드가 2xx가 아닌 경우
                 console.error('서버 응답 오류:', error.response.data);
-                Alert.alert('회원가입 실패', `오류: ${error.response.data.error}`);
+                console.log('회원가입 실패', `오류: ${error.response.data.error}`);
             } else if (error.request) {
                 // 요청이 서버로 전송되었으나 응답을 받지 못한 경우
                 console.error('요청 오류:', error.request);
-                Alert.alert('회원가입 실패', '서버가 응답하지 않습니다.');
+                console.log('회원가입 실패', '서버가 응답하지 않습니다.');
             } else {
                 // 오류가 발생한 이유가 설정된 요청이 아닌 경우
                 console.error('설정 오류:', error.message);
-                Alert.alert('회원가입 실패', '회원가입 처리 중 오류가 발생했습니다.');
+                console.log('회원가입 실패', '회원가입 처리 중 오류가 발생했습니다.');
             }
         }
     };
