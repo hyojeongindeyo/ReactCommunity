@@ -31,7 +31,7 @@ const SignupScreen = ({ navigation }) => {
             return;  // 하나라도 비어 있으면 함수 종료
         }
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.(com|net|org|gov|edu|info|biz|co|int|mil)$/;
         const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
 
@@ -39,14 +39,14 @@ const SignupScreen = ({ navigation }) => {
             Toast.show({
                 type: 'error',
                 text1: '비밀번호 형식 오류',
-                text2: '비밀번호는 8자리 이상, 영어, 숫자, 특수문자를 포함해야 합니다.',
+                text2: '비밀번호는 8자리 이상, 영어, 숫자, 특수문자(@$!%*#?&)를 포함해야 합니다.',
                 text1Style: { fontSize: 15, color: 'black' },
                 text2Style: { fontSize: 13, color: 'black' },
                 visibilityTime: 2000,
             });
             return;
         }
-    
+
         if (password !== confirmPassword) {
             Toast.show({
                 type: 'error',
@@ -80,7 +80,14 @@ const SignupScreen = ({ navigation }) => {
             });
 
             if (response.status === 200) {
-                Alert.alert('회원가입 성공', response.data.message);
+                Toast.show({
+                    type: 'success',
+                    text1: '회원가입 성공',
+                    // text2: '유효한 이메일 형식을 입력해주세요',
+                    text1Style: { fontSize: 15, color: 'black' },
+                    text2Style: { fontSize: 13, color: 'black' },
+                    visibilityTime: 2000,
+                });
                 navigation.navigate('Login');
             }
         } catch (error) {
