@@ -31,26 +31,41 @@ const SignupScreen = ({ navigation }) => {
             return;  // 하나라도 비어 있으면 함수 종료
         }
 
-        if (!email.includes('@')) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+
+        if (!passwordPattern.test(password)) {
             Toast.show({
                 type: 'error',
-                text1: '이메일 형식 오류',
-                text2: '@를 포함한 이메일을 적어주세요',
-                text1Style: { fontSize: 15,  color: 'black' },  // text1 스타일 조정
-                text2Style: { fontSize: 13, color: 'black' },  // text2 스타일 조정
-                visibilityTime: 2000, // 2초 후 자동 사라짐
+                text1: '비밀번호 형식 오류',
+                text2: '비밀번호는 8자리 이상, 영어, 숫자, 특수문자를 포함해야 합니다.',
+                text1Style: { fontSize: 15, color: 'black' },
+                text2Style: { fontSize: 13, color: 'black' },
+                visibilityTime: 2000,
             });
             return;
         }
-
+    
         if (password !== confirmPassword) {
             Toast.show({
                 type: 'error',
                 text1: '비밀번호 확인 오류',
                 text2: '비밀번호가 다릅니다.',
-                text1Style: { fontSize: 15,  color: 'black' },  // text1 스타일 조정
-                text2Style: { fontSize: 13, color: 'black' },  // text2 스타일 조정
-                visibilityTime: 2000, // 2초 후 자동 사라짐
+                text1Style: { fontSize: 15, color: 'black' },
+                text2Style: { fontSize: 13, color: 'black' },
+                visibilityTime: 2000,
+            });
+            return;
+        }
+        if (!emailPattern.test(email)) {
+            Toast.show({
+                type: 'error',
+                text1: '이메일 형식 오류',
+                text2: '유효한 이메일 형식을 입력해주세요',
+                text1Style: { fontSize: 15, color: 'black' },
+                text2Style: { fontSize: 13, color: 'black' },
+                visibilityTime: 2000,
             });
             return;
         }
