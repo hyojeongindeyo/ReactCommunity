@@ -48,34 +48,34 @@ const App = ({ navigation, route }) => {
     1: {
       image: require('../assets/flashlight.png'),
       name: '손전등',
-      description: 'A flashlight to light up the dark.',
+      description: '어두운 곳을 밝혀주는 손전등이에요. 🌟',
     },
     2: {
       image: require('../assets/whistle.png'),
       name: '호루라기',
-      description: 'A whistle for signaling.',
+      description: '위험할 땐 호루라기를 불어요. 🚨',
     },
     3: {
       image: require('../assets/compass.png'),
       name: '나침반',
-      description: 'A compass for navigation.',
+      description: '길을 잃었을 때 유용한 나침반이에요. 🧭',
     },
     4: {
       image: require('../assets/fire_extinguisher.png'),
       name: '소화기',
-      description: 'A fire extinguisher to put out fires.',
+      description: '불이 나면 소화기로 안전하게 끄세요. 🔥',
     },
     5: {
       image: require('../assets/first_aid_kit.png'),
       name: '구급상자',
-      description: 'A kit for treating injuries.',
+      description: '부상을 치료할 수 있는 구급상자에요. 🚑',
     },
     6: {
       image: require('../assets/water.png'),
       name: '물',
-      description: 'Water for hydration.',
+      description: '갈증을 해소해주는 시원한 물이에요. 💧',
     },
-  };
+};
 
 
 
