@@ -115,11 +115,11 @@ export default function App({ navigation }) {
         body: JSON.stringify({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: "You’re an expert at identifying cracks in walls. Examine the provided image carefully and determine whether the wall in that image has a crack. Only recognize natural or real cracks in the wall, such as those caused by structural damage, weathering, or other physical causes. If the image is not a photograph of a wall or depicts hand-drawn lines or artificial marks (such as pen or pencil drawings), answer 'No.' Do not consider any cracks that appear artificially drawn or fabricated." },
+            { role: "system", content: "You are an expert at identifying cracks in walls. Examine the provided image carefully and determine whether the wall in the image has a natural or real crack. Only recognize cracks caused by structural damage, weathering, or other physical causes. Do not recognize cracks that are hand-drawn, artificially created, or photos of hand-drawn cracks on a computer screen. If the image depicts an artificially uniform, smooth, or white background, especially if it resembles paper, cardboard, or a non-wall surface, then it is likely not a real crack. Such cases should be excluded from recognition as a crack. If the crack appears to be highly defined, with sharp edges or perfect symmetry, this might indicate it is an artificial drawing or graphic. If there is excessive clarity of the crack's edges with no variation in texture or wall details, you should be cautious. When evaluating the crack, consider the texture, depth, and irregularity of the crack. Natural cracks typically have uneven edges and may display gradual variations in texture, color, and depth. Please return a probability between 0.0001 and 0.9999, with a higher probability indicating greater certainty of a real, natural crack. Even if you are highly confident, you should return a probability to account for minor uncertainty. Example output: 'Crack probability: 0.3457'" },
             { role: "user", content: [
               {
                   type: "text",
-                  text: "Is there a crack in this wall image? please say yes or no"
+                  text: "Is there a crack in this wall image? Please return a probability value along with your answer."
               },
               {
                   type: "image_url",
@@ -135,10 +135,17 @@ export default function App({ navigation }) {
 
       const data = await response.json();
       const resultMessage = data.choices[0].message.content.toLowerCase();
+      const match = resultMessage.match(/crack probability:\s*([0-9]+(?:\.[0-9]+)?)/i);
+      let crackProbability = 0;
+      if (match) {
+        crackProbability = parseFloat(match[1]);
+      }
+
+  const nonCrackProbability = 1 - crackProbability;
       setLoading(false);
       setPreviewUri(null); // 미리보기 해제하여 카메라 활성화
 
-      if (resultMessage.includes('yes')) {
+      if (crackProbability > 0.5) {
         setAlterModalText('균열이 맞습니다.');
         setShowReportLink(true);
         setAlterModalSubText('');
@@ -149,6 +156,8 @@ export default function App({ navigation }) {
       }
 
       setAlterModalVisible(true);
+
+      console.log(`(${crackProbability.toFixed(4)}, ${nonCrackProbability.toFixed(4)})`);
 
       await completeMission(5);
 
