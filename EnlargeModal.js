@@ -23,15 +23,13 @@ const EnlargeModal = ({ enlargeModalVisible, setEnlargeModalVisible, selectedIma
                         <TouchableOpacity onPress={() => setEnlargeModalVisible(false)} style={styles.enlargeCloseButton}>
                             <Text style={styles.closeButtonText}>X</Text>
                         </TouchableOpacity>
-
-
                     </View>
 
                     <View style={styles.imageContainer}>
                         {selectedImage && (
                             <>
-                                <Text style={styles.enlargedtext}>{selectedName}</Text>
                                 <Image source={selectedImage} style={styles.enlargedImage} />
+                                <Text style={styles.enlargedtext}>{selectedName}</Text>
                                 <Text style={styles.enlargeddes}>{selectedDescription}</Text>
                             </>
                         )}
@@ -70,8 +68,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between', // 버튼들을 양쪽 끝에 배치
         alignItems: 'center',    // 세로로 가운데 정렬
-        // position: 'relative',    // 버튼을 화면에 위치시킬 수 있도록 설정
-        // marginBottom: 20,        // 상단 여백을 주어 제목이 잘리지 않도록 설정
     },
     enlargeCloseButton: {
         padding: 10,
@@ -91,9 +87,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '500'
     },
-    backButtonText: {
-        fontSize: 18,
-    },
     imageContainer: {
         flex: 1,
         justifyContent: 'center', // 세로 중앙 정렬
@@ -107,12 +100,12 @@ const styles = StyleSheet.create({
     },
     enlargedtext: {
         fontSize: 18,
-        marginBottom: 20,
+        marginTop: 20, // 이름과 설명 간격을 줄임
     },
     enlargeddes: {
-        marginTop: 20,
+        marginTop: 5, // 설명 위쪽 간격을 줄임
     },
-})
+});
 
 
 export default EnlargeModal; // 기본 내보내기 추가
