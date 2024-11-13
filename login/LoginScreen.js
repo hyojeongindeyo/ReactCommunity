@@ -1,7 +1,9 @@
+import 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Dimensions, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
-import axios from 'axios'; // axios 추가
+import { StyleSheet, Text, Image, View, Dimensions, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import axios from 'axios'; // axios를 사용하여 API 호출
 import config from '../config';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -14,40 +16,54 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
 
     const handleLogin = async () => {
         if (id.trim() === '' || password.trim() === '') {
-            Alert.alert('입력 오류', '아이디와 비밀번호를 모두 입력해 주세요.');
+            Toast.show({
+                type: 'error',
+                text1: '입력 오류',
+                text2: '아이디와 비밀번호를 모두 입력해 주세요.',
+                text1Style: { fontSize: 15, color: 'black' },
+                text2Style: { fontSize: 13, color: 'black' },
+                visibilityTime: 2000, // 2초 후 자동 사라짐
+            });
             return;
         }
-
+    
         setLoading(true);
-
+    
         try {
             const response = await axios.post(`${apiUrl}/users/login`, {
                 id,
                 password
             });
-
+    
             if (response.status === 200) {
-                Alert.alert('로그인 성공', response.data.message);
+                // 로그인 성공 시 알림을 제거하고 onLoginSuccess만 호출
                 onLoginSuccess(); // 로그인 성공 시 onLoginSuccess 호출
-                
             } else {
-                Alert.alert('로그인 실패', '올바르지 않은 로그인 정보입니다.');
+                // 로그인 실패 메시지
+                Toast.show({
+                    type: 'error',
+                    text1: '로그인 실패',
+                    text2: '로그인 정보가 일치하지 않습니다.',
+                    text1Style: { fontSize: 15, color: 'black' },
+                    text2Style: { fontSize: 13, color: 'black' },
+                    visibilityTime: 2000, // 2초 후 자동 사라짐
+                });
             }
         } catch (error) {
-            if (error.response) {
-                console.error('서버 응답 오류:', error.response.data);
-                Alert.alert('로그인 실패', `오류: ${error.response.data.error}`);
-            } else if (error.request) {
-                console.error('요청 오류:', error.request);
-                Alert.alert('로그인 실패', '서버가 응답하지 않습니다.');
-            } else {
-                console.error('설정 오류:', error.message);
-                Alert.alert('로그인 실패', '로그인 처리 중 오류가 발생했습니다.');
-            }
+            // 서버 응답에서 구체적인 오류 정보가 없어도 일관된 메시지 출력
+            Toast.show({
+                type: 'error',
+                text1: '로그인 실패',
+                text2: '로그인 정보가 일치하지 않습니다.',
+                text1Style: { fontSize: 15, color: 'black' },
+                text2Style: { fontSize: 13, color: 'black' },
+                visibilityTime: 2000, // 2초 후 자동 사라짐
+            });
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -81,7 +97,6 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <StatusBar style="auto" />
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
     );
