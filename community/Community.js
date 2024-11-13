@@ -439,7 +439,7 @@ function Community({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('MenuPage')}>
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>커뮤니티</Text>
