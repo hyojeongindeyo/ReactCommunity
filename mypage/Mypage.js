@@ -219,7 +219,7 @@ function ChangePasswordScreen({ navigation }) {
 
   const handlePasswordChange = async () => {
     try {
-      const response = await axios.post(`${config.apiUrl}/change-password`, {
+      const response = await axios.post(`${config.apiUrl}/users/change-password`, {
         currentPassword,
         newPassword,
       });
