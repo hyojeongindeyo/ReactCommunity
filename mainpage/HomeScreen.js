@@ -8,8 +8,8 @@ import Swiper from 'react-native-swiper';
 import axios from 'axios';
 import config from '../config'; // config 파일 import
 import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
-import MissionModal from '../MissionModal'; // MissionModal import
-import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
+import BagCombinedModal from '../BagCombinedModal'; // MissionModal import
+// import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -362,23 +362,24 @@ const App = ({ navigation, route }) => {
 
 
             {/* 평안이의 안전 가방 모달 */}
-            <MissionModal
+            <BagCombinedModal
               modalVisible={modalVisible}
               setModalVisible={setModalVisible}
               userMissions={userMissions}
               handleImagePress={handleImagePress}
               missionImages={missionImages}
+              
 
             />
 
-            <EnlargeModal
+            {/* <EnlargeModal
               enlargeModalVisible={enlargeModalVisible}
               setEnlargeModalVisible={setEnlargeModalVisible}
               selectedImage={selectedImage}
               selectedName={selectedName} // name도 함께 전달
               selectedDescription={selectedDescription} // name도 함께 전달
               handleCloseEnlargeModal={handleCloseEnlargeModal}
-            />
+            /> */}
 
           </View>
         </View>

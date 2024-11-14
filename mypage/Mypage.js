@@ -12,8 +12,8 @@ import PrivacyPolicyContent from './PrivacyPolicyContent';
 import axios from 'axios';
 import config from '../config';
 import { useFocusEffect } from '@react-navigation/native';
-import MissionModal from '../MissionModal'; // MissionModal import
-import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
+import BagCombinedModal from '../BagCombinedModal'; // MissionModal import
+// import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
@@ -162,7 +162,7 @@ function MainScreen({ navigation, handleLogout }) {
 
 
         </View>
-        <MissionModal
+        <BagCombinedModal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
           userMissions={userMissions}
@@ -170,14 +170,7 @@ function MainScreen({ navigation, handleLogout }) {
           missionImages={missionImages}
         />
 
-        <EnlargeModal
-          enlargeModalVisible={enlargeModalVisible}
-          setEnlargeModalVisible={setEnlargeModalVisible}
-          selectedImage={selectedImage} 
-          selectedName={selectedName} // name도 함께 전달
-          selectedDescription={selectedDescription} // name도 함께 전달
-          handleCloseEnlargeModal={handleCloseEnlargeModal}
-        />
+
 
         <View style={styles.separator} />
         <Text style={styles.title}>내 정보</Text>
