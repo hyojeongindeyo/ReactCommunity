@@ -499,10 +499,13 @@ function InquiryScreen({ navigation }) {
   return (
     <View style={styles.inquiryContainer}>
       <TextInput
+        style={styles.inputi}
         placeholder="문의 내용을 입력하세요"
+        secureTextEntry
         value={inquiry}
-        onChangeText={setInquiry}
         multiline
+        onChangeText={setInquiry}
+        placeholderTextColor="#000"
       />
       <TouchableOpacity style={styles.button} onPress={handleSendInquiry}>
         <Text style={styles.buttonText}>보내기</Text>
@@ -810,6 +813,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
   },
+  inputi: {
+    width: SCREEN_WIDTH * 0.8,
+    height: 60,
+    borderColor: '#ccc',
+    backgroundColor: '#F3F3F3',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+  },
   button: {
     width: 60,
     height: 35,
@@ -817,7 +830,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
-    marginTop: 50,
+    marginTop: 30,
   },
   buttonText: {
     color: '#fff',
@@ -841,6 +854,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
+    
   },
   inquiryInput: {
     width: SCREEN_WIDTH * 0.8,
