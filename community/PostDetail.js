@@ -8,7 +8,6 @@ import { CommentsContext } from './CommentsContext';
 import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
-import DeleteModal from './DeleteModal';
 import Toast from 'react-native-toast-message';
 
 
