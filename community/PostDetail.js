@@ -8,6 +8,8 @@ import { CommentsContext } from './CommentsContext';
 import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
+import DeleteModal from './DeleteModal';
+import Toast from 'react-native-toast-message';
 
 
 export default function PostDetail({ route, navigation }) {
@@ -31,6 +33,8 @@ export default function PostDetail({ route, navigation }) {
   const textInputRef = useRef(null);
   const scrollViewRef = useRef(null); // ScrollView 참조
   const [commentLayouts, setCommentLayouts] = useState([]);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [replyingVisible, setReplyingVisible] = useState(false);
 
   useEffect(() => {
     console.log("수정된 데이터:", post);
@@ -422,13 +426,38 @@ export default function PostDetail({ route, navigation }) {
       // 서버로부터의 오류 메시지 확인
       const errorMessage = error.response?.data?.error;
       if (errorMessage === '자신이 작성한 글은 스크랩할 수 없습니다.') {
-        Alert.alert("알림", "내가 작성한 글은 스크랩할 수 없습니다."); // 사용자에게 안내 메시지 표시
+        Toast.show({
+          type: 'error', 
+          position: 'top', 
+          text1: '알림',
+          text2: '내가 작성한 글은 스크랩할 수 없습니다.', 
+          text1Style: { fontSize: 15, color: 'black' },
+          text2Style: { fontSize: 13, color: 'black' },
+          visibilityTime: 2000,
+          autoHide: true, 
+        });
       } else {
         console.error('스크랩 오류:', error);
       }
     }
   };
 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height); // 키보드 높이 설정
+      setReplyingVisible(true); // 키보드가 올라오면 "Replying to" 영역 보이기
+    });
+
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0); // 키보드가 내려갔을 때 초기화
+      setReplyingVisible(false); // 키보드가 내려가면 "Replying to" 영역 숨기기
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -568,6 +597,24 @@ export default function PostDetail({ route, navigation }) {
             ))}
         </View>
       </ScrollView>
+
+      {/* replying */}
+      {replyToCommentId && (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: keyboardHeight-35, 
+            left: 0,
+            right: 0,
+            backgroundColor: 'white',
+            padding: 10,
+            borderTopWidth: 1,
+            borderColor: '#ddd',
+          }}
+        >
+          <Text style={{ fontWeight: 'bold', marginBottom:15 }}>답글 달기 : </Text>
+        </View>
+      )}
 
       {/* Fixed comment input box at the bottom */}
       <View style={styles.commentInputContainer}>
