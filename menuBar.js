@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const MenuPage = ({ navigation }) => {
     const [selectedFilter, setSelectedFilter] = useState('전체');
@@ -7,13 +9,11 @@ const MenuPage = ({ navigation }) => {
 
     const filteredInfos = selectedFilter === '전체' ? safetyInfos : safetyInfos.filter(info => info.category === selectedFilter);
 
-    // 카테고리 데이터 설정 (객체)
     const categoriesData = {
         NearbySafety: ['내 주변 안전소식', '전체', '교통', '화재', '재해', '주의'],
         SafetyInfo: ['안전 정보', '전체', '재해', '화재', '생활', '주의'],
     };
- 
-    // 메뉴 아이템 생성 함수
+
     const generateMenuItems = () => {
         let menuId = 1;
         const items = [];
@@ -23,8 +23,8 @@ const MenuPage = ({ navigation }) => {
                 items.push({
                     id: menuId.toString(),
                     title: title,
-                    navigateTo: navigateTo, // NearbySafety 또는 SafetyInfo로 이동
-                    filter: title, // 필터값 (교통, 화재, 재해 등)
+                    navigateTo: navigateTo,
+                    filter: title,
                 });
                 menuId++;
             });
@@ -32,11 +32,27 @@ const MenuPage = ({ navigation }) => {
 
         return items;
     };
+
     const menuItems = generateMenuItems();
+
+    // 각 카테고리별 색상 설정
+    const categoryColors = {
+        교통: '#007BFF',  // 더 진한 파란색 (교통)
+        화재: '#FF4C4C',   // 강렬한 빨간색 (화재)
+        재해: '#28A745',   // 진한 초록색 (재해)
+        주의: '#FFA500',   // 선명한 주황색 (주의)
+        생활: '#800080',   // 진한 보라색 (생활)
+        전체: '#808080',   // 중간 회색 (전체)
+    };
 
     return (
         <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.menuItemsContainer}>
+            {/* 왼쪽 상단 뒤로가기 아이콘 */}
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
+            </TouchableOpacity>
+
+            <View style={styles.menuItemsContainer}>
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
                     <Text style={styles.boldText}>메인페이지</Text>
                 </TouchableOpacity>
@@ -47,75 +63,62 @@ const MenuPage = ({ navigation }) => {
                     <Text style={styles.boldText}>균열 카메라</Text>
                 </TouchableOpacity>
 
-                {menuItems.map(item => (
-    item.title === '내 주변 안전소식' || item.title === '안전 정보' ? (
-        // '내 주변 안전소식'과 '안전 정보'는 클릭 불가능한 텍스트로 처리
-        <Text key={item.id} style={styles.boldText}>
-            {item.title}
-        </Text>
-    ) : (
-        // 나머지 항목은 클릭 가능한 TouchableOpacity로 처리
-        <TouchableOpacity
-            key={item.id}
-            onPress={() => {
-                if (item.navigateTo === 'NearbySafety') {
-                    // 'NearbySafety' 클릭 시, 스택을 새로 설정
-                    navigation.reset({
-                        index: 0,
-                        routes: [
-                            {
-                                name: 'Community',
-                                params: {
-                                    screen: 'NearbySafety',
-                                    params: { filter: item.filter }, // 필터값을 파라미터로 전달
-                                },
-                            },
-                        ],
-                    });
-                } else if (item.navigateTo === 'SafetyInfo') {
-                    // 'SafetyInfo' 클릭 시, 스택을 새로 설정
-                    navigation.reset({
-                        index: 0,
-                        routes: [
-                            {
-                                name: 'Community',
-                                params: {
-                                    screen: 'SafetyInfo',
-                                    params: { filter: item.filter }, // 필터값을 파라미터로 전달
-                                },
-                            },
-                        ],
-                    });
-                }
-            }}
-        >
-            <Text style={styles.menuText}>
-                {item.title}
-            </Text>
-        </TouchableOpacity>
-    )
-))}
+                {/* 카테고리 부분만 두 개씩 배치 */}
+                <View style={styles.categoriesContainer}>
+                    {menuItems.map(item => (
+                        item.title === '내 주변 안전소식' || item.title === '안전 정보' ? (
+                            <View key={item.id} style={styles.singleItem}>
+                                <Text style={styles.boldText}>{item.title}</Text>
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                key={item.id}
+                                onPress={() => {
+                                    if (item.navigateTo === 'NearbySafety') {
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [
+                                                {
+                                                    name: 'Community',
+                                                    params: {
+                                                        screen: 'NearbySafety',
+                                                        params: { filter: item.filter },
+                                                    },
+                                                },
+                                            ],
+                                        });
+                                    } else if (item.navigateTo === 'SafetyInfo') {
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [
+                                                {
+                                                    name: 'Community',
+                                                    params: {
+                                                        screen: 'SafetyInfo',
+                                                        params: { filter: item.filter },
+                                                    },
+                                                },
+                                            ],
+                                        });
+                                    }
+                                }}
+                            >
+                                <View style={styles.menuItem}>
+                                    <Icon
+                                        name={item.filter === '교통' ? 'car' : item.filter === '화재' ? 'fire' : item.filter === '재해' ? 'exclamation-circle' : item.filter === '주의' ? 'exclamation-triangle' : 'home'}
+                                        size={28} // 아이콘 크기 조정
+                                        color={categoryColors[item.filter] || '#000'} // 각 카테고리 색상 적용
+                                        style={styles.icon}
+                                    />
+                                    <Text style={styles.menuText}>{item.title}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )
+                    ))}
+                </View>
 
-
-
-                {/* "내 평안" 항목을 메뉴의 마지막에 추가 */}
                 <TouchableOpacity onPress={() => navigation.navigate('Mypage')}>
-                    <Text style={styles.boldText}>{'내 평안'}</Text>
-                </TouchableOpacity>
-            </ScrollView>
-
-            <View style={styles.footerMenu}>
-                <TouchableOpacity onPress={() => navigation.jumpTo('Home')}>
-                    <Text style={styles.footerText}>홈</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.jumpTo('Shelter')}>
-                    <Text style={styles.footerText}>대피소</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.jumpTo('Camera')}>
-                    <Text style={styles.footerText}>카메라</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.jumpTo('Community')}>
-                    <Text style={styles.footerText}>커뮤니티</Text>
+                    <Text style={styles.boldText}>내 평안</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -125,33 +128,53 @@ const MenuPage = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 60, // 상단 여백을 늘려서 시작점을 아래로 내림
+        paddingTop: 80,
         backgroundColor: 'white',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 35, // 아이콘을 더 아래로 내리기 위해 top 값을 증가시킴
+        left: 10,
+        zIndex: 1, // zIndex로 다른 요소 위에 배치
+        padding: 10, // 터치 영역 확대
     },
     menuItemsContainer: {
         paddingHorizontal: 20,
         paddingBottom: 20,
     },
+    categoriesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+    singleItem: {
+        width: '100%',
+        marginBottom: 10,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '48%',
+        marginBottom: 10,
+    },
+    icon: {
+        marginRight: 10,
+        borderRadius: 12,
+        padding: 8,
+        width: 80,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     menuText: {
         fontSize: 16,
-        paddingVertical: 8,
     },
     boldText: {
         fontWeight: 'bold',
         fontSize: 18,
         paddingTop: 20,
         paddingBottom: 5,
-    },
-    footerMenu: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#ddd',
-        paddingVertical: 10,
-    },
-    footerText: {
-        fontSize: 14,
     },
 });
 
