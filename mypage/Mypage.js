@@ -11,9 +11,10 @@ import UpdatePost from '../community/UpdatePost';
 import PrivacyPolicyContent from './PrivacyPolicyContent';
 import axios from 'axios';
 import config from '../config';
+import Toast from 'react-native-toast-message';
 import { useFocusEffect } from '@react-navigation/native';
 import BagCombinedModal from '../BagCombinedModal'; // MissionModal import
-// import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Stack = createStackNavigator();
@@ -28,7 +29,7 @@ function MainScreen({ navigation, handleLogout }) {
   const [selectedName, setSelectedName] = useState(null);
   const [selectedDescription, setSelectedDescription] = useState(null);
   const [enlargeModalVisible, setEnlargeModalVisible] = useState(false); // 이미지 확대 모달
-  
+
   useEffect(() => {
     // 로그인된 사용자의 세션 정보를 가져오는 함수
     const fetchUserSession = async () => {
@@ -43,7 +44,7 @@ function MainScreen({ navigation, handleLogout }) {
 
     fetchUserSession();
   }, []);
-  
+
   const fetchMissionSession = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
@@ -113,7 +114,7 @@ function MainScreen({ navigation, handleLogout }) {
       console.error("회원 탈퇴 실패:", error);
     }
   };
- 
+
   const missionImages = {
     1: {
       image: require('../assets/flashlight.png'),
@@ -145,7 +146,7 @@ function MainScreen({ navigation, handleLogout }) {
       name: '물',
       description: '갈증을 해소해주는 시원한 물이에요. 💧',
     },
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -208,9 +209,38 @@ function MainScreen({ navigation, handleLogout }) {
 function ChangePasswordScreen({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
   const handlePasswordChange = async () => {
+    // 새 비밀번호와 새 비밀번호 확인이 일치하는지 확인
+    if (newPassword !== confirmNewPassword) {
+      Toast.show({
+        type: 'error',
+        text1: '새 비밀번호 확인 오류',
+        text2: '새 비밀번호가 일치하지 않습니다.',
+        text1Style: { fontSize: 15, color: 'black' },
+        text2Style: { fontSize: 13, color: 'black' },
+        visibilityTime: 2000,
+      });
+      return;
+    }
+
+    // 비밀번호 형식 검사
+    if (!passwordPattern.test(newPassword)) {
+      Toast.show({
+        type: 'error',
+        text1: '비밀번호 형식 오류',
+        text2: '8자리 이상, 영어, 숫자, 특수문자(@$!%*#?&) 포함',
+        text1Style: { fontSize: 15, color: 'black' },
+        text2Style: { fontSize: 13, color: 'black' },
+        visibilityTime: 2000,
+      });
+      return;
+    }
+
     try {
       const response = await axios.post(`${config.apiUrl}/users/change-password`, {
         currentPassword,
@@ -240,6 +270,7 @@ function ChangePasswordScreen({ navigation }) {
         secureTextEntry
         value={currentPassword}
         onChangeText={setCurrentPassword}
+        placeholderTextColor="#000"
       />
       <TextInput
         style={styles.input}
@@ -247,6 +278,15 @@ function ChangePasswordScreen({ navigation }) {
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
+        placeholderTextColor="#000"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="새 비밀번호 확인"
+        secureTextEntry
+        value={confirmNewPassword}
+        onChangeText={setConfirmNewPassword}
+        placeholderTextColor="#000"
       />
       {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
@@ -300,8 +340,8 @@ function MyPostsScreen({ navigation }) {
           <TouchableOpacity
             key={post.id} // 고유한 키를 사용
             style={styles.postItem}
-            onPress={() => navigation.navigate('PostDetail', { post })}
-          >
+            onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post } })}
+            >
             <View style={styles.titleContainer}>
               <Text style={styles.postTitle}>{post.title}</Text>
               <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
@@ -392,7 +432,8 @@ function ScrappedPostsScreen({ navigation }) {
             <TouchableOpacity
               key={index}
               style={styles.postItem}
-              onPress={() => navigation.navigate('PostDetail', { post })}
+              onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post } })}
+              // onPress={() => navigation.navigate('PostDetail', { post })}
             >
               <View style={styles.titleContainer}>
                 <Text style={styles.postTitle}>{post.title}</Text>
