@@ -368,7 +368,7 @@ function ScrappedPostsScreen({ navigation }) {
 
   const fetchScrappedPosts = async () => {
     try {
-      const response = await axios.get(`${config.apiUrl}/scrap/read/myscrap`, { withCredentials: true });
+      const response = await axios.get(`${config.apiUrl}/scraps/read/myscrap`, { withCredentials: true });
       const updatedPosts = response.data.map(post => ({
         ...post,
         isScraped: true, // 스크랩된 글이므로 true로 설정
