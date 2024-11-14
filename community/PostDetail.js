@@ -34,10 +34,25 @@ export default function PostDetail({ route, navigation }) {
   const [commentLayouts, setCommentLayouts] = useState([]);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [replyingVisible, setReplyingVisible] = useState(false);
+  const { fromScrappedPosts } = route.params || {};
+  const { fromMyPosts } = route.params || {};
 
+
+  const handleBackPress = () => {
+    if (fromScrappedPosts) {
+      navigation.navigate('ScrappedPosts');
+    } else if (fromMyPosts) {
+      navigation.navigate('MyPosts');
+    }
+    else {
+      navigation.goBack();
+    }
+  };
   useEffect(() => {
     console.log("수정된 데이터:", post);
   }, [post]);
+
+  
 
   // 이미지 비율 동적 계산
   useEffect(() => {
@@ -474,7 +489,7 @@ export default function PostDetail({ route, navigation }) {
       keyboardVerticalOffset={0}  // Offset value
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+        <TouchableOpacity onPress={() => handleBackPress()} style={styles.iconButton}>
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
