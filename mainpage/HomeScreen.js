@@ -395,7 +395,7 @@ const App = ({ navigation, route }) => {
           </View>
           <Text style={styles.safetyText}>내 주변 안전소식</Text>
           <View style={styles.icons}>
-            <AntDesign name="right" size={16} color="black" />
+            <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4}] }}/>
           </View>
         </TouchableOpacity>
 
