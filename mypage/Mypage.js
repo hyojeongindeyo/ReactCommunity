@@ -501,7 +501,6 @@ function InquiryScreen({ navigation }) {
       <TextInput
         style={styles.inputi}
         placeholder="문의 내용을 입력하세요"
-        secureTextEntry
         value={inquiry}
         multiline
         onChangeText={setInquiry}
