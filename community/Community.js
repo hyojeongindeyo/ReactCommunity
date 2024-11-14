@@ -469,7 +469,7 @@ function Community({ navigation, route }) {
           <Text style={styles.safetyHeaderText}>
             내 주변 안전소식
             <View style={styles.icons}>
-              <AntDesign name="right" size={16} color="black" />
+              <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4}] }}/>
             </View>
           </Text>
         </TouchableOpacity>
@@ -552,7 +552,7 @@ function Community({ navigation, route }) {
           <Text style={styles.infoHeader}>
             안전 정보
             <View style={styles.icons}>
-              <AntDesign name="right" size={16} color="black" />
+              <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4}] }}/>
             </View>
           </Text>
         </TouchableOpacity>
@@ -806,8 +806,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginHorizontal: '5%',
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOffset: { width: 2, height: 1 },
+    shadowOpacity: 0.2,
     shadowRadius: 3.84,
     elevation: 5,
   },
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
     padding: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 3,
     // elevation: 1,
   },
@@ -941,6 +941,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
+    marginTop:15,
   },
   safe: {
     marginBottom: 5,
@@ -1019,6 +1020,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
+    marginBottom:5,
   },
   categoryContainer: {
     flexDirection: 'row',
