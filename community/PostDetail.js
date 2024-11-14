@@ -218,19 +218,28 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleReply = (commentId) => {
-    setReplyToCommentId(commentId);  // 대댓글을 다는 댓글 ID 설정
-    setReplyComment('');  // 대댓글 입력란 초기화
-
+    // 대댓글 모드가 아닐 때는 대댓글 모드로, 이미 대댓글 모드라면 일반 댓글 모드로 전환
+    if (replyToCommentId === commentId) {
+      setReplyToCommentId(null);  // 대댓글 모드 해제
+      setReplyComment('');  // 대댓글 입력 초기화
+    } else { 
+      setReplyToCommentId(commentId);  // 대댓글 모드 활성화
+      setReplyComment(''); 
+    }
+  
     // 키보드 호출 (대댓글 입력창으로 포커스를 맞추기)
     setTimeout(() => {
+      const parentCommentIndex = postComments.findIndex((c) => c.id === commentId);
+      const parentCommentY = commentLayouts[parentCommentIndex];  // 부모 댓글의 Y 위치
+      
       if (textInputRef.current) {
         textInputRef.current.focus();  // 대댓글 입력창에 포커스를 맞춤
       }
-
+  
       // 대댓글 입력창으로 스크롤 이동
       if (scrollViewRef.current) {
         // 스크롤을 대댓글 입력창으로 이동시킴
-        scrollViewRef.current.scrollTo({ x: 0, y: 300, animated: true });  // 300은 스크롤 위치, 필요에 맞게 조정
+        scrollViewRef.current.scrollTo({ x: 0, y: parentCommentY - 50, animated: true });  // 300은 스크롤 위치, 필요에 맞게 조정
       }
     }, 100);  // 딜레이 후 포커스 이동
   };
@@ -472,10 +481,12 @@ export default function PostDetail({ route, navigation }) {
           <Text style={styles.location}>
             {post.location_address} 안전 소식
           </Text>
-          <Text style={styles.timestamp}>
-            {moment(post.timestamp).format('YY/MM/DD HH:mm')}
-          </Text>
-          <Text style={styles.timestamp}>{post.user_nickname}</Text>
+          <View style={styles.timestampContainer}>
+            <Text style={styles.timestampname}>{post.user_nickname}</Text>
+            <Text style={styles.timestamp}>
+              {moment(post.timestamp).format('YY/MM/DD HH:mm')}
+            </Text>
+        </View>
         </View>
 
         <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
@@ -598,7 +609,7 @@ export default function PostDetail({ route, navigation }) {
       </ScrollView>
 
       {/* replying */}
-      {replyToCommentId && (
+      {replyToCommentId && replyingVisible && (
         <View
           style={{
             position: 'absolute',
@@ -712,13 +723,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  timestampContainer: {
+    flexDirection: 'row', // 가로 배열 설정
+    alignItems: 'center', // 텍스트 세로 정렬
+  },
   timestamp: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#8E8E8E',
     fontWeight: '600',
     paddingTop: 1,
-    // marginTop: 3,
+    marginTop: 2,
     // marginVertical: 10,
+  },
+  timestampname: {
+    marginRight: 5, 
+    marginTop: 1,
+    fontSize: 14,
+    color: '#5E5E5E',
+    fontWeight: '700',
   },
   separator: {
     height: 1,
