@@ -31,7 +31,7 @@ const SignupScreen = ({ navigation }) => {
             return;  // 하나라도 비어 있으면 함수 종료
         }
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.(com|net|org|gov|edu|info|biz|co|int|mil)$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.(com|net|org|gov|edu|info|biz|co|int|mil)$/i;
         const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
 
