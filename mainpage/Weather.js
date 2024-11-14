@@ -34,7 +34,7 @@ const Weather = ({ latitude, longitude, city }) => {
   }, [latitude, longitude]);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="small" color="#f1f1f1" />;
   }
 
   if (error) {
