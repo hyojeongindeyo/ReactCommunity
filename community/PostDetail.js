@@ -167,6 +167,16 @@ export default function PostDetail({ route, navigation }) {
     );
   };
 
+  useEffect(() => {
+    // 화면을 벗어나거나 돌아올 때 상태 초기화
+    const unsubscribe = navigation.addListener('blur', () => {
+      setReplyToCommentId(null); // 대댓글 상태 초기화
+      setReplyComment(''); // 대댓글 입력 내용 초기화
+    });
+  
+    return unsubscribe;
+  }, [navigation]);  
+
   const handleCommentLayout = (event, index) => {
     const layout = event.nativeEvent.layout;
     setCommentLayouts((prevLayouts) => {
