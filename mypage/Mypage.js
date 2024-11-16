@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Dimensions, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, Dimensions, Linking, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
@@ -150,18 +150,16 @@ function MainScreen({ navigation, handleLogout }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.scrollViewContent}>
         <View>
           <Text style={styles.nametitle}>{nickname}님의 평안이</Text>
         </View>
-
+  
         <View style={styles.imgContainer}>
           <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode='contain' />
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Image source={require('../assets/bag.png')} style={styles.bag} resizeMode='contain' />
           </TouchableOpacity>
-
-
         </View>
         <BagCombinedModal
           modalVisible={modalVisible}
@@ -170,9 +168,7 @@ function MainScreen({ navigation, handleLogout }) {
           handleImagePress={handleImagePress}
           missionImages={missionImages}
         />
-
-
-
+  
         <View style={styles.separator} />
         <Text style={styles.title}>내 정보</Text>
         <Text style={styles.message} onPress={() => navigation.navigate('ChangePassword')}>비밀번호 변경</Text>
@@ -199,12 +195,12 @@ function MainScreen({ navigation, handleLogout }) {
           onClose={() => setDeleteAccountModalVisible(false)}
           onDelete={handleDeleteAccountClick}
         />
-      </ScrollView>
-
+      </View>
+  
       <StatusBar />
     </View>
   );
-}
+}  
 
 function ChangePasswordScreen({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -215,6 +211,19 @@ function ChangePasswordScreen({ navigation }) {
   const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
   const handlePasswordChange = async () => {
+    // 모든 입력 항목이 작성되었는지 확인
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      Toast.show({
+        type: 'error',
+        text1: '공백 오류',
+        text2: '모든 항목을 빠짐없이 작성해주세요.',
+        text1Style: { fontSize: 15, color: 'black' },
+        text2Style: { fontSize: 13, color: 'black' },
+        visibilityTime: 2000,
+      });
+      return;
+    }
+
     // 새 비밀번호와 새 비밀번호 확인이 일치하는지 확인
     if (newPassword !== confirmNewPassword) {
       Toast.show({
@@ -263,36 +272,38 @@ function ChangePasswordScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.passwordContainer}>
-      <TextInput
-        style={styles.input}
-        placeholder="현재 비밀번호"
-        secureTextEntry
-        value={currentPassword}
-        onChangeText={setCurrentPassword}
-        placeholderTextColor="#000"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="새 비밀번호"
-        secureTextEntry
-        value={newPassword}
-        onChangeText={setNewPassword}
-        placeholderTextColor="#000"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="새 비밀번호 확인"
-        secureTextEntry
-        value={confirmNewPassword}
-        onChangeText={setConfirmNewPassword}
-        placeholderTextColor="#000"
-      />
-      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-      <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
-        <Text style={styles.buttonText}>확인</Text>
-      </TouchableOpacity>
-    </View>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="현재 비밀번호"
+          secureTextEntry
+          value={currentPassword}
+          onChangeText={setCurrentPassword}
+          placeholderTextColor="#000"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="새 비밀번호"
+          secureTextEntry
+          value={newPassword}
+          onChangeText={setNewPassword}
+          placeholderTextColor="#000"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="새 비밀번호 확인"
+          secureTextEntry
+          value={confirmNewPassword}
+          onChangeText={setConfirmNewPassword}
+          placeholderTextColor="#000"
+        />
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
+          <Text style={styles.buttonText}>확인</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -490,26 +501,56 @@ function PrivacyPolicyScreen() {
   );
 }
 
-function InquiryScreen({ navigation }) {
+function InquiryScreen() {
   const [inquiry, setInquiry] = useState('');
+  const email = '00000@naver.com';
 
   const handleSendInquiry = () => {
-    console.log('문의 내용:', inquiry);
-    navigation.goBack();
+    if (inquiry.trim() === '') {
+      Toast.show({
+        type: 'error',
+        text1: '오류',
+        text2: '문의 내용을 입력하세요.',
+        text1Style: { fontSize: 15, color: 'black' },
+        text2Style: { fontSize: 13, color: 'black' },
+        visibilityTime: 2000,
+      });
+      return;
+    }
+
+    const subject = encodeURIComponent('문의 사항');
+    const body = encodeURIComponent(inquiry);
+    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+
+    Linking.openURL(mailtoUrl).catch((error) => {
+      console.error('메일 앱 열기 실패:', error);
+      Toast.show({
+        type: 'error',
+        text1: '오류',
+        text2: '메일 앱을 열 수 없습니다.',
+        text1Style: { fontSize: 15, color: 'black' },
+        text2Style: { fontSize: 13, color: 'black' },
+        visibilityTime: 2000,
+      });
+    });
   };
 
   return (
-    <View style={styles.inquiryContainer}>
-      <TextInput
-        placeholder="문의 내용을 입력하세요"
-        value={inquiry}
-        onChangeText={setInquiry}
-        multiline
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSendInquiry}>
-        <Text style={styles.buttonText}>보내기</Text>
-      </TouchableOpacity>
-    </View>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.inquiryContainer}>
+        <TextInput
+          style={styles.inputi}
+          placeholder="문의 내용을 입력하세요"
+          value={inquiry}
+          multiline
+          onChangeText={setInquiry}
+          placeholderTextColor="#000"
+        />
+        <TouchableOpacity style={styles.mailbutton} onPress={handleSendInquiry}>
+          <Text style={styles.buttonText}>메일 보내기</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -812,6 +853,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
   },
+  inputi: {
+    width: SCREEN_WIDTH * 0.8,
+    height: 150,
+    borderColor: '#ccc',
+    backgroundColor: '#F3F3F3',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+  },
   button: {
     width: 60,
     height: 35,
@@ -819,7 +870,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
-    marginTop: 50,
+    marginTop: 30,
+  },
+  mailbutton: {
+    backgroundColor: '#5A4A3E',
+    height: 35,
+    width: 100,
+    alignItems: 'center',
+    borderRadius: 20,
+    marginTop: 10,
   },
   buttonText: {
     color: '#fff',
