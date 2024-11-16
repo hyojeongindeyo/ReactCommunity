@@ -215,7 +215,7 @@ function ChangePasswordScreen({ navigation }) {
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       Toast.show({
         type: 'error',
-        text1: '공백 오류',
+        text1: '입력 오류',
         text2: '모든 항목을 빠짐없이 작성해주세요.',
         text1Style: { fontSize: 15, color: 'black' },
         text2Style: { fontSize: 13, color: 'black' },
@@ -509,7 +509,7 @@ function InquiryScreen() {
     if (inquiry.trim() === '') {
       Toast.show({
         type: 'error',
-        text1: '오류',
+        text1: '입력 오류',
         text2: '문의 내용을 입력하세요.',
         text1Style: { fontSize: 15, color: 'black' },
         text2Style: { fontSize: 13, color: 'black' },
@@ -866,19 +866,20 @@ const styles = StyleSheet.create({
   button: {
     width: 60,
     height: 35,
-    backgroundColor: '#5A4A3E',
+    backgroundColor: '#6F8B87',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
     marginTop: 30,
   },
   mailbutton: {
-    backgroundColor: '#5A4A3E',
+    backgroundColor: '#6F8B87',
     height: 35,
     width: 100,
     alignItems: 'center',
     borderRadius: 20,
     marginTop: 10,
+    justifyContent: 'center', // 텍스트를 수직으로 중앙 정렬
   },
   buttonText: {
     color: '#fff',
