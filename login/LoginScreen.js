@@ -5,6 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, Image, View, Dimensions, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import axios from 'axios'; // axios를 사용하여 API 호출
 import config from '../config';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -26,15 +28,15 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
             });
             return;
         }
-    
+
         setLoading(true);
-    
+
         try {
             const response = await axios.post(`${apiUrl}/users/login`, {
                 id,
                 password
             });
-    
+
             if (response.status === 200) {
                 // 로그인 성공 시 알림을 제거하고 onLoginSuccess만 호출
                 onLoginSuccess(); // 로그인 성공 시 onLoginSuccess 호출
@@ -63,6 +65,41 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
             setLoading(false);
         }
     };
+
+
+    const handleGuestLogin = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/users/guest-login`, {
+                method: 'POST',
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to connect to server');
+            }
+    
+            const sessionData = await response.json();
+            console.log('Session Data:', sessionData);  // 응답 확인 로그
+    
+            // 서버 응답에서 user.id를 확인하도록 수정
+            if (sessionData && sessionData.user && sessionData.user.id) {
+                await AsyncStorage.setItem('userSession', JSON.stringify(sessionData.user));
+                onLoginSuccess();
+            } else {
+                throw new Error('Session creation failed');
+            }
+        } catch (e) {
+            console.error('Failed to set guest session:', e);
+            alert('로그인 실패: ' + e.message);
+        }
+    };
+    
+    
+    
+
+    
+    
+    
+    
 
 
     return (
@@ -95,6 +132,10 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
                         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
                             <Text style={styles.linkText}>회원가입</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity onPress={handleGuestLogin}>
+                            <Text style={styles.linkText}>비회원 로그인</Text>
+                        </TouchableOpacity>
+
                     </View>
                 </View>
             </KeyboardAvoidingView>

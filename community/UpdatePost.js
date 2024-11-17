@@ -121,7 +121,7 @@ export default function UpdatePost({ navigation, route }) {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <View style={styles.header}>
-                        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+                        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.replace('PostDetail', {post})}>
                             <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
                         </TouchableOpacity>
                         <Text style={styles.title}>게시물 수정하기</Text>

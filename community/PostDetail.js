@@ -36,23 +36,35 @@ export default function PostDetail({ route, navigation }) {
   const [replyingVisible, setReplyingVisible] = useState(false);
   const { fromScrappedPosts } = route.params || {};
   const { fromMyPosts } = route.params || {};
+  const { fromHome } = route.params || {};
+  const {fromNearby} = route.param || {};
+  const [optionsMenuVisible, setOptionsMenuVisible] = useState(false);
 
+
+  const handleOptionsPress = () => {
+    setOptionsMenuVisible((prevState) => !prevState); // 현재 상태를 반전
+  };
 
   const handleBackPress = () => {
     if (fromScrappedPosts) {
       navigation.navigate('ScrappedPosts');
     } else if (fromMyPosts) {
       navigation.navigate('MyPosts');
-    }
-    else {
+    } else if (fromHome){
+      navigation.navigate('Home');
+    }else if(fromNearby){
+      navigation.navigate('NeabySafety')
+    } else {
       navigation.goBack();
     }
   };
+
+
   useEffect(() => {
     console.log("수정된 데이터:", post);
   }, [post]);
 
-  
+
 
   // 이미지 비율 동적 계산
   useEffect(() => {
@@ -173,9 +185,9 @@ export default function PostDetail({ route, navigation }) {
       setReplyToCommentId(null); // 대댓글 상태 초기화
       setReplyComment(''); // 대댓글 입력 내용 초기화
     });
-  
+
     return unsubscribe;
-  }, [navigation]);  
+  }, [navigation]);
 
   const handleCommentLayout = (event, index) => {
     const layout = event.nativeEvent.layout;
@@ -187,6 +199,18 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleCommentSubmit = () => {
+    const userRole = userData.role; // userData 객체에 롤 정보가 있다고 가정
+
+    if (userRole === 'guest') {
+      Toast.show({
+        type: 'info',
+        position: 'top',
+        text1: '게스트는 댓글을 작성할 수 없습니다.',
+        visibilityTime: 2000, // 2초 동안 표시
+      });
+      return; // 댓글 작성 중지
+    }
+
     if (newComment.trim()) {
       postComment(newComment, userData.id); // 새 댓글과 사용자 ID를 전달
 
@@ -247,20 +271,20 @@ export default function PostDetail({ route, navigation }) {
     if (replyToCommentId === commentId) {
       setReplyToCommentId(null);  // 대댓글 모드 해제
       setReplyComment('');  // 대댓글 입력 초기화
-    } else { 
+    } else {
       setReplyToCommentId(commentId);  // 대댓글 모드 활성화
-      setReplyComment(''); 
+      setReplyComment('');
     }
-  
+
     // 키보드 호출 (대댓글 입력창으로 포커스를 맞추기)
     setTimeout(() => {
       const parentCommentIndex = postComments.findIndex((c) => c.id === commentId);
       const parentCommentY = commentLayouts[parentCommentIndex];  // 부모 댓글의 Y 위치
-      
+
       if (textInputRef.current) {
         textInputRef.current.focus();  // 대댓글 입력창에 포커스를 맞춤
       }
-  
+
       // 대댓글 입력창으로 스크롤 이동
       if (scrollViewRef.current) {
         // 스크롤을 대댓글 입력창으로 이동시킴
@@ -282,6 +306,18 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleReplySubmit = async () => {
+    const userRole = userData.role; // userData 객체에 롤 정보가 있다고 가정
+
+    if (userRole === 'guest') {
+      Toast.show({
+        type: 'info',
+        position: 'top',
+        text1: '게스트는 답글을 작성할 수 없습니다.',
+        visibilityTime: 2000, // 2초 동안 표시
+      });
+      return; // 댓글 작성 중지
+    }
+
     console.log("입력된 대댓글:", replyComment); // 대댓글 내용 확인
 
     if (replyComment.trim()) {
@@ -445,6 +481,17 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleScrap = async () => {
+    const userRole = userData.role; // userData 객체에 롤 정보가 있다고 가정
+
+    if (userRole === 'guest') {
+      Toast.show({
+        type: 'info',
+        position: 'top',
+        text1: '게스트는 스크랩할 수 없습니다.',
+        visibilityTime: 2000, // 2초 동안 표시
+      });
+      return; // 작업 중지
+    }
     try {
       if (isScraped) {
         await axios.delete(`${config.apiUrl}/scraps/${postId}`, { withCredentials: true });
@@ -456,41 +503,29 @@ export default function PostDetail({ route, navigation }) {
         setScrapCount(scrapCount + 1); // 스크랩 수 증가
       }
     } catch (error) {
-      // 서버로부터의 오류 메시지 확인
       const errorMessage = error.response?.data?.error;
       if (errorMessage === '자신이 작성한 글은 스크랩할 수 없습니다.') {
         Toast.show({
-          type: 'error', 
-          position: 'top', 
+          type: 'error',
+          position: 'top',
           text1: '알림',
-          text2: '내가 작성한 글은 스크랩할 수 없습니다.', 
+          text2: '내가 작성한 글은 스크랩할 수 없습니다.',
           text1Style: { fontSize: 15, color: 'black' },
           text2Style: { fontSize: 13, color: 'black' },
           visibilityTime: 2000,
-          autoHide: true, 
+          autoHide: true,
         });
       } else {
-        console.error('스크랩 오류:', error);
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: '스크랩 실패',
+          text2: '오류가 발생했습니다. 다시 시도해 주세요.',
+          visibilityTime: 2000,
+        });
       }
     }
   };
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
-      setKeyboardHeight(e.endCoordinates.height); // 키보드 높이 설정
-      setReplyingVisible(true); // 키보드가 올라오면 "Replying to" 영역 보이기
-    });
-
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardHeight(0); // 키보드가 내려갔을 때 초기화
-      setReplyingVisible(false); // 키보드가 내려가면 "Replying to" 영역 숨기기
-    });
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -499,10 +534,13 @@ export default function PostDetail({ route, navigation }) {
       keyboardVerticalOffset={0}  // Offset value
     >
       <View style={styles.header}>
+        {/* 뒤로 가기 버튼 */}
         <TouchableOpacity onPress={() => handleBackPress()} style={styles.iconButton}>
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
-        <View style={{ alignItems: 'center' }}>
+
+        {/* 중앙 텍스트 (주소 및 시간 정보) */}
+        <View style={styles.centerContent}>
           <Text style={styles.location}>
             {post.location_address} 안전 소식
           </Text>
@@ -511,14 +549,58 @@ export default function PostDetail({ route, navigation }) {
             <Text style={styles.timestamp}>
               {moment(post.timestamp).format('YY/MM/DD HH:mm')}
             </Text>
-        </View>
+          </View>
         </View>
 
-        <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
-          <FontAwesome name={isScraped ? 'star' : 'star-o'} size={20} color={isScraped ? 'gold' : 'black'} />
-          <Text style={{ marginLeft: 3 }}>{scrapCount}</Text>
-        </TouchableOpacity>
+        {/* 옵션 메뉴 또는 스크랩 버튼 */}
+        {userData && userData.email === post.user_email ? (
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity onPress={() => setOptionsMenuVisible(!optionsMenuVisible)} style={styles.optionsButton}>
+              <MaterialIcons name="more-vert" size={20} color="gray" />
+            </TouchableOpacity>
+            {optionsMenuVisible && (
+              <View style={styles.optionsMenu}>
+                <TouchableOpacity
+                  style={[styles.menuItem, { zIndex: 10 }]}
+                  onPress={() => {
+                    setOptionsMenuVisible(false);
+                    // const { fromHome } = route.params;  // fromHome 값 받아오기
+                    navigation.replace('UpdatePost', { 
+                      post, 
+                      // fromScreen: 'PostDetail', 
+                      fromHome: fromHome === true  // fromHome이 true일 때만 전달
+                    });
+                  }}
+                >
+                  <MaterialIcons name="edit" size={20} color="#333" />
+                  <Text style={styles.menuText}>수정</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.menuItem, { zIndex: 10 }]}
+                  onPress={() => {
+                    setOptionsMenuVisible(false);
+                    handleDelete();
+                  }}
+                >
+                  <MaterialIcons name="delete" size={20} color="#333" />
+                  <Text style={styles.menuText}>삭제</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        ) : (
+          <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
+            <FontAwesome
+              name={isScraped ? 'star' : 'star-o'}
+              size={14}
+              color={isScraped ? 'gold' : 'black'}
+            />
+            <Text style={styles.scrapCountText}>{scrapCount}</Text>
+          </TouchableOpacity>
+        )}
       </View>
+
+
       <View style={styles.headerSeparator}></View>
 
       <ScrollView
@@ -531,28 +613,33 @@ export default function PostDetail({ route, navigation }) {
           onClose={handleClose}
           onConfirm={handleConfirm}
         />
-        <Text style={styles.title}>{post.title}</Text>
-        <Text style={styles.postText}>{post.message}</Text>
+        <View style={styles.mainContent}>
+
+          <Text style={styles.title}>{post.title}</Text>
+          <Text style={styles.postText}>{post.message}</Text>
+        </View>
+
 
         {post.image && imageWidth && imageHeight ? (
-          <Image
-            source={{ uri: post.image }}
-            style={{
-              width: imageWidth * 0.9,
-              height: imageHeight * 0.9,
-              resizeMode: 'contain',
-              marginVertical: 10,
-              borderRadius: 10,
-            }}
-            onError={(error) => {
-              console.error("Image load error: ", error);
-              Alert.alert("이미지를 로드할 수 없습니다.");
-            }}
-          />
+          <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 10 }}>
+            <Image
+              source={{ uri: post.image }}
+              style={{
+                width: imageWidth * 0.9,
+                height: imageHeight * 0.9,
+                resizeMode: 'contain',
+                borderRadius: 10,
+              }}
+              onError={(error) => {
+                console.error("Image load error: ", error);
+                Alert.alert("이미지를 로드할 수 없습니다.");
+              }}
+            />
+          </View>
         ) : null}
 
-        {userData && userData.email === post.user_email && (
-          <View style={{ flexDirection: 'row' }}>
+        {/* {userData && userData.email === post.user_email && (
+          <View style={{ flexDirection: 'row', marginTop: 15, marginBottom: 5 }}>
             <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
               <Text style={styles.udText}>삭제</Text>
             </TouchableOpacity>
@@ -563,18 +650,31 @@ export default function PostDetail({ route, navigation }) {
               <Text style={styles.udText}>수정</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )} */}
+
+
 
         <View style={styles.separator}></View>
 
         <View style={styles.commentsSection}>
           <View style={styles.commentsHeader}>
             <Text style={styles.commentsTitle}>댓글</Text>
-            <View style={styles.commentCountContainer}>
-              <Ionicons name="chatbubble-outline" size={16} color="#666" />
-              <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
+            <View style={styles.commentScrapContainer}>
+              <View style={styles.commentCountContainer}>
+                <Ionicons name="chatbubble-outline" size={14} color="#666" />
+                <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
+              </View>
+              <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
+                <FontAwesome
+                  name={isScraped ? 'star' : 'star-o'}
+                  size={14} // 아이콘 크기를 줄임
+                  color={isScraped ? 'gold' : 'black'}
+                />
+                <Text style={styles.scrapCountText}>{scrapCount}</Text>
+              </TouchableOpacity>
             </View>
           </View>
+
 
           {postComments
             .filter(comment => comment.parent_comment_id === null) // 부모 댓글만 필터링
@@ -583,14 +683,15 @@ export default function PostDetail({ route, navigation }) {
                 key={index}
                 style={[
                   styles.commentContainer,
-                  replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
+                  // replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
                 ]}
                 onLayout={(event) => handleCommentLayout(event, index)} // onLayout 이벤트로 위치 추적
               >
-                <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
-                <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
-                <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
-
+                <View style={[styles.parentscomment, replyToCommentId === comment.id && styles.replyingComment,]}>
+                  <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
+                  <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
+                  <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
+                </View>
                 <TouchableOpacity
                   onPress={() => {
                     handleReply(comment.id);
@@ -638,7 +739,7 @@ export default function PostDetail({ route, navigation }) {
         <View
           style={{
             position: 'absolute',
-            bottom: keyboardHeight-35, 
+            bottom: keyboardHeight - 35,
             left: 0,
             right: 0,
             backgroundColor: 'white',
@@ -647,7 +748,7 @@ export default function PostDetail({ route, navigation }) {
             borderColor: '#ddd',
           }}
         >
-          <Text style={{ fontWeight: 'bold', marginBottom:15 }}>답글 달기 : </Text>
+          <Text style={{ fontWeight: 'bold', marginBottom: 15 }}>답글 달기 : </Text>
         </View>
       )}
 
@@ -698,14 +799,18 @@ const styles = StyleSheet.create({
     paddingTop: '10%',
     paddingBottom: '3%',
   },
+  headerContent: {
+    alignItems: 'center', // 텍스트를 가운데 정렬
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     // textAlign: 'center',
     // marginTop: 5,
-    paddingBottom: '5%'
+    paddingBottom: '3%'
   },
   location: {
+    flex: 1, // 가운데 정렬을 위한 유연한 공간 확보
     fontSize: 16,
     color: '#565656',
     textAlign: 'center',
@@ -727,26 +832,20 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingTop: '5%',
-    paddingHorizontal: '5%',
+    // paddingHorizontal: '5%',
     // marginBottom: 10,
     // marginBottom: 4,
+  },
+  mainContent: {
+    // justifyContent: 'center', // 세로 가운데 정렬
+    // alignItems: 'center',     // 가로 가운데 정렬
+    marginHorizontal: 15, // 좌우 여백
 
   },
   postText: {
     fontSize: 17,
     color: '#333',
-    marginBottom: 20,
-  },
-  // postImage: {
-  //   width: '100%',
-  //   resizeMode: 'contain',  // 이미지 비율 유지
-  //   height: 280,
-  //   borderRadius: 10,
-  //   marginBottom: 20,
-  // },
-  scrapButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: 10,
   },
   timestampContainer: {
     flexDirection: 'row', // 가로 배열 설정
@@ -761,7 +860,7 @@ const styles = StyleSheet.create({
     // marginVertical: 10,
   },
   timestampname: {
-    marginRight: 5, 
+    marginRight: 5,
     marginTop: 1,
     fontSize: 14,
     color: '#5E5E5E',
@@ -775,6 +874,7 @@ const styles = StyleSheet.create({
   commentsSection: {
     marginTop: 20,
     marginBottom: 30, // 입력창 높이만큼 공간을 남겨둠
+    marginHorizontal: 10,
 
   },
   commentsTitle: {
@@ -783,25 +883,33 @@ const styles = StyleSheet.create({
 
   },
   commentContainer: {
-    padding: 10,
+    // padding: 10,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+
   },
   commentAuthor: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#333', // 작성자 닉네임 색상
-    marginBottom: 3, // 댓글 본문과의 간격 조절
+    // marginBottom: 3, // 댓글 본문과의 간격 조절
+    marginTop: 5,
+    marginHorizontal: 10, // 좌우 여백
+
   },
   comment: {
     fontSize: 16,
     color: '#333',
+    marginHorizontal: 10, // 좌우 여백
   },
   commentTimestamp: {
     fontSize: 12,
     color: '#999',
     textAlign: 'left',
     marginTop: 5,
+    marginBottom: 5,
+    marginHorizontal: 10, // 좌우 여백
   },
   commentInputContainer: {
     // position: 'absolute', // 화면 하단에 고정
@@ -845,6 +953,7 @@ const styles = StyleSheet.create({
     right: 30,
     top: 10,
   },
+
   // deleteButton: {
   //   backgroundColor: 'red',
   //   justifyContent: 'center',
@@ -873,6 +982,15 @@ const styles = StyleSheet.create({
     color: '#666',
     marginLeft: 3,         // 말풍선 아이콘과 댓글 수 텍스트 사이의 간격
   },
+  scrapButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scrapCountText: {
+    fontSize: 12,
+    marginLeft: 3,
+    color: '#666',
+  },
   commentsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between', // 양쪽 끝에 요소 배치
@@ -886,9 +1004,103 @@ const styles = StyleSheet.create({
     // borderLeftWidth: 2,      // 왼쪽에 선 추가해서 구분감 줌
     // borderLeftColor: '#ccc', // 선 색상 설정
     backgroundColor: '#f5f5f5', // 배경색 설정 (부드러운 회색)
-    marginTop: 5,
+    borderRadius: 10,
+    marginRight: 10,
+    marginBottom: 5,
+    // marginTop: 5,
+  },
+  parentscomment: {
+    paddingBottom: 10,
+    paddingVertical: 10, // 상하 여백
+
   },
   replyingComment: {
     backgroundColor: '#f0f8ff',  // 대댓글 작성 중인 부모 댓글의 배경색
+    paddingBottom: 10,
+  },
+  moreOptionsButton: {
+    padding: 5,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  optionsMenu: {
+    position: 'absolute',
+    top: 50, // 옵션바 아래로 약간 내려오도록 위치 조정
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // Android 그림자 효과
+    zIndex: 1000,
+    marginTop: '10%'
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    backgroundColor: 'white'
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 10,
+  },
+  commentScrapContainer: {
+    flexDirection: 'row',
+
+  },
+  optionsContainer: {
+    flexDirection: 'row', // 옵션 버튼 가로 정렬
+    alignItems: 'center',
+
+  },
+  optionsButton: {
+    paddingHorizontal: 5,
+  },
+  optionsMenu: {
+    position: 'absolute',
+    top: 40,
+    right: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    elevation: 5,
+    padding: 10,
+  },
+  scrapButton: {
+    flexDirection: 'row', // 아이콘과 텍스트 가로 정렬
+    alignItems: 'center',
+  },
+  scrapCountText: {
+    marginLeft: 5,
+    fontSize: 14,
+  },
+  location: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  timestampContainer: {
+    flexDirection: 'row',
+    marginTop: 2,
+  },
+  timestampname: {
+    fontSize: 12,
+    color: '#666',
+    marginRight: 5,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#666',
+  },
+  centerContent: {
+    flex: 1, // 중앙 컨텐츠가 가로 공간 차지
+    alignItems: 'center', // 텍스트 가운데 정렬
   },
 });

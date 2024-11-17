@@ -23,18 +23,18 @@ export default function ShelterScreen({ navigation }) {
   const scrollViewHeight = useRef(new Animated.Value(SCREEN_HEIGHT / 5)).current;
   const [locationRequestTime, setLocationRequestTime] = useState(Date.now());
 
-  useEffect(() => {
-    fetchUserSession();
-  }, []);
+  // useEffect(() => {
+  //   fetchUserSession();
+  // }, []);
 
-  const fetchUserSession = async () => {
-    try {
-      const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
-      setUserData(response.data);
-    } catch (error) {
-      console.error('Error fetching user session:', error);
-    }
-  };
+  // const fetchUserSession = async () => {
+  //   try {
+  //     const response = await axios.get(`${config.apiUrl}/users/session`, { withCredentials: true });
+  //     setUserData(response.data);
+  //   } catch (error) {
+  //     console.error('Error fetching user session:', error);
+  //   }
+  // };
 
   // Haversine 공식을 사용하여 두 지점 간의 거리를 계산하는 함수
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {

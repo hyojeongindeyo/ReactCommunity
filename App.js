@@ -42,8 +42,8 @@ const HomeStack = () => (
     <Stack.Screen name="HomeScreen" component={HomeScreen} />
     {/* <Stack.Screen name="NearbySafety" component={NearbySafety} /> */}
     {/* <Stack.Screen name="PostDetail" component={PostDetail} /> */}
-    <Stack.Screen name="WritePost" component={WritePost} />
-    <Stack.Screen name="UpdatePost" component={UpdatePost} />
+    {/* <Stack.Screen name="WritePost" component={WritePost} /> */}
+    {/* <Stack.Screen name="UpdatePost" component={UpdatePost} /> */}
     <Stack.Screen name="MenuPage" component={MenuPage} />
     {/* <Stack.Screen name="SafetyInfo" component={SafetyInfo} /> */}
 

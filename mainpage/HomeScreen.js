@@ -368,6 +368,7 @@ const App = ({ navigation, route }) => {
               userMissions={userMissions}
               handleImagePress={handleImagePress}
               missionImages={missionImages}
+              userData = {userData}
               
 
             />
@@ -408,7 +409,7 @@ const App = ({ navigation, route }) => {
                 {filteredPost ? (
                   <TouchableOpacity
                     style={styles.safebox}
-                    onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post: filteredPost } })}
+                    onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post: filteredPost, fromHome:true } })}
 
                     // onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
                   >

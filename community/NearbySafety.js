@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncSt
 import axios from 'axios'; // axios 임포트
 import config from '../config'; // API URL을 위한 config 임포트
 import CustomModal from '../CustomModal'; // 모달 컴포넌트 import
+import Toast from 'react-native-toast-message';
 
 export default function NearbySafety({ navigation, route }) {
   const { posts, loadPosts } = useContext(PostsContext); // PostsContext에서 posts를 가져옴
@@ -24,6 +25,8 @@ export default function NearbySafety({ navigation, route }) {
   const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
   const [missionModalVisible, setMissionModalVisible] = useState(false); // 새로운 상태 변수
   const [userData, setUserData] = useState(null); // userData 상태 추가
+  const userRole = userData ? userData.role : null;
+
 
   // 사용자 세션 정보 가져오기
   useEffect(() => {
@@ -84,7 +87,7 @@ export default function NearbySafety({ navigation, route }) {
 
         if (address.length > 0) {
           const { city, district, street } = address[0];
-          const userAddress = `${city} ${district || street }`;
+          const userAddress = `${city} ${district || street}`;
           setUserLocation(userAddress);  // 시(city)와 동(district) 정보 설정
           await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
         }
@@ -332,7 +335,9 @@ export default function NearbySafety({ navigation, route }) {
           <ScrollView style={styles.content}>
             {filteredPosts.length > 0 ? (
               filteredPosts.map((post, index) => (
-                <TouchableOpacity key={index} style={styles.postContainer} onPress={() => navigation.navigate('PostDetail', { post })}>
+                <TouchableOpacity key={index} style={styles.postContainer} onPress={() => navigation.navigate('PostDetail', { post, fromNearby:true })}>
+                  {/* onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post: filteredPost, fromHome: true } })} */}
+
                   <View style={styles.postContent}>
                     {/* 텍스트 블록 (제목, 본문, 날짜) */}
                     <View style={styles.textContainer}>
@@ -387,7 +392,23 @@ export default function NearbySafety({ navigation, route }) {
       )}
 
       {/* 게시물 작성 버튼 */}
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('WritePost')}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => {
+          if (userRole === 'guest') {
+            // 비회원인 경우 Toast 메시지 표시
+            Toast.show({
+              type: 'info',
+              text1: '로그인 필요',
+              text2: '게스트는 글을 작성할 수 없습니다.',
+              visibilityTime: 2000,
+            });
+          } else {
+            // 회원인 경우 WritePost 화면으로 이동
+            navigation.navigate('WritePost');
+          }
+        }}
+      >
         <Entypo name="plus" size={30} color="black" />
       </TouchableOpacity>
 
