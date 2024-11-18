@@ -555,37 +555,33 @@ export default function PostDetail({ route, navigation }) {
         {/* 옵션 메뉴 또는 스크랩 버튼 */}
         {userData && userData.email === post.user_email ? (
           <View style={styles.optionsContainer}>
-            <TouchableOpacity onPress={() => setOptionsMenuVisible(!optionsMenuVisible)} style={styles.optionsButton}>
+            <TouchableOpacity onPress={() => setOptionsMenuVisible(!optionsMenuVisible)} style={styles.scrapButton}>
               <MaterialIcons name="more-vert" size={20} color="gray" />
             </TouchableOpacity>
             {optionsMenuVisible && (
               <View style={styles.optionsMenu}>
-                <TouchableOpacity
-                  style={[styles.menuItem, { zIndex: 10 }]}
-                  onPress={() => {
-                    setOptionsMenuVisible(false);
-                    // const { fromHome } = route.params;  // fromHome 값 받아오기
-                    navigation.replace('UpdatePost', { 
-                      post, 
-                      // fromScreen: 'PostDetail', 
-                      fromHome: fromHome === true  // fromHome이 true일 때만 전달
-                    });
-                  }}
-                >
-                  <MaterialIcons name="edit" size={20} color="#333" />
-                  <Text style={styles.menuText}>수정</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.menuItem, { zIndex: 10 }]}
-                  onPress={() => {
-                    setOptionsMenuVisible(false);
-                    handleDelete();
-                  }}
-                >
-                  <MaterialIcons name="delete" size={20} color="#333" />
-                  <Text style={styles.menuText}>삭제</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={[styles.menuItem, styles.menuItemBorder]} // 구분선 추가
+                onPress={() => {
+                  setOptionsMenuVisible(false);
+                  navigation.replace('UpdatePost', { post, fromHome: fromHome === true });
+                }}
+              >
+                <MaterialIcons name="edit" size={20} color="#333" />
+                <Text style={styles.menuText}>수정</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItemLast} // 마지막 버튼 스타일
+                onPress={() => {
+                  setOptionsMenuVisible(false);
+                  handleDelete();
+                }}
+              >
+                <MaterialIcons name="delete" size={20} color="#333" />
+                <Text style={styles.menuText}>삭제</Text>
+              </TouchableOpacity>
+            </View>
+            
             )}
           </View>
         ) : (
@@ -933,7 +929,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  optionsButton: {
+  optionsmenuButton: {
     position: 'absolute',
     right: 10,
     top: 10,
@@ -1008,9 +1004,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f8ff',  // 대댓글 작성 중인 부모 댓글의 배경색
     paddingBottom: 10,
   },
-  moreOptionsButton: {
-    padding: 5,
-  },
+  // moreOptionsButton: {
+  //   padding: 5,
+  // },
   modalButtonText: {
     fontSize: 16,
     color: '#333',
@@ -1020,42 +1016,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    backgroundColor: 'white'
+    backgroundColor: 'white', // 버튼 배경
   },
+  
+  menuItemBorder: {
+    borderBottomWidth: 1, // 구분선 추가
+    borderBottomColor: '#ddd',
+  },
+  
+  menuItemLast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: 'white',
+    // 삭제 버튼 아래 여백 제거
+  },
+  
   menuText: {
     fontSize: 16,
     color: '#333',
-    marginLeft: 10,
+    textAlign: 'center',
   },
   optionsContainer: {
     flexDirection: 'row', // 옵션 버튼 가로 정렬
     alignItems: 'center',
-
   },
+  optionsMenu: {
+    position: 'absolute',
+    top: 45,               // 스크랩 버튼 바로 아래
+    right: -20,            // 오른쪽 끝에 정렬
+    backgroundColor: '#fff',
+    elevation: 5,          // Android 그림자 효과
+    shadowColor: '#000',   // iOS 그림자 효과
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    paddingVertical: 0,    // 메뉴 자체의 상하 여백 제거
+    zIndex: 1000,          // 다른 요소 위에 표시
+    minWidth: 100,  
+    marginLeft: 10,        // 메뉴 너비 확보
+  },  
   optionsButton: {
     position: 'absolute', // 절대 위치
     right: 10,            // 오른쪽 여백
     top: 10,              // 상단 여백
-  },
-  optionsMenu: {
-    position: 'absolute',
-    top: 30,               // 옵션 버튼 바로 아래
-    right: 10,             // 오른쪽 정렬
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    elevation: 5,
-    padding: 10,
-    zIndex: 1000,          // 다른 요소 위에 표시
-  },  
-  scrapButton: {
-    flexDirection: 'row', // 아이콘과 텍스트 가로 정렬
-    alignItems: 'center',
-  },
-  scrapCountText: {
-    marginLeft: 5,
-    fontSize: 14,
   },
   location: {
     fontSize: 16,
