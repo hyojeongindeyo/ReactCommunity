@@ -10,6 +10,7 @@ import config from '../config'; // config 파일 import
 import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage import
 import BagCombinedModal from '../BagCombinedModal'; // MissionModal import
 // import EnlargeModal from '../EnlargeModal'; // EnlargeModal import
+import Toast from 'react-native-toast-message';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -317,48 +318,63 @@ const App = ({ navigation, route }) => {
 
             {/* 평안이 가방 모달입니다 */}
             {/* 평안이 가방 모달 버튼 */}
-            <TouchableOpacity onPress={() => setModalVisible(true)}>
-              <View style={styles.inpyeongbag}>
-                <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
-                {/* 아이템 이미지들을 추가 */}
-                <View style={styles.itemImagesContainer}>
-                  {userMissions && userMissions.length > 0 ? (
-                    <>
-                      {userMissions.slice(0, 3).map((missionId) => (
-                        <View key={missionId} style={styles.missionContainer}>
-                          {missionImages[missionId] && missionImages[missionId].image ? (
-                            <Image
-                              source={missionImages[missionId].image}
-                              style={styles.itemImage}
-                            />
-                          ) : (
-                            <Text style={styles.noImageText}>
-                              미션 아이디 {missionId}에 대한 이미지가 없습니다.
-                            </Text>
-                          )}
-                        </View>
-                      ))}
-                      {userMissions.slice(3, 6).map((missionId) => (
-                        <View key={missionId} style={styles.missionContainer}>
-                          {missionImages[missionId] && missionImages[missionId].image ? (
-                            <Image
-                              source={missionImages[missionId].image}
-                              style={styles.itemImage}
-                            />
-                          ) : (
-                            <Text style={styles.noImageText}>
-                              미션 아이디 {missionId}에 대한 이미지가 없습니다.
-                            </Text>
-                          )}
-                        </View>
-                      ))}
-                    </>
-                  ) : (
-                    <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
+            <TouchableOpacity
+  onPress={() => {
+    if (userData?.role === 'guest') {
+      // 게스트인 경우
+      Toast.show({
+        type: 'info',
+        text1: '게스트는 미션에 참여할 수 없습니다.',
+        position: 'top',
+        visibilityTime: 2000, // 2초 동안 표시
+      });
+    } else {
+      // 일반 사용자일 경우
+      setModalVisible(true);
+    }
+  }}
+>
+  <View style={styles.inpyeongbag}>
+    <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
+    {/* 아이템 이미지 추가 */}
+    <View style={styles.itemImagesContainer}>
+      {userMissions && userMissions.length > 0 ? (
+        <>
+          {userMissions.slice(0, 3).map((missionId) => (
+            <View key={missionId} style={styles.missionContainer}>
+              {missionImages[missionId]?.image ? (
+                <Image
+                  source={missionImages[missionId].image}
+                  style={styles.itemImage}
+                />
+              ) : (
+                <Text style={styles.noImageText}>
+                  미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                </Text>
+              )}
+            </View>
+          ))}
+          {userMissions.slice(3, 6).map((missionId) => (
+            <View key={missionId} style={styles.missionContainer}>
+              {missionImages[missionId]?.image ? (
+                <Image
+                  source={missionImages[missionId].image}
+                  style={styles.itemImage}
+                />
+              ) : (
+                <Text style={styles.noImageText}>
+                  미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                </Text>
+              )}
+            </View>
+          ))}
+        </>
+      ) : (
+        <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
+      )}
+    </View>
+  </View>
+</TouchableOpacity>
 
 
             {/* 평안이의 안전 가방 모달 */}

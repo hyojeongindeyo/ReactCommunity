@@ -42,32 +42,67 @@ export default function App({ navigation }) {
 
   useEffect(() => {
     (async () => {
+      // 카메라 권한 요청
       const { status: cameraStatus } = await requestCameraPermission();
-      const { status: mediaStatus } = await requestMediaPermission();
-
       if (cameraStatus !== 'granted') {
-        Alert.alert("카메라 권한이 필요합니다.");
+        Alert.alert(
+          "카메라 권한 필요",
+          "앱이 카메라를 사용하여 이미지를 촬영하고 업로드할 수 있도록 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+          [
+            { text: "취소", style: "cancel" },
+            {
+              text: "설정으로 이동",
+              onPress: () => Linking.openSettings(),
+            },
+          ]
+        );
       }
-
+  
+      // 사진첩 권한 요청
+      const { status: mediaStatus } = await requestMediaPermission();
       if (mediaStatus !== 'granted') {
-        Alert.alert("미디어 라이브러리 권한이 필요합니다.");
+        Alert.alert(
+          "사진첩 권한 필요",
+          "앱이 사진첩에서 이미지를 선택하고 업로드할 수 있도록 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+          [
+            { text: "취소", style: "cancel" },
+            {
+              text: "설정으로 이동",
+              onPress: () => Linking.openSettings(),
+            },
+          ]
+        );
       }
     })();
   }, []);
-
+  
   if (!cameraPermission || !mediaPermission) {
+    // 권한 로딩 중
     return <View />;
   }
-
+  
   if (!cameraPermission.granted || !mediaPermission.granted) {
+    // 권한이 거부된 경우
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-        <Button onPress={requestCameraPermission} title="grant camera permission" />
-        <Button onPress={requestMediaPermission} title="grant media permission" />
+        <Text style={{ textAlign: 'center', marginBottom: 20 }}>
+          앱의 기능을 사용하려면 카메라와 사진첩 권한이 필요합니다.
+        </Text>
+        <Button
+          onPress={() => requestCameraPermission()}
+          title="카메라 권한 요청"
+        />
+        <Button
+          onPress={() => requestMediaPermission()}
+          title="사진첩 권한 요청"
+        />
+        <Button
+          onPress={() => Linking.openSettings()}
+          title="설정으로 이동"
+        />
       </View>
     );
-  }
+  }  
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
