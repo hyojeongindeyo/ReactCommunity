@@ -659,19 +659,9 @@ export default function PostDetail({ route, navigation }) {
         <View style={styles.commentsSection}>
           <View style={styles.commentsHeader}>
             <Text style={styles.commentsTitle}>댓글</Text>
-            <View style={styles.commentScrapContainer}>
               <View style={styles.commentCountContainer}>
                 <Ionicons name="chatbubble-outline" size={14} color="#666" />
                 <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
-              </View>
-              <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
-                <FontAwesome
-                  name={isScraped ? 'star' : 'star-o'}
-                  size={14} // 아이콘 크기를 줄임
-                  color={isScraped ? 'gold' : 'black'}
-                />
-                <Text style={styles.scrapCountText}>{scrapCount}</Text>
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -1025,20 +1015,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  optionsMenu: {
-    position: 'absolute',
-    top: 50, // 옵션바 아래로 약간 내려오도록 위치 조정
-    right: 10,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5, // Android 그림자 효과
-    zIndex: 1000,
-    marginTop: '10%'
-  },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1053,27 +1029,26 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 10,
   },
-  commentScrapContainer: {
-    flexDirection: 'row',
-
-  },
   optionsContainer: {
     flexDirection: 'row', // 옵션 버튼 가로 정렬
     alignItems: 'center',
 
   },
   optionsButton: {
-    paddingHorizontal: 5,
+    position: 'absolute', // 절대 위치
+    right: 10,            // 오른쪽 여백
+    top: 10,              // 상단 여백
   },
   optionsMenu: {
     position: 'absolute',
-    top: 40,
-    right: 10,
+    top: 30,               // 옵션 버튼 바로 아래
+    right: 10,             // 오른쪽 정렬
     backgroundColor: '#fff',
     borderRadius: 5,
     elevation: 5,
     padding: 10,
-  },
+    zIndex: 1000,          // 다른 요소 위에 표시
+  },  
   scrapButton: {
     flexDirection: 'row', // 아이콘과 텍스트 가로 정렬
     alignItems: 'center',
