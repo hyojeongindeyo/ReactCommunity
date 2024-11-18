@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Alert,  Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Dimensions, Alert, Modal, TextInput, TouchableWithoutFeedback, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 // import BottomTabBar from '../BottomTabBar';
 import axios from 'axios'; // Axios 임포트
@@ -59,7 +59,7 @@ const SafetyInfo = ({ navigation, route }) => {
     8: require('../assets/banner_heat_safety.png'),
     9: require('../assets/banner_disaster_guide.png'),
   };
-  
+
   useEffect(() => {
     if (filter) {
       setSelectedCategory(filter);
@@ -96,29 +96,29 @@ const SafetyInfo = ({ navigation, route }) => {
 
     return () => clearInterval(interval);
   }, [randomBanners]);
-  
-    // 모든 카드의 표지 이미지를 가져오는 함수
-    const fetchCoverImages = async (infos) => {
-      const images = {};
-      for (const info of infos) {
-        const image = await fetchCoverImage(info.id);
-        if (image) {
-          images[info.id] = image; // 각 카드의 ID를 키로 하여 이미지 URL을 저장
-        }
+
+  // 모든 카드의 표지 이미지를 가져오는 함수
+  const fetchCoverImages = async (infos) => {
+    const images = {};
+    for (const info of infos) {
+      const image = await fetchCoverImage(info.id);
+      if (image) {
+        images[info.id] = image; // 각 카드의 ID를 키로 하여 이미지 URL을 저장
       }
-      setCoverImages(images); // 모든 표지 이미지를 상태에 저장
-    };
-  
-    // 각 게시물의 표지 이미지를 불러오는 함수
-    const fetchCoverImage = async (infoId) => {
-      try {
-        const imageResponse = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`);
-        return imageResponse.data[0]; // 첫 번째 이미지를 반환
-      } catch (error) {
-        console.error('Error fetching cover image:', error);
-        return null; // 이미지가 없을 경우 null 반환
-      }
-    };
+    }
+    setCoverImages(images); // 모든 표지 이미지를 상태에 저장
+  };
+
+  // 각 게시물의 표지 이미지를 불러오는 함수
+  const fetchCoverImage = async (infoId) => {
+    try {
+      const imageResponse = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`);
+      return imageResponse.data[0]; // 첫 번째 이미지를 반환
+    } catch (error) {
+      console.error('Error fetching cover image:', error);
+      return null; // 이미지가 없을 경우 null 반환
+    }
+  };
   // 랜덤으로 배너 세 개를 선택하는 함수
   const selectRandomBanners = (infos) => {
     // infos 배열을 복사하여 원본을 변경하지 않음
@@ -133,47 +133,59 @@ const SafetyInfo = ({ navigation, route }) => {
     await fetchImages(info.id);
 
     try {
-        const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
-        const missions = response.data.missions;
-        const missionIdToCheck = 2; // 미션 ID
+      const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
+      const missions = response.data.missions;
+      const missionIdToCheck = 2; // 미션 ID
 
-        // 미션이 완료되지 않았으면, 미션 모달을 열기
-        if (!missions.includes(missionIdToCheck)) {
-            // 미션을 완료하기 전에 API 호출
-            await axios.post(`${config.apiUrl}/missions/complete-mission`, {
-                userId: userData.id,
-                missionId: missionIdToCheck
-            });
-            console.log("미션 완료");
-            setMissionModalVisible(true); // 미션 완료 시 새로운 모달 표시
-        } else {
-            setInfoModalVisible(true); // 기존 모달 표시
-            console.log("이미 미션을 완료하셨습니다.");
-            // 미션 모달을 열 필요가 없으므로 상태를 변경하지 않음
-            setMissionModalVisible(false); // 이 부분은 필요 없습니다.
+      // 게스트 계정인 경우 미션 모달은 띄우지 않고 info 모달만 띄우기
+      if (userData.role === 'guest') {
+        console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+        setInfoModalVisible(true); // 정보 모달 열기
+        return;
+      }
+
+      // 미션이 완료되지 않았으면, 미션 모달을 열기
+      if (!missions.includes(missionIdToCheck)) {
+        // 미션을 완료하기 전에 API 호출
+        await axios.post(`${config.apiUrl}/missions/complete-mission`, {
+          userId: userData.id,
+          missionId: missionIdToCheck
+        });
+        console.log("미션 완료");
+        if (userData.role === 'guest') {
+          console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+          return;
         }
+
+        setMissionModalVisible(true); // 미션 완료 시 새로운 모달 표시
+      } else {
+        setInfoModalVisible(true); // 기존 모달 표시
+        console.log("이미 미션을 완료하셨습니다.");
+        // 미션 모달을 열 필요가 없으므로 상태를 변경하지 않음
+        setMissionModalVisible(false); // 이 부분은 필요 없습니다.
+      }
     } catch (error) {
-        console.error('오류:', error.response ? error.response.data : error);
+      console.error('오류:', error.response ? error.response.data : error);
     }
-};
+  };
 
-// 모달의 상태가 변경될 때마다 확인
-useEffect(() => {
+  // 모달의 상태가 변경될 때마다 확인
+  useEffect(() => {
     console.log('모달 비지블 상태:', missionModalVisible);
-}, [missionModalVisible]);
+  }, [missionModalVisible]);
 
-const missionhandleClose = () => {
+  const missionhandleClose = () => {
     setMissionModalVisible(false); // 새로운 모달 닫기
     setInfoModalVisible(false); // 기존 모달 표시
-};
+  };
 
-const missionhandleConfirm = () => {
-  console.log("사용자가 '네'를 선택했습니다.");
-  missionhandleClose(); // 모달 닫기
-  // navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
-  navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } })
-  
-};
+  const missionhandleConfirm = () => {
+    console.log("사용자가 '네'를 선택했습니다.");
+    missionhandleClose(); // 모달 닫기
+    // navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } })
+
+  };
 
   useEffect(() => {
     const fetchUserSession = async () => {
@@ -184,10 +196,10 @@ const missionhandleConfirm = () => {
         console.error('Error fetching user session:', error);
       }
     };
-  
+
     fetchUserSession();
-  }, []);  
-  
+  }, []);
+
   const fetchImages = async (infoId) => {
     try {
       const response = await axios.get(`${config.apiUrl}/safetyinfos/cardnews/${infoId}`); // 해당 정보 ID로 이미지 가져오기
@@ -208,12 +220,12 @@ const missionhandleConfirm = () => {
   // 검색 처리 (검색 결과 필터링 및 설정)
   const handleSearch = async () => {
     setSearchPerformed(true); // 검색이 수행되었음을 표시
-  
+
     if (searchQuery.trim() !== '') {
       try {
         // 백엔드에 검색 요청 보내기
         const response = await axios.post(`${config.apiUrl}/safetyinfos/search`, { searchQuery });
-        
+
         // 백엔드에서 가져온 검색 결과를 searchResults로 설정
         setSearchResults(response.data);
         setSearchHistory(prevHistory => [searchQuery, ...prevHistory]); // 검색어 기록 저장
@@ -223,7 +235,7 @@ const missionhandleConfirm = () => {
     } else {
       setSearchResults([]); // 검색어가 비어있을 때 검색 결과를 빈 배열로 설정
     }
-    
+
     setSearchQuery(''); // 검색어 초기화
   };
 
@@ -232,28 +244,28 @@ const missionhandleConfirm = () => {
       setCurrentImageIndex(0); // 모달이 열리면 즉시 첫 번째 이미지로 설정
     }
   }, [infoModalVisible]);
-  
-// 모달이 처음 열릴 때 searchResults와 searchPerformed 초기화
-useEffect(() => {
-  if (searchModalVisible) {
-    setSearchResults([]); // 검색 모달이 열릴 때 searchResults를 빈 배열로 초기화
-    setSearchPerformed(false); // 검색 수행 여부 초기화
-  }
-}, [searchModalVisible]);
+
+  // 모달이 처음 열릴 때 searchResults와 searchPerformed 초기화
+  useEffect(() => {
+    if (searchModalVisible) {
+      setSearchResults([]); // 검색 모달이 열릴 때 searchResults를 빈 배열로 초기화
+      setSearchPerformed(false); // 검색 수행 여부 초기화
+    }
+  }, [searchModalVisible]);
 
   const handleNextImage = () => {
     if (currentImageIndex < images.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1); // 마지막 이미지가 아닐 때만 넘어가게
     }
   };
-  
+
   // "이전" 버튼 클릭 시 처리
   const handlePrevImage = () => {
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1); // 첫 번째 이미지가 아닐 때만 넘어가게
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -270,7 +282,7 @@ useEffect(() => {
         onClose={missionhandleClose}
         onConfirm={missionhandleConfirm}
       />
-  
+
       {/* 로딩 상태일 때 표시 */}
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -307,7 +319,7 @@ useEffect(() => {
               ))}
             </ScrollView>
           </View>
-  
+
           <View style={styles.categoryContainer}>
             {categories.map((category) => (
               <TouchableOpacity
@@ -321,7 +333,7 @@ useEffect(() => {
               </TouchableOpacity>
             ))}
           </View>
-  
+
           <ScrollView contentContainerStyle={styles.infoContainer}>
             <View style={styles.infoRow}>
               {filteredInfos.map((info) => (
@@ -349,7 +361,7 @@ useEffect(() => {
           </ScrollView>
         </>
       )}
-  
+
       {/* Info Modal */}
       <Modal
         animationType="slide"
@@ -373,17 +385,17 @@ useEffect(() => {
                   onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
                 />
                 <View style={styles.imageNavigation}>
-                <TouchableOpacity onPress={handlePrevImage} disabled={currentImageIndex === 0}>
-                  <Text style={styles.navigationText}>이전</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity onPress={handlePrevImage} disabled={currentImageIndex === 0}>
+                    <Text style={styles.navigationText}>이전</Text>
+                  </TouchableOpacity>
 
-                <Text style={styles.pageInfo}>
-                  {currentImageIndex + 1} / {images.length}
-                </Text>
+                  <Text style={styles.pageInfo}>
+                    {currentImageIndex + 1} / {images.length}
+                  </Text>
 
-                <TouchableOpacity onPress={handleNextImage} disabled={currentImageIndex === images.length - 1}>
-                  <Text style={styles.navigationText}>다음</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity onPress={handleNextImage} disabled={currentImageIndex === images.length - 1}>
+                    <Text style={styles.navigationText}>다음</Text>
+                  </TouchableOpacity>
                 </View>
               </>
             ) : (
@@ -392,7 +404,7 @@ useEffect(() => {
           </View>
         </View>
       </Modal>
-  
+
       {/* Search Modal */}
       <Modal
         animationType="slide"
@@ -462,7 +474,7 @@ useEffect(() => {
         </TouchableWithoutFeedback>
       </Modal>
     </View>
-  );  
+  );
 };
 
 const styles = StyleSheet.create({
@@ -507,7 +519,7 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: SCREEN_WIDTH,  // 배너 이미지가 화면 너비에 맞게 설정
     height: '100%',       // 배너의 높이에 맞게 설정
-  },  
+  },
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -557,7 +569,7 @@ const styles = StyleSheet.create({
     // color: 'white',
     textAlign: 'left',
     backgroundColor: 'rgba(255, 255, 255, 0.6)', // 흐릿한 하얀색 배경
-    
+
   },
   infoFooter: {
     flexDirection: 'row',
@@ -575,7 +587,7 @@ const styles = StyleSheet.create({
   pageInfo: {
     fontSize: 14,
     marginHorizontal: 10,
-  },  
+  },
   categoryBadge: {
     backgroundColor: '#e0e0e0',
     borderRadius: 10,
@@ -717,7 +729,7 @@ const styles = StyleSheet.create({
     right: 0, // 카드의 오른쪽에 맞춤
     bottom: 0, // 카드의 하단에 맞춤
     borderRadius: 10, // 카드의 모서리 둥글게 만들기
-    
+
   },
 
 });

@@ -116,7 +116,7 @@ function Community({ navigation, route }) {
 
         if (address.length > 0) {
           const { city, district, street } = address[0];
-          const userAddress = `${city} ${district || street }`;
+          const userAddress = `${city} ${district || street}`;
           setUserLocation(userAddress); // 시(city)와 동(district) 정보 설정
           await AsyncStorage.setItem('userLocation', userAddress); // 위치 캐싱
         }
@@ -275,6 +275,13 @@ function Community({ navigation, route }) {
       const missions = response.data.missions;
       const missionIdToCheck = 2; // 미션 ID
 
+      // 게스트 계정인 경우 미션 모달은 띄우지 않고 info 모달만 띄우기
+      if (userData.role === 'guest') {
+        console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+        setInfoModalVisible(true); // 정보 모달 열기
+        return;
+      }
+
       // 미션이 완료되지 않았으면, 미션 모달을 열기
       if (!missions.includes(missionIdToCheck)) {
         // 미션을 완료하기 전에 API 호출
@@ -310,7 +317,7 @@ function Community({ navigation, route }) {
     missionhandleClose(); // 모달 닫기
     // navigation.replace('HomeScreen', { showModal: true }); // 홈 화면으로 이동
     navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } })
-    
+
   };
 
 
@@ -469,7 +476,7 @@ function Community({ navigation, route }) {
           <Text style={styles.safetyHeaderText}>
             내 주변 안전소식
             <View style={styles.icons}>
-              <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4}] }}/>
+              <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4 }] }} />
             </View>
           </Text>
         </TouchableOpacity>
@@ -552,7 +559,7 @@ function Community({ navigation, route }) {
           <Text style={styles.infoHeader}>
             안전 정보
             <View style={styles.icons}>
-              <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4}] }}/>
+              <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4 }] }} />
             </View>
           </Text>
         </TouchableOpacity>
@@ -941,7 +948,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
-    marginTop:15,
+    marginTop: 15,
   },
   safe: {
     marginBottom: 5,
@@ -1020,7 +1027,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
-    marginBottom:5,
+    marginBottom: 5,
   },
   categoryContainer: {
     flexDirection: 'row',
@@ -1093,7 +1100,7 @@ const styles = StyleSheet.create({
   pageInfo: {
     fontSize: 14,
     marginHorizontal: 10,
-  },  
+  },
   infoCard: {
     backgroundColor: '#F3F3F3',
     padding: 20,

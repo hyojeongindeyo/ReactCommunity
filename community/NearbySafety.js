@@ -219,32 +219,38 @@ export default function NearbySafety({ navigation, route }) {
     재해: '🌪️',
     주의: '⚠️',
   };
+// 미션 완료 여부 확인 및 API 호출
+const completeMission = async (missionId) => {
+  if (!userData) {
+    console.error('사용자 데이터가 없습니다. 로그인 필요');
+    return;
+  }
 
-  // 미션 완료 여부 확인 및 API 호출
-  const completeMission = async (missionId) => {
-    if (!userData) {
-      console.error('사용자 데이터가 없습니다. 로그인 필요');
-      return;
+  // userData.role이 guest인 경우 실행 중단
+  if (userData.role === 'guest') {
+    console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+    return;
+  }
+
+  try {
+    const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
+    const missions = response.data.missions;
+
+    if (missions.includes(missionId)) {
+      console.log('이미 미션을 완료했습니다.');
+    } else {
+      const completeResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
+        userId: userData.id,
+        missionId: missionId,
+      });
+      console.log(`미션 ${missionId} 완료:`, completeResponse.data);
+      setMissionModalVisible(true); // 처음 완료된 미션일 경우 모달 띄우기
     }
+  } catch (error) {
+    console.error('미션 완료 오류:', error.response ? error.response.data : error);
+  }
+};
 
-    try {
-      const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
-      const missions = response.data.missions;
-
-      if (missions.includes(missionId)) {
-        console.log('이미 미션을 완료했습니다.');
-      } else {
-        const completeResponse = await axios.post(`${config.apiUrl}/missions/complete-mission`, {
-          userId: userData.id,
-          missionId: missionId,
-        });
-        console.log(`미션 ${missionId} 완료:`, completeResponse.data);
-        setMissionModalVisible(true); // 처음 완료된 미션일 경우 모달 띄우기
-      }
-    } catch (error) {
-      console.error('미션 완료 오류:', error.response ? error.response.data : error);
-    }
-  };
 
   const missionhandleClose = () => {
     setMissionModalVisible(false); // 새로운 모달 닫기

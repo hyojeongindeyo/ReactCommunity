@@ -25,7 +25,7 @@ export default function App({ navigation }) {
   const [alterModalVisible, setAlterModalVisible] = useState(false);
   const [alterModalText, setAlterModalText] = useState('');
   const [alterModalSubText, setAlterModalSubText] = useState('');
-  const [showReportLink, setShowReportLink] = useState(false); 
+  const [showReportLink, setShowReportLink] = useState(false);
 
   useEffect(() => {
     const fetchUserSession = async () => {
@@ -78,7 +78,7 @@ export default function App({ navigation }) {
       try {
         const photo = await cameraRef.current.takePictureAsync();
         setPreviewUri(photo.uri);
-        
+
         const asset = await MediaLibrary.createAssetAsync(photo.uri);
         await checkForCracks(photo.uri);
       } catch (error) {
@@ -116,18 +116,20 @@ export default function App({ navigation }) {
           model: "gpt-4o",
           messages: [
             { role: "system", content: "You are an expert at identifying cracks in walls. Examine the provided image carefully and determine whether the wall in the image has a natural or real crack. Only recognize cracks caused by structural damage, weathering, or other physical causes. Do not recognize cracks that are hand-drawn, artificially created, or photos of hand-drawn cracks on a computer screen. If the image depicts an artificially uniform, smooth, or white background, especially if it resembles paper, cardboard, or a non-wall surface, then it is likely not a real crack. Such cases should be excluded from recognition as a crack. If the crack appears to be highly defined, with sharp edges or perfect symmetry, this might indicate it is an artificial drawing or graphic. If there is excessive clarity of the crack's edges with no variation in texture or wall details, you should be cautious. When evaluating the crack, consider the texture, depth, and irregularity of the crack. Natural cracks typically have uneven edges and may display gradual variations in texture, color, and depth. Please return a probability between 0.0001 and 0.9999, with a higher probability indicating greater certainty of a real, natural crack. Even if you are highly confident, you should return a probability to account for minor uncertainty. Example output: 'Crack probability: 0.3457'" },
-            { role: "user", content: [
-              {
+            {
+              role: "user", content: [
+                {
                   type: "text",
                   text: "Is there a crack in this wall image? Please return a probability value along with your answer."
-              },
-              {
+                },
+                {
                   type: "image_url",
                   image_url: {
-                      url: imageUrl
+                    url: imageUrl
                   }
-              }
-          ] }
+                }
+              ]
+            }
           ],
           max_tokens: 300
         })
@@ -141,7 +143,7 @@ export default function App({ navigation }) {
         crackProbability = parseFloat(match[1]);
       }
 
-  const nonCrackProbability = 1 - crackProbability;
+      const nonCrackProbability = 1 - crackProbability;
       setLoading(false);
       setPreviewUri(null); // 미리보기 해제하여 카메라 활성화
 
@@ -170,6 +172,11 @@ export default function App({ navigation }) {
   }
 
   const completeMission = async (missionId) => {
+    // 사용자 역할이 guest일 경우 아무 동작도 하지 않음
+    if (userData.role === 'guest') {
+      console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+      return;
+    }
     try {
       const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
       const missions = response.data.missions;
@@ -187,7 +194,7 @@ export default function App({ navigation }) {
           text1: '미션 완료!',
           text2: `미션 ${missionId}이(가) 완료되었습니다.`,
           visibilityTime: 3000,
-      });
+        });
       }
     } catch (error) {
       console.error('미션 완료 오류:', error.response ? error.response.data : error);
@@ -252,7 +259,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-    width: '100%', 
+    width: '100%',
     height: '100%',
   },
   buttonContainer: {
