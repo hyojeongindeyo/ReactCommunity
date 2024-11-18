@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const CombinedModal = ({ modalVisible, setModalVisible, userMissions, missionImages, userData }) => {
+const CombinedModal = ({ modalVisible, setModalVisible, userMissions, missionImages }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedName, setSelectedName] = useState('');
     const [selectedDescription, setSelectedDescription] = useState('');
     const [isEnlargeModalVisible, setIsEnlargeModalVisible] = useState(false);
-
 
     const handleImagePress = (image, name, description) => {
         setSelectedImage(image);
@@ -74,12 +73,8 @@ const CombinedModal = ({ modalVisible, setModalVisible, userMissions, missionIma
                                     <Text style={styles.closeButtonText}>X</Text>
                                 </TouchableOpacity>
                             </View>
-
-                            {userData && userData.role !== 'guest' ? (
-                                <Text style={styles.modalsubTitle}>클릭하여 안전물품 정보를 확인하세요</Text>
-                            ) : (
-                                <Text style={styles.modalsubTitle}>로그인해서 평안이의 가방을 채워주세요</Text>
-                            )}                            {/* <Text style={styles.modalTitle}>평안이의 안전 가방</Text> */}
+                            <Text style={styles.modalsubTitle}>클릭하여 안전물품 정보를 확인하세요</Text>
+                            {/* <Text style={styles.modalTitle}>평안이의 안전 가방</Text> */}
                             {/* <Text style={styles.modalsubTitle}>클릭하여 안전물품 정보를 확인하세요</Text> */}
                             {/* <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
                                 <Text style={styles.closeButtonText}>X</Text>
@@ -114,11 +109,7 @@ const CombinedModal = ({ modalVisible, setModalVisible, userMissions, missionIma
                                     </View>
                                 </>
                             ) : (
-                                userData && userData.role === 'guest' ? (
-                                   null
-                                ) : (
-                                    <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
-                                )
+                                <Text style={styles.noMissionsText}>획득한 미션이 없습니다.</Text>
                             )}
                         </View>
                     )}
