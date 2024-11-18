@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, Image, View, Dimensions, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import axios from 'axios'; // axios를 사용하여 API 호출
@@ -15,27 +15,6 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const apiUrl = config.apiUrl;
-
-    // 앱 시작 시 AsyncStorage에서 토큰을 불러와 자동 로그인 시도
-    useEffect(() => {
-        const checkToken = async () => {
-            const token = await AsyncStorage.getItem('userToken');
-            if (token) {
-                try {
-                    // 토큰을 사용하여 백엔드에서 세션 확인
-                    const response = await axios.get(`${apiUrl}/users/check`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (response.data.loggedIn) {
-                        onLoginSuccess();
-                    }
-                } catch (error) {
-                    console.error('세션 확인 오류:', error);
-                }
-            }
-        };
-        checkToken();
-    }, []);
 
     const handleLogin = async () => {
         if (id.trim() === '' || password.trim() === '') {
@@ -59,14 +38,8 @@ const LoginScreen = ({ navigation, onLoginSuccess }) => {
             });
 
             if (response.status === 200) {
-                const token = response.data.token;
-    
-                if (token) {
-                    await AsyncStorage.setItem('userToken', token); // 토큰 저장
-                    onLoginSuccess();
-                } else {
-                    Alert.alert('로그인 실패', '서버에서 토큰을 받지 못했습니다.');
-                }
+                // 로그인 성공 시 알림을 제거하고 onLoginSuccess만 호출
+                onLoginSuccess(); // 로그인 성공 시 onLoginSuccess 호출
             } else {
                 // 로그인 실패 메시지
                 Toast.show({
