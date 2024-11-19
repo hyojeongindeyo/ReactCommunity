@@ -594,7 +594,7 @@ export default function PostDetail({ route, navigation }) {
           <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
             <FontAwesome
               name={isScraped ? 'star' : 'star-o'}
-              size={20}
+              size={14}
               color={isScraped ? 'gold' : 'black'}
             />
             <Text style={styles.scrapCountText}>{scrapCount}</Text>
@@ -700,7 +700,7 @@ export default function PostDetail({ route, navigation }) {
 
         {userData && comment.user_id === userData.id && (
           <TouchableOpacity
-            onPress={() => handleCommentOptions(comment.id)}
+            onPress={() => handleCommentDelete(comment.id)}
             style={styles.optionsButton}
           >
             <MaterialIcons name="more-vert" size={20} color="gray" />
@@ -981,9 +981,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scrapCountText: {
-    fontSize: 15,
+    fontSize: 12,
     marginLeft: 3,
-    color: '#000',
+    color: '#666',
   },
   commentsHeader: {
     flexDirection: 'row',
@@ -1090,6 +1090,5 @@ const styles = StyleSheet.create({
   centerContent: {
     flex: 1, // 중앙 컨텐츠가 가로 공간 차지
     alignItems: 'center', // 텍스트 가운데 정렬
-    marginTop: 10,
   },
 });
