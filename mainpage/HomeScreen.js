@@ -482,6 +482,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
     paddingVertical: '3%',
     backgroundColor: '#fff',
+    marginTop: 10,
   },
   iconButton: {
     padding: 10,
