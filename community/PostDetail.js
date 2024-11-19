@@ -404,21 +404,21 @@ export default function PostDetail({ route, navigation }) {
   };
 
 
-  const handleCommentOptions = (commentId) => {
-    Alert.alert(
-      "댓글 옵션",
-      "이 댓글을 삭제하시겠습니까?",
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: "삭제",
-          onPress: () => handleCommentDelete(commentId),
-          style: "destructive",
-        },
-      ],
-      { cancelable: true }
-    );
-  };
+  // const handleCommentOptions = (commentId) => {
+  //   Alert.alert(
+  //     "댓글 옵션",
+  //     "이 댓글을 삭제하시겠습니까?",
+  //     [
+  //       { text: "취소", style: "cancel" },
+  //       {
+  //         text: "삭제",
+  //         onPress: () => handleCommentDelete(commentId),
+  //         style: "destructive",
+  //       },
+  //     ],
+  //     { cancelable: true }
+  //   );
+  // };
 
   const handleCommentDelete = (commentId) => {
     Alert.alert(
@@ -690,7 +690,7 @@ export default function PostDetail({ route, navigation }) {
 
         {userData && comment.user_id === userData.id && (
           <TouchableOpacity
-            onPress={() => handleCommentOptions(comment.id)}
+            onPress={() => handleCommentDelete(comment.id)}
             style={styles.optionsButton}
           >
             <MaterialIcons name="more-vert" size={20} color="gray" />
