@@ -39,7 +39,7 @@ export default function PostDetail({ route, navigation }) {
   const { fromHome } = route.params || {};
   const {fromNearby} = route.param || {};
   const [optionsMenuVisible, setOptionsMenuVisible] = useState(false);
-
+  const [replyToCommentNickname, setReplyToCommentNickname] = useState('');
 
   const handleOptionsPress = () => {
     setOptionsMenuVisible((prevState) => !prevState); // 현재 상태를 반전
@@ -267,32 +267,26 @@ export default function PostDetail({ route, navigation }) {
   };
 
   const handleReply = (commentId) => {
-    // 대댓글 모드가 아닐 때는 대댓글 모드로, 이미 대댓글 모드라면 일반 댓글 모드로 전환
+    const parentComment = postComments.find((comment) => comment.id === commentId);
+    const parentAuthor = parentComment?.user_nickname || parentComment?.nickname || '작성자';
+  
     if (replyToCommentId === commentId) {
       setReplyToCommentId(null);  // 대댓글 모드 해제
-      setReplyComment('');  // 대댓글 입력 초기화
+      setReplyToCommentNickname(''); // 닉네임 초기화
+      setReplyComment('');        // 대댓글 입력 초기화
     } else {
-      setReplyToCommentId(commentId);  // 대댓글 모드 활성화
-      setReplyComment('');
+      setReplyToCommentId(commentId); // 대댓글 모드 활성화
+      setReplyToCommentNickname(parentAuthor); // 부모 댓글 닉네임 저장
+      setReplyComment(''); // 대댓글 입력 초기화
     }
-
-    // 키보드 호출 (대댓글 입력창으로 포커스를 맞추기)
+  
     setTimeout(() => {
-      const parentCommentIndex = postComments.findIndex((c) => c.id === commentId);
-      const parentCommentY = commentLayouts[parentCommentIndex];  // 부모 댓글의 Y 위치
-
       if (textInputRef.current) {
-        textInputRef.current.focus();  // 대댓글 입력창에 포커스를 맞춤
+        textInputRef.current.focus(); // 대댓글 입력창에 포커스
       }
-
-      // 대댓글 입력창으로 스크롤 이동
-      if (scrollViewRef.current) {
-        // 스크롤을 대댓글 입력창으로 이동시킴
-        scrollViewRef.current.scrollTo({ x: 0, y: parentCommentY - 50, animated: true });  // 300은 스크롤 위치, 필요에 맞게 조정
-      }
-    }, 100);  // 딜레이 후 포커스 이동
+    }, 100);
   };
-
+  
   const fetchComments = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/comments/${post.id}`);
@@ -320,16 +314,18 @@ export default function PostDetail({ route, navigation }) {
 
     console.log("입력된 대댓글:", replyComment); // 대댓글 내용 확인
 
-    if (replyComment.trim()) {
-      // 대댓글 작성
-      await postReplyComment(replyComment, userData.id, replyToCommentId);
-      setReplyComment(''); // 입력 필드 초기화
-      setReplyToCommentId(null); // 대댓글 대상 초기화
+    if (!replyComment.trim()) return;
 
-      // 대댓글 작성 후 댓글 목록 새로 고침
-      fetchComments();
-    }
-  };
+  const parentComment = postComments.find((comment) => comment.id === replyToCommentId);
+  const parentAuthor = parentComment?.user_nickname || parentComment?.nickname || '작성자';
+
+  const formattedReply = `@${parentAuthor} ${replyComment.replace(`@${parentAuthor} `, '')}`;
+
+  await postReplyComment(formattedReply, userData.id, replyToCommentId);
+  setReplyComment('');
+  setReplyToCommentId(null);
+  fetchComments(); // 댓글 목록 새로 고침
+};
 
 
   // 대댓글 작성 API 호출
@@ -634,139 +630,142 @@ export default function PostDetail({ route, navigation }) {
           </View>
         ) : null}
 
-        {/* {userData && userData.email === post.user_email && (
-          <View style={{ flexDirection: 'row', marginTop: 15, marginBottom: 5 }}>
-            <TouchableOpacity style={styles.udButton} onPress={handleDelete}>
-              <Text style={styles.udText}>삭제</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.replace('UpdatePost', { post })}
-              style={[styles.udButton, { marginLeft: 5 }]}
-            >
-              <Text style={styles.udText}>수정</Text>
-            </TouchableOpacity>
-          </View>
-        )} */}
-
-
-
         <View style={styles.separator}></View>
 
         <View style={styles.commentsSection}>
-          <View style={styles.commentsHeader}>
-            <Text style={styles.commentsTitle}>댓글</Text>
-              <View style={styles.commentCountContainer}>
-                <Ionicons name="chatbubble-outline" size={14} color="#666" />
-                <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
-            </View>
-          </View>
+  <View style={styles.commentsHeader}>
+    <Text style={styles.commentsTitle}>댓글</Text>
+    <View style={styles.commentCountContainer}>
+      <Ionicons name="chatbubble-outline" size={14} color="#666" />
+      <Text style={styles.commentCountText}>{postComments.length || 0}</Text>
+    </View>
+  </View>
 
-
-          {postComments
-            .filter(comment => comment.parent_comment_id === null) // 부모 댓글만 필터링
-            .map((comment, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.commentContainer,
-                  // replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
-                ]}
-                onLayout={(event) => handleCommentLayout(event, index)} // onLayout 이벤트로 위치 추적
-              >
-                <View style={[styles.parentscomment, replyToCommentId === comment.id && styles.replyingComment,]}>
-                  <Text style={styles.commentAuthor}>{comment.user_nickname || comment.nickname}</Text>
-                  <Text style={styles.comment}>{comment.text || comment.comment_text}</Text>
-                  <Text style={styles.commentTimestamp}>{moment(comment.timestamp).format('YY/MM/DD HH:mm')}</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    handleReply(comment.id);
-                    // 부모 댓글의 위치를 추적하여 해당 위치로 스크롤
-                    const parentCommentIndex = postComments.findIndex((c) => c.id === comment.id);
-                    const parentCommentY = commentLayouts[parentCommentIndex];  // 부모 댓글의 Y 위치
-                    if (parentCommentY !== undefined) {
-                      // 부모 댓글의 위치로 스크롤 (50px 만큼 위로 스크롤)
-                      scrollViewRef.current.scrollTo({ x: 0, y: parentCommentY - 50, animated: true });
-                    }
-                  }}
-                  style={styles.replyButton}
-                >
-                  <MaterialIcons name="reply" size={20} color="gray" />
-                </TouchableOpacity>
-
-                {userData && comment.user_id === userData.id && (
-                  <TouchableOpacity onPress={() => handleCommentOptions(comment.id)} style={styles.optionsButton}>
-                    <MaterialIcons name="more-vert" size={20} color="gray" />
-                  </TouchableOpacity>
-                )}
-
-                {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
-                {postComments
-                  .filter(reply => reply.parent_comment_id === comment.id) // 현재 부모 댓글에 해당하는 자식 댓글만 필터링
-                  .map((reply, replyIndex) => (
-                    <View key={replyIndex} style={styles.replyContainer}>
-                      <Text style={styles.commentAuthor}>{reply.user_nickname || reply.nickname}</Text>
-                      <Text style={styles.comment}>{reply.text || reply.comment_text}</Text>
-                      <Text style={styles.commentTimestamp}>{moment(reply.timestamp).format('YY/MM/DD HH:mm')}</Text>
-                      {userData && reply.user_id === userData.id && (
-                        <TouchableOpacity onPress={() => handleReplyDelete(reply.id)} style={styles.optionsButton}>
-                          <MaterialIcons name="more-vert" size={20} color="gray" />
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  ))}
-              </View>
-            ))}
-        </View>
-      </ScrollView>
-
-      {/* replying */}
-      {replyToCommentId && replyingVisible && (
+  {postComments
+    .filter((comment) => comment.parent_comment_id === null) // 부모 댓글만 필터링
+    .map((comment, index) => (
+      <View
+        key={index}
+        style={[
+          styles.commentContainer,
+          // replyToCommentId === comment.id && styles.replyingComment,  // 대댓글 작성 중인 부모 댓글에 스타일 적용
+        ]}
+        onLayout={(event) => handleCommentLayout(event, index)} // onLayout 이벤트로 위치 추적
+      >
         <View
-          style={{
-            position: 'absolute',
-            bottom: keyboardHeight - 35,
-            left: 0,
-            right: 0,
-            backgroundColor: 'white',
-            padding: 10,
-            borderTopWidth: 1,
-            borderColor: '#ddd',
-          }}
+          style={[
+            styles.parentscomment,
+            replyToCommentId === comment.id && styles.replyingComment,
+          ]}
         >
-          <Text style={{ fontWeight: 'bold', marginBottom: 15 }}>답글 달기 : </Text>
+          <Text style={styles.commentAuthor}>
+            {comment.user_nickname || comment.nickname}
+          </Text>
+          <Text style={styles.comment}>
+            {comment.text || comment.comment_text}
+          </Text>
+          <Text style={styles.commentTimestamp}>
+            {moment(comment.timestamp).format("YY/MM/DD HH:mm")}
+          </Text>
         </View>
-      )}
-
-      {/* Fixed comment input box at the bottom */}
-      <View style={styles.commentInputContainer}>
-        <TextInput
-          ref={textInputRef}
-          style={styles.commentInput}
-          placeholder={replyToCommentId ? "대댓글을 입력하세요" : "댓글을 입력하세요"}
-          value={replyToCommentId ? replyComment : newComment}
-          onChangeText={replyToCommentId ? setReplyComment : setNewComment}
-          onFocus={() => {
-            setTimeout(() => {
-              scrollViewRef.current.scrollToEnd({ animated: true });
-            }, 100); // 키보드가 올라올 시간을 고려하여 약간의 지연을 줄 수 있음
-          }}
-        />
         <TouchableOpacity
           onPress={() => {
-            if (replyToCommentId) {
-              handleReplySubmit();
-            } else {
-              handleCommentSubmit();
+            handleReply(comment.id);
+            const parentCommentIndex = postComments.findIndex(
+              (c) => c.id === comment.id
+            );
+            const parentCommentY = commentLayouts[parentCommentIndex]; // 부모 댓글의 Y 위치
+            if (parentCommentY !== undefined) {
+              scrollViewRef.current.scrollTo({
+                x: 0,
+                y: parentCommentY - 50,
+                animated: true,
+              });
             }
-            Keyboard.dismiss();
-            setTimeout(() => scrollViewRef.current.scrollToEnd({ animated: true }), 200);
           }}
-          style={styles.commentSubmitButton}
+          style={styles.replyButton}
         >
-          <Text style={styles.commentSubmitButtonText}>등록</Text>
+          <MaterialIcons name="reply" size={20} color="gray" />
         </TouchableOpacity>
+
+        {userData && comment.user_id === userData.id && (
+          <TouchableOpacity
+            onPress={() => handleCommentOptions(comment.id)}
+            style={styles.optionsButton}
+          >
+            <MaterialIcons name="more-vert" size={20} color="gray" />
+          </TouchableOpacity>
+        )}
+
+        {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
+        {postComments
+          .filter((reply) => reply.parent_comment_id === comment.id) // 현재 부모 댓글에 해당하는 자식 댓글만 필터링
+          .map((reply, replyIndex) => (
+            <View key={replyIndex} style={styles.replyContainer}>
+              <Text style={styles.commentAuthor}>
+                {reply.user_nickname || reply.nickname}
+              </Text>
+              <Text style={styles.comment}>{reply.text || reply.comment_text}</Text>
+              <Text style={styles.commentTimestamp}>
+                {moment(reply.timestamp).format("YY/MM/DD HH:mm")}
+              </Text>
+              {userData && reply.user_id === userData.id && (
+                <TouchableOpacity
+                  onPress={() => handleReplyDelete(reply.id)}
+                  style={styles.optionsButton}
+                >
+                  <MaterialIcons name="more-vert" size={20} color="gray" />
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
       </View>
+    ))}
+</View>
+</ScrollView>
+
+{/* 댓글 입력창 */}
+<View style={styles.commentInputContainer}>
+  <TextInput
+    ref={textInputRef}
+    style={styles.commentInput}
+    placeholder={replyToCommentId ? `@${replyToCommentNickname} 님에게 답글을 남겨주세요` : "댓글을 입력하세요"}
+    value={replyToCommentId ? `${replyComment}` : newComment}
+    onChangeText={(text) => {
+      if (replyToCommentId) {
+        const prefix = `@${replyToCommentNickname} `;
+        
+        // 입력값이 prefix로 시작하지 않으면 강제로 prefix로 덮어쓰기
+        if (!text.startsWith(prefix)) {
+          setReplyComment(prefix); // 강제로 prefix 유지
+        } else {
+          setReplyComment(text); // 정상적으로 입력값 반영
+        }
+      } else {
+        setNewComment(text); // 일반 댓글 입력 처리
+      }
+    }}
+    onFocus={() => {
+      setTimeout(() => {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }, 100);
+    }}
+  />
+  <TouchableOpacity
+    onPress={() => {
+      if (replyToCommentId) {
+        handleReplySubmit();
+      } else {
+        handleCommentSubmit();
+      }
+      Keyboard.dismiss();
+      setTimeout(() => scrollViewRef.current.scrollToEnd({ animated: true }), 200);
+    }}
+    style={styles.commentSubmitButton}
+  >
+    <Text style={styles.commentSubmitButtonText}>등록</Text>
+  </TouchableOpacity>
+</View>
     </KeyboardAvoidingView>
   );
 }
@@ -910,7 +909,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white', // 배경색을 설정하여 입력창이 잘 보이게
 
   },
-
   commentInput: {
     flex: 1,
     borderWidth: 1,

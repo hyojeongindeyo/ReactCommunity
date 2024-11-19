@@ -503,7 +503,7 @@ function PrivacyPolicyScreen() {
 
 function InquiryScreen() {
   const [inquiry, setInquiry] = useState('');
-  const email = '00000@naver.com';
+  const email = 'hywoman_official@likelion.org';
 
   const handleSendInquiry = () => {
     if (inquiry.trim() === '') {

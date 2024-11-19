@@ -197,6 +197,11 @@ export default function ShelterScreen({ navigation }) {
   };
 
   const completeMission = async (missionId) => {
+    // userData.role이 guest인 경우 실행 중단
+  if (userData.role === 'guest') {
+    console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+    return;
+  }
     try {
       // 서버에서 유저의 완료된 미션 목록을 가져옵니다.
       const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
