@@ -698,14 +698,14 @@ export default function PostDetail({ route, navigation }) {
                   <MaterialIcons name="reply" size={20} color="gray" />
                 </TouchableOpacity>
 
-                {userData && comment.user_id === userData.id && (
-                  <TouchableOpacity
-                    onPress={() => handleCommentDelete(comment.id)}
-                    style={styles.optionsButton}
-                  >
-                    <MaterialIcons name="more-vert" size={20} color="gray" />
-                  </TouchableOpacity>
-                )}
+        {userData && comment.user_id === userData.id && (
+          <TouchableOpacity
+            onPress={() => handleCommentOptions(comment.id)}
+            style={styles.optionsButton}
+          >
+            <MaterialIcons name="more-vert" size={20} color="gray" />
+          </TouchableOpacity>
+        )}
 
                 {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
                 {postComments
