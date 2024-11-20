@@ -765,6 +765,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
     paddingTop: '10%',
     paddingBottom: '3%',
+    marginTop: 10,
   },
   headerContent: {
     alignItems: 'center', // 텍스트를 가운데 정렬
