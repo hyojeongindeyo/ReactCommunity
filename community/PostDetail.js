@@ -413,23 +413,6 @@ export default function PostDetail({ route, navigation }) {
     navigation.navigate('Home', { screen: 'HomeScreen', params: { showModal: true } }); // Home 탭으로 이동
   };
 
-
-  // const handleCommentOptions = (commentId) => {
-  //   Alert.alert(
-  //     "댓글 옵션",
-  //     "이 댓글을 삭제하시겠습니까?",
-  //     [
-  //       { text: "취소", style: "cancel" },
-  //       {
-  //         text: "삭제",
-  //         onPress: () => handleCommentDelete(commentId),
-  //         style: "destructive",
-  //       },
-  //     ],
-  //     { cancelable: true }
-  //   );
-  // };
-
   const handleCommentDelete = (commentId) => {
     Alert.alert(
       "댓글 삭제",
@@ -561,34 +544,23 @@ export default function PostDetail({ route, navigation }) {
         {/* 옵션 메뉴 또는 스크랩 버튼 */}
         {userData && userData.email === post.user_email ? (
           <View style={styles.optionsContainer}>
-            <TouchableOpacity onPress={() => setOptionsMenuVisible(!optionsMenuVisible)} style={styles.scrapButton}>
-              <MaterialIcons name="more-vert" size={20} color="gray" />
+            <TouchableOpacity
+              style={styles.menuItem} // 구분선 추가
+              onPress={() => {
+                navigation.replace('UpdatePost', { post, fromHome: fromHome === true });
+              }}
+            >
+              <MaterialIcons name="edit" size={20} color="#333" />
             </TouchableOpacity>
-            {optionsMenuVisible && (
-              <View style={styles.optionsMenu}>
-                <TouchableOpacity
-                  style={[styles.menuItem, styles.menuItemBorder]} // 구분선 추가
-                  onPress={() => {
-                    setOptionsMenuVisible(false);
-                    navigation.replace('UpdatePost', { post, fromHome: fromHome === true });
-                  }}
-                >
-                  <MaterialIcons name="edit" size={20} color="#333" />
-                  <Text style={styles.menuText}>수정</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.menuItemLast} // 마지막 버튼 스타일
-                  onPress={() => {
-                    setOptionsMenuVisible(false);
-                    handleDelete();
-                  }}
-                >
-                  <MaterialIcons name="delete" size={20} color="#333" />
-                  <Text style={styles.menuText}>삭제</Text>
-                </TouchableOpacity>
-              </View>
+            <TouchableOpacity
+              style={[styles.menuItemLast, styles.menuItem]} // 마지막 버튼 스타일
+              onPress={() => {
+                handleDelete();
+              }}
+            >
+              <MaterialIcons name="delete" size={20} color="#333" />
+            </TouchableOpacity>
 
-            )}
           </View>
         ) : (
           <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
@@ -698,14 +670,14 @@ export default function PostDetail({ route, navigation }) {
                   <MaterialIcons name="reply" size={20} color="gray" />
                 </TouchableOpacity>
 
-        {userData && comment.user_id === userData.id && (
-          <TouchableOpacity
-            onPress={() => handleCommentDelete(comment.id)}
-            style={styles.optionsButton}
-          >
-            <MaterialIcons name="more-vert" size={20} color="gray" />
-          </TouchableOpacity>
-        )}
+                {userData && comment.user_id === userData.id && (
+                  <TouchableOpacity
+                    onPress={() => handleCommentDelete(comment.id)}
+                    style={styles.optionsButton}
+                  >
+                    <MaterialIcons name="more-vert" size={20} color="gray" />
+                  </TouchableOpacity>
+                )}
 
                 {/* 부모 댓글 아래에 해당하는 자식 댓글을 표시 */}
                 {postComments
@@ -827,13 +799,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingTop: '5%',
-    // paddingHorizontal: '5%',
-    // marginBottom: 10,
-    // marginBottom: 4,
   },
   mainContent: {
-    // justifyContent: 'center', // 세로 가운데 정렬
-    // alignItems: 'center',     // 가로 가운데 정렬
+
     marginHorizontal: 15, // 좌우 여백
 
   },
@@ -948,13 +916,6 @@ const styles = StyleSheet.create({
     top: 10,
   },
 
-  // deleteButton: {
-  //   backgroundColor: 'red',
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   width: 70,
-  //   height: '100%',
-  // },
   udButton: {
     backgroundColor: '#E0E0E0',
     justifyContent: 'center',
@@ -1023,24 +984,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: 'white', // 버튼 배경
+    // // paddingHorizontal: 15
+    // backgroundColor: 'white', // 버튼 배경
+  },
+  menuItemLast: {
+    marginLeft: 8,
   },
 
   menuItemBorder: {
     borderBottomWidth: 1, // 구분선 추가
     borderBottomColor: '#ddd',
   },
-
-  menuItemLast: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: 'white',
-    // 삭제 버튼 아래 여백 제거
-  },
-
   menuText: {
     fontSize: 16,
     color: '#333',
