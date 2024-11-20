@@ -489,9 +489,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: '5%',
     paddingTop: '10%',
-    paddingBottom: '5%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    paddingBottom: '3%',
   },
   title: {
     fontSize: 18,
