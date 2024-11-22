@@ -481,8 +481,16 @@ function Community({ navigation, route }) {
           </Text>
         </TouchableOpacity>
 
-        {/* HOT 게시물 표시 */}
-        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(getHotPost())}>
+        <TouchableOpacity
+          style={styles.postContainer}
+          onPress={() => {
+            const hotPost = getHotPost();
+            if (hotPost) {
+              handlePostPress(hotPost); // HOT 게시물이 있을 경우에만 동작
+            }
+          }}
+          disabled={!getHotPost()} // HOT 게시물이 없으면 터치 비활성화
+        >
           <View style={styles.postHeader}>
             <Text style={styles.hotText}>[HOT]</Text>
             {/* HOT 텍스트 옆에 게시글 제목 추가 */}
@@ -491,7 +499,7 @@ function Community({ navigation, route }) {
                 {getHotPost().title.length > 18 ? `${getHotPost().title.slice(0, 18)}...` : getHotPost().title}
               </Text>
             ) : (
-              <Text style={styles.postTitle}>HOT 게시물은 아직 없습니다.</Text>
+              <Text style={styles.postTitle}>HOT 게시물이 아직 없습니다.</Text>
             )}
           </View>
           {getHotPost() && (
