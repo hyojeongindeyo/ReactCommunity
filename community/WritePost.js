@@ -8,7 +8,7 @@ import axios from 'axios';
 import config from '../config';
 import CustomModal from '../CustomModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import moment from 'moment';
 
 export default function WritePost({ navigation }) {
   const { addPost } = useContext(PostsContext);
@@ -128,7 +128,7 @@ export default function WritePost({ navigation }) {
       formData.append('title', postTitle);
       formData.append('message', postContent);
       formData.append('user_id', userData.id);
-      formData.append('timestamp', new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' '));
+      formData.append('timestamp', moment().utcOffset(9).format('YYYY-MM-DD HH:mm:ss'));
   
       if (selectedImage) {
         formData.append('image', {
