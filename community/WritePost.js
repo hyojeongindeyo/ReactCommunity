@@ -128,8 +128,8 @@ export default function WritePost({ navigation }) {
       formData.append('title', postTitle);
       formData.append('message', postContent);
       formData.append('user_id', userData.id);
-      formData.append('timestamp', moment().format('YYYY-MM-DD HH:mm:ss'));
-  
+      formData.append('timestamp', moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss'));
+      
       if (selectedImage) {
         formData.append('image', {
           uri: selectedImage.startsWith('file://') ? selectedImage : `file://${selectedImage}`,
