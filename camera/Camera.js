@@ -185,7 +185,7 @@ export default function App({ navigation }) {
       if (crackProbability > 0.5) {
         setAlterModalText('균열이 맞습니다.');
         setShowReportLink(true);
-        setAlterModalSubText('');
+        setAlterModalSubText((crackProbability*100).toFixed(1)+'%');
       } else {
         setAlterModalText('균열이 아닙니다.');
         setShowReportLink(false);
