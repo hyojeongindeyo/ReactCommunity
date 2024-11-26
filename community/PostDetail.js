@@ -566,7 +566,7 @@ export default function PostDetail({ route, navigation }) {
           <TouchableOpacity onPress={handleScrap} style={styles.scrapButton}>
             <FontAwesome
               name={isScraped ? 'star' : 'star-o'}
-              size={14}
+              size={20}
               color={isScraped ? 'gold' : 'black'}
             />
             <Text style={styles.scrapCountText}>{scrapCount}</Text>
@@ -943,7 +943,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scrapCountText: {
-    fontSize: 12,
+    fontSize: 15,
     marginLeft: 3,
     color: '#666',
   },
