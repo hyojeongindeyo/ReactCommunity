@@ -904,11 +904,11 @@ const styles = StyleSheet.create({
   searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%', // 전체 너비를 차지하도록 설정
-    marginTop: 20, // 상단 여백 추가
+    width: '100%',
   },
   backButton: {
     marginRight: 10, // 검색창과 버튼 사이 여백 추가
+    marginTop: -20, // 여백을 줄여 버튼 위치를 위로 올림
   },
   searchInput: {
     borderBottomWidth: 1,
@@ -923,6 +923,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginLeft: 10, // 검색창과 버튼 사이 여백 추가
+    marginTop: -12, // 여백을 줄여 버튼 위치를 위로 올림
   },
   searchButtonText: {
     color: '#fff',
