@@ -198,10 +198,12 @@ export default function ShelterScreen({ navigation }) {
 
   const completeMission = async (missionId) => {
     // userData.role이 guest인 경우 실행 중단
-  if (userData.role === 'guest') {
-    console.log('게스트 계정은 미션을 완료할 수 없습니다.');
-    return;
-  }
+    if (userData.role === 'guest') {
+      console.log('게스트 계정은 미션을 완료할 수 없습니다.');
+      // console.log(userData.role);
+      return;
+      
+    };
     try {
       // 서버에서 유저의 완료된 미션 목록을 가져옵니다.
       const response = await axios.get(`${config.apiUrl}/missions/user/${userData.id}`);
@@ -306,13 +308,14 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     padding: 10,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+
     borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 1,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.8,
+    // shadowRadius: 2,
+    // elevation: 1,
   },
   scrollViewContainer: {
     position: 'absolute',
