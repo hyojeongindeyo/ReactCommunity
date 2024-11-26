@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     color: 'gray',
     textAlign: 'center',
     marginTop:-10,
-    marginBottom:10,
+    marginBottom:15,
   },
 });
 
