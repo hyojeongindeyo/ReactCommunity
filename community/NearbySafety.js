@@ -433,7 +433,7 @@ const completeMission = async (missionId) => {
               <View style={styles.searchModalContent}>
                 <View style={styles.searchHeader}>
                   <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.backButton}>
-                    <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
+                    <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
                   </TouchableOpacity>
                   <TextInput
                     style={styles.searchInput}
@@ -638,15 +638,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    marginTop: 20,
   },
   backButton: {
-    marginRight: 10,
+    marginRight: 10, // 검색창과 버튼 사이 여백 추가
+    marginTop: -20, // 여백을 줄여 버튼 위치를 위로 올림
   },
   searchInput: {
     borderBottomWidth: 1,
     borderColor: '#ddd',
-    flex: 1,
+    flex: 1, // 남은 공간을 차지하도록 설정
     marginBottom: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -655,7 +655,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#556D6A',
     padding: 10,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: 10, // 검색창과 버튼 사이 여백 추가
+    marginTop: -12, // 여백을 줄여 버튼 위치를 위로 올림
   },
   searchButtonText: {
     color: '#fff',
