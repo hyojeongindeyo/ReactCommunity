@@ -771,14 +771,24 @@ function Community({ navigation, route }) {
                   resizeMode="contain"
                 />
                 <View style={styles.imageNavigation}>
-                  <TouchableOpacity onPress={handlePrevImage} disabled={currentImageIndex === 0}>
+                  <TouchableOpacity 
+                    onPress={handlePrevImage} 
+                    disabled={currentImageIndex === 0} 
+                    style={{ opacity: currentImageIndex === 0 ? 0 : 1 }}
+                  >
                     <Text style={styles.navigationText}>이전</Text>
                   </TouchableOpacity>
                   <Text style={styles.pageInfo}>
                     {currentImageIndex + 1} / {images.length}
                   </Text>
-                  <TouchableOpacity onPress={handleNextImage} disabled={currentImageIndex === images.length - 1}>
-                    <Text style={styles.navigationText}>다음</Text>
+                  <TouchableOpacity 
+                    onPress={handleNextImage} 
+                    disabled={currentImageIndex === images.length - 1} 
+                    style={{ opacity: currentImageIndex === images.length - 1 ? 0 : 1 }}
+                  >
+                    <Text style={[styles.navigationText, currentImageIndex === images.length - 1 ? { opacity: 0 } : {}]}>
+                      다음
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </>
