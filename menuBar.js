@@ -48,7 +48,16 @@ const MenuPage = ({ navigation }) => {
     return (
         <View style={styles.container}>
             {/* 왼쪽 상단 뒤로가기 아이콘 */}
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <TouchableOpacity onPress={() =>{
+                const state = navigation.getState()
+
+                if(state.routeNames.includes("CommunityHome")){
+                    navigation.navigate('CommunityHome');
+                } else {
+                    navigation.navigate('HomeScreen');
+                }
+
+                }} style={styles.backButton}>
                 <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
             </TouchableOpacity>
 
@@ -74,32 +83,11 @@ const MenuPage = ({ navigation }) => {
                             <TouchableOpacity
                                 key={item.id}
                                 onPress={() => {
+                                    const state = navigation.getState()
                                     if (item.navigateTo === 'NearbySafety') {
-                                        navigation.reset({
-                                            index: 0,
-                                            routes: [
-                                                {
-                                                    name: 'Community',
-                                                    params: {
-                                                        screen: 'NearbySafety',
-                                                        params: { filter: item.filter },
-                                                    },
-                                                },
-                                            ],
-                                        });
+                                        navigation.navigate('NearbySafety',{ filter: item.filter });
                                     } else if (item.navigateTo === 'SafetyInfo') {
-                                        navigation.reset({
-                                            index: 0,
-                                            routes: [
-                                                {
-                                                    name: 'Community',
-                                                    params: {
-                                                        screen: 'SafetyInfo',
-                                                        params: { filter: item.filter },
-                                                    },
-                                                },
-                                            ],
-                                        });
+                                        navigation.navigate('SafetyInfo',{ filter: item.filter });
                                     }
                                 }}
                             >

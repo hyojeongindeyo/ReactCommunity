@@ -265,7 +265,9 @@ const completeMission = async (missionId) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('CommunityHome')}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => {         
+          navigation.goBack() 
+        }}>
           <MaterialIcons name="keyboard-arrow-left" size={30} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>내 주변 안전 소식</Text>
