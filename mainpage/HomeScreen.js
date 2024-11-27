@@ -513,10 +513,10 @@ const styles = StyleSheet.create({
     padding: '0.5%',
     borderRadius: 25,
     width: '100%',
-    shadowColor: '#000', // 그림자의 색상
+    shadowColor: 'gray', // 그림자의 색상
     shadowOffset: { width: 1, height: 1 }, // 그림자의 위치 조정
-    shadowOpacity: 0.3, // 그림자의 불투명도
-    shadowRadius: 5, // 그림자의 모서리 반경
+    shadowOpacity: 0.1, // 그림자의 불투명도
+    shadowRadius: 1, // 그림자의 모서리 반경
   },
   tipTitles: {
     flexDirection: 'column',
@@ -565,6 +565,7 @@ const styles = StyleSheet.create({
   weather: {
     // paddingLeft: 10,
     width: '100%',
+    marginTop:-57,
     // paddingTop: '10%'
   },
   // weather content style 설정
@@ -658,7 +659,7 @@ const styles = StyleSheet.create({
   //   width: '100%',
   // },
   horizontalLine: {
-    paddingTop: '5%',
+    paddingTop: '2%',
     borderBottomWidth: 3,
     borderColor: '#E7E7E7',
     width: '100%',
