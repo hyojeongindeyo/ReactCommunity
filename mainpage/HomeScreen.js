@@ -76,7 +76,7 @@ const App = ({ navigation, route }) => {
       name: '물',
       description: '갈증을 해소해주는 시원한 물이에요. 💧',
     },
-};
+  };
 
 
 
@@ -124,11 +124,6 @@ const App = ({ navigation, route }) => {
       const missionsResponse = await axios.get(`${config.apiUrl}/missions/user/${userId}`, { withCredentials: true });
       console.log('User Missions:', missionsResponse.data); // 미션 데이터 출력
       setUserMissions(missionsResponse.data.missions || []); // 미션 상태 설정
-
-      // // 모달 표시 여부를 설정
-      // if (route.params?.showModal) {
-      //   setModalVisible(true);
-      // }
 
     } catch (error) {
       if (error.response) {
@@ -253,17 +248,17 @@ const App = ({ navigation, route }) => {
   const getCategoryColor = (category) => {
     switch (category) {
       case '교통':
-        return '#C0E6F6'; // 교통은 파란색
+        return '#C0E6F6'; 
       case '화재':
-        return '#F6C0C0'; // 시위는 빨간색
+        return '#F6C0C0'; 
       case '재해':
-        return '#C0F6C6'; // 재해는 녹색
+        return '#C0F6C6'; 
       case '주의':
-        return '#F6D8C0'; // 주의는 주황색
+        return '#F6D8C0'; 
       case '생활':
-        return '#DBBBDF'; // 
+        return '#DBBBDF';
       default:
-        return '#F3F3F3'; // 기본 색상
+        return '#F3F3F3'; 
     }
   };
 
@@ -319,62 +314,62 @@ const App = ({ navigation, route }) => {
             {/* 평안이 가방 모달입니다 */}
             {/* 평안이 가방 모달 버튼 */}
             <TouchableOpacity
-  onPress={() => {
-    if (userData?.role === 'guest') {
-      // 게스트인 경우
-      Toast.show({
-        type: 'info',
-        text1: '게스트는 미션에 참여할 수 없습니다.',
-        position: 'top',
-        visibilityTime: 2000, // 2초 동안 표시
-      });
-    } else {
-      // 일반 사용자일 경우
-      setModalVisible(true);
-    }
-  }}
->
-  <View style={styles.inpyeongbag}>
-    <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
-    {/* 아이템 이미지 추가 */}
-    <View style={styles.itemImagesContainer}>
-      {userMissions && userMissions.length > 0 ? (
-        <>
-          {userMissions.slice(0, 3).map((missionId) => (
-            <View key={missionId} style={styles.missionContainer}>
-              {missionImages[missionId]?.image ? (
-                <Image
-                  source={missionImages[missionId].image}
-                  style={styles.itemImage}
-                />
-              ) : (
-                <Text style={styles.noImageText}>
-                  미션 아이디 {missionId}에 대한 이미지가 없습니다.
-                </Text>
-              )}
-            </View>
-          ))}
-          {userMissions.slice(3, 6).map((missionId) => (
-            <View key={missionId} style={styles.missionContainer}>
-              {missionImages[missionId]?.image ? (
-                <Image
-                  source={missionImages[missionId].image}
-                  style={styles.itemImage}
-                />
-              ) : (
-                <Text style={styles.noImageText}>
-                  미션 아이디 {missionId}에 대한 이미지가 없습니다.
-                </Text>
-              )}
-            </View>
-          ))}
-        </>
-      ) : (
-        <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
-      )}
-    </View>
-  </View>
-</TouchableOpacity>
+              onPress={() => {
+                if (userData?.role === 'guest') {
+                  // 게스트인 경우
+                  Toast.show({
+                    type: 'info',
+                    text1: '게스트는 미션에 참여할 수 없습니다.',
+                    position: 'top',
+                    visibilityTime: 2000, // 2초 동안 표시
+                  });
+                } else {
+                  // 일반 사용자일 경우
+                  setModalVisible(true);
+                }
+              }}
+            >
+              <View style={styles.inpyeongbag}>
+                <Text style={styles.inpyeongtext}>평안이의 가방 속</Text>
+                {/* 아이템 이미지 추가 */}
+                <View style={styles.itemImagesContainer}>
+                  {userMissions && userMissions.length > 0 ? (
+                    <>
+                      {userMissions.slice(0, 3).map((missionId) => (
+                        <View key={missionId} style={styles.missionContainer}>
+                          {missionImages[missionId]?.image ? (
+                            <Image
+                              source={missionImages[missionId].image}
+                              style={styles.itemImage}
+                            />
+                          ) : (
+                            <Text style={styles.noImageText}>
+                              미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                            </Text>
+                          )}
+                        </View>
+                      ))}
+                      {userMissions.slice(3, 6).map((missionId) => (
+                        <View key={missionId} style={styles.missionContainer}>
+                          {missionImages[missionId]?.image ? (
+                            <Image
+                              source={missionImages[missionId].image}
+                              style={styles.itemImage}
+                            />
+                          ) : (
+                            <Text style={styles.noImageText}>
+                              미션 아이디 {missionId}에 대한 이미지가 없습니다.
+                            </Text>
+                          )}
+                        </View>
+                      ))}
+                    </>
+                  ) : (
+                    <Text style={styles.noItemsText}>아이템이 없습니다.</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
 
 
             {/* 평안이의 안전 가방 모달 */}
@@ -384,19 +379,10 @@ const App = ({ navigation, route }) => {
               userMissions={userMissions}
               handleImagePress={handleImagePress}
               missionImages={missionImages}
-              userData = {userData}
-              
+              userData={userData}
+
 
             />
-
-            {/* <EnlargeModal
-              enlargeModalVisible={enlargeModalVisible}
-              setEnlargeModalVisible={setEnlargeModalVisible}
-              selectedImage={selectedImage}
-              selectedName={selectedName} // name도 함께 전달
-              selectedDescription={selectedDescription} // name도 함께 전달
-              handleCloseEnlargeModal={handleCloseEnlargeModal}
-            /> */}
 
           </View>
         </View>
@@ -412,7 +398,7 @@ const App = ({ navigation, route }) => {
           </View>
           <Text style={styles.safetyText}>내 주변 안전소식</Text>
           <View style={styles.icons}>
-            <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4}] }}/>
+            <AntDesign name="right" size={10} color="black" style={{ marginLeft: 2, transform: [{ scaleX: 1.2 }, { scaleY: 1.4 }] }} />
           </View>
         </TouchableOpacity>
 
@@ -425,9 +411,9 @@ const App = ({ navigation, route }) => {
                 {filteredPost ? (
                   <TouchableOpacity
                     style={styles.safebox}
-                    onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post: filteredPost, fromHome:true } })}
+                    onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post: filteredPost, fromHome: true } })}
 
-                    // onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
+                  // onPress={() => navigation.navigate('PostDetail', { post: filteredPost })}
                   >
                     <View style={styles.safetyContent}>
                       <View style={[styles.listContainer, { backgroundColor: getCategoryColor(category) }]}>
@@ -495,15 +481,11 @@ const styles = StyleSheet.create({
   logohidden: {
     opacity: 0,
   },
-
-
   container: {
     paddingLeft: '3%',
     paddingRight: '3%',
     paddingTop: 0,
-
   },
-
   tips: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -543,14 +525,12 @@ const styles = StyleSheet.create({
     width: '8%',
     marginRight: '5%',
     marginLeft: '2%',
-
   },
   verticalLine: {
     height: '60%', // 세로선의 높이
     width: 1, // 세로선의 너비
     backgroundColor: 'black', // 세로선의 배경색
     marginHorizontal: 5, // 텍스트와 세로선 사이의 간격
-    // alignItems: "center",
     alignSelf: "center"
   },
   locationText: {
@@ -558,35 +538,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 0, // 아래쪽 마진을 제거합니다
     paddingTop: 0, // 위쪽 패딩을 제거합니다
-    // alignItems: "right",
-    // paddingTop: 20,
-    // marginBottom: 10,
   },
   weather: {
-    // paddingLeft: 10,
     width: '100%',
-    marginTop:-57,
-    // paddingTop: '10%'
+    marginTop: -57,
   },
   // weather content style 설정
   rowcontainer: {
     flexDirection: 'row', // 양옆으로 나란히 배치
     width: '100%',
-    // height: '100%',
   },
   leftContainer: {
     width: '50%', // 화면의 왼쪽 50% 차지
     justifyContent: 'center',
-    // alignItems: 'center',
     height: 200, // height를 제한합니다.
   },
   rightContainer: {
     width: '50%', // 화면의 오른쪽 50% 차지
-    // paddingLeft: 10, // 오른쪽에 약간의 여백 추가
     justifyContent: 'center',
     alignItems: 'center',
-    // paddingTop: '20%',
-    // padding: 0,
     height: 200, // height를 제한합니다.
   },
   pyeong: {
@@ -594,8 +564,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     height: '80%',
     marginLeft: 10,
-
-
   },
   bag: {
     width: '30%', // 작은 가방 이미지
@@ -607,10 +575,6 @@ const styles = StyleSheet.create({
     height: '50%',
 
   },
-  weatherContent: {
-    // marginBottom: 10,
-    // padding: 0,
-  },
   pyeongT: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -621,11 +585,8 @@ const styles = StyleSheet.create({
   banners: {
     width: '100%',
     height: 100, // 배너의 높이를 충분히 설정합니다.
-    // marginTop: '%',
     padding: 0, // 여기가 여백의 원인일 수 있음
 
-
-    // overflow: 'hidden', // 오버플로우를 숨깁니다.
   },
 
   bannerImage: {
@@ -636,31 +597,15 @@ const styles = StyleSheet.create({
     height: '90%',
     // height: '100%', // 배너 높이를 100%로 설정합니다.
   },
-
-
-
-
   imageContainer: {
     flexDirection: "row",
     alignContent: "center",
     width: '40%'
   },
-  // pyeong: {
-  //   paddingTop: 10,
-  //   marginTop: 5,
-  //   width: '100%'
-  // },
-  // bag: {
-  //   width: '50%',
-  //   height: '30%',
-  //   position: 'absolute',
-  //   top: '56%',
-  //   left: '33%',
-  //   width: '100%',
-  // },
+
   horizontalLine: {
-    paddingTop: '2%',
-    borderBottomWidth: 3,
+    paddingTop: 0,
+    borderBottomWidth: 2,
     borderColor: '#E7E7E7',
     width: '100%',
   },
@@ -670,10 +615,10 @@ const styles = StyleSheet.create({
 
   },
   iconContainer: {
-    padding: '2%',
+    marginTop: '3%',
+    marginBottom: '2%',
     flexDirection: 'row',
     alignItems: "center",
-
   },
 
   safe: {
@@ -706,7 +651,6 @@ const styles = StyleSheet.create({
   },
   safetyContent: {
     flexDirection: 'row', // 제목과 본문을 수평으로 배치
-    // justifyContent: 'space-between',
     alignItems: 'center',
   },
   safecategory: {
@@ -717,8 +661,6 @@ const styles = StyleSheet.create({
   },
   safetitle: {
     fontSize: 15,
-    // marginLeft: 5, // 제목과 본문 사이 여백 추가
-    // flex: 1, // 남은 공간을 차지하도록 설정
     fontWeight: 'bold', // 내용도 굵은 글씨로 설정
   },
   safetime: {
@@ -742,23 +684,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
 
-
-
-  // 배너
-
-
-  // banners: {
-  //   width: '100%',
-  //   height: '16%',
-  //   marginTop: '5%'
-
-  // },
-  // bannerImage: {
-  //   alignSelf: 'center', // 이미지를 부모 컨테이너 내에서 가운데 정렬
-
-  //   resizeMode: "contain",
-  //   width: '90%',
-  // },
   buttonText: {
     alignItems: "center",
     fontSize: 30,
