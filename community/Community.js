@@ -460,18 +460,16 @@ function Community({ navigation, route }) {
         onConfirm={missionhandleConfirm}
       />
 
-      <View style={styles.calendarContainer}>
-        <View style={styles.calendar}>
-          {daysOfWeek.map((day, index) => (
-            <View key={index} style={[styles.day, index === todayIndex && styles.today]}>
-              <Text style={[styles.dayText, (day === 'SUN' || day === 'SAT') ? styles.weekendText : styles.weekdayText]}>{day}</Text>
-              <Text style={styles.dateText}>{datesOfWeek[index]}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
+
 
       <ScrollView style={styles.content}>
+        <View style={styles.bannerContainer}>
+          <Image
+            source={require('../assets/community_banner.png')}  // assets 폴더에서 이미지를 불러옵니다.
+            style={{ width: 350 }}
+            resizeMode="contain"  // "cover"나 "stretch"를 사용할 수도 있습니다.
+          />
+        </View>
         <TouchableOpacity onPress={() => navigation.navigate('NearbySafety')}>
           <Text style={styles.safetyHeaderText}>
             내 주변 안전소식
@@ -771,9 +769,9 @@ function Community({ navigation, route }) {
                   resizeMode="contain"
                 />
                 <View style={styles.imageNavigation}>
-                  <TouchableOpacity 
-                    onPress={handlePrevImage} 
-                    disabled={currentImageIndex === 0} 
+                  <TouchableOpacity
+                    onPress={handlePrevImage}
+                    disabled={currentImageIndex === 0}
                     style={{ opacity: currentImageIndex === 0 ? 0 : 1 }}
                   >
                     <Text style={styles.navigationText}>이전</Text>
@@ -781,9 +779,9 @@ function Community({ navigation, route }) {
                   <Text style={styles.pageInfo}>
                     {currentImageIndex + 1} / {images.length}
                   </Text>
-                  <TouchableOpacity 
-                    onPress={handleNextImage} 
-                    disabled={currentImageIndex === images.length - 1} 
+                  <TouchableOpacity
+                    onPress={handleNextImage}
+                    disabled={currentImageIndex === images.length - 1}
                     style={{ opacity: currentImageIndex === images.length - 1 ? 0 : 1 }}
                   >
                     <Text style={[styles.navigationText, currentImageIndex === images.length - 1 ? { opacity: 0 } : {}]}>
@@ -824,53 +822,15 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 10,
   },
-  calendarContainer: {
-    marginTop: '3%',
-    padding: '1%',
-    backgroundColor: 'white',
+  bannerContainer: {
+    // marginTop: '3%',
+    // padding: '1%',
+    height: '6%',
+    // height: 80,
+    marginHorizontal: '10%',
+    // backgroundColor: 'black',
     borderRadius: 15,
-    marginHorizontal: '5%',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  calendar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  day: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    borderRadius: 10,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    // elevation: 1,
-  },
-  today: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#d3d3d3',
-  },
-  dayText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  weekendText: {
-    color: '#A51919',
-  },
-  weekdayText: {
-    color: 'black',
-  },
-  dateText: {
-    fontSize: 14,
-    color: 'gray',
-    fontWeight: 'bold',
+    alignItems: 'center'
   },
   menuModalOverlay: {
     flex: 1,
