@@ -114,68 +114,68 @@ export default function WritePost({ navigation }) {
     console.log('Post Content:', postContent);
     console.log('Location Address:', formattedUserLocation);
     console.log('Selected Image:', selectedImage);
-  
-    if (!userData.id || !selectedCategory || !postTitle.trim() || !postContent.trim()) {
-      Alert.alert('All fields are required');
-      return;
+
+    if (!selectedCategory) {
+        Alert.alert('카테고리를 선택해주세요');
+        return;
     }
-  
+
+    if (!postTitle.trim() || !postContent.trim()) {
+        Alert.alert('모든 필드를 작성해주세요');
+        return;
+    }
+
     if (selectedCategory && postTitle.trim() && postContent.trim() && (formattedUserLocation || 'Seoul, Jongno-gu') && userData) {
-      setLoading(true);
-  
-      const formData = new FormData();
-      formData.append('category', selectedCategory);
-      formData.append('title', postTitle);
-      formData.append('message', postContent);
-      formData.append('user_id', userData.id);
-      formData.append('timestamp', moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss'));
-      
-      if (selectedImage) {
-        formData.append('image', {
-          uri: selectedImage.startsWith('file://') ? selectedImage : `file://${selectedImage}`,
-          name: selectedImage.split('/').pop(),
-          type: 'image/jpeg',
-        });
-      }
-  
-      formData.append('location_address', formattedUserLocation);
-  
-      try {
-        const response = await axios.post(`${config.apiUrl}/posts`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          withCredentials: true,
-        });
-        console.log('서버 응답:', response.data);
-  
-        // 미션 완료 상태 확인 및 모달 표시
-        const isMissionCompleted = await completeMission(userData.id);
-        if (!isMissionCompleted) {
-          setMissionModalVisible(true); // 미션이 처음 완료되었을 때만 모달 띄움
-        } else {
-          console.log('이미 미션이 완료되었습니다.'); // 이미 미션이 완료되었을 때는 터미널 로그만 출력
-          navigation.goBack();
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('category', selectedCategory);
+        formData.append('title', postTitle);
+        formData.append('message', postContent);
+        formData.append('user_id', userData.id);
+        formData.append('timestamp', moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss'));
+
+        if (selectedImage) {
+            formData.append('image', {
+                uri: selectedImage.startsWith('file://') ? selectedImage : `file://${selectedImage}`,
+                name: selectedImage.split('/').pop(),
+                type: 'image/jpeg',
+            });
         }
-  
-      } catch (error) {
-        if (error.response) {
-          console.log('Response error data:', error.response.data);
-          console.log('Response status:', error.response.status);
-          Alert.alert('Error', `Failed to submit post. Server returned: ${error.response.data.error}`);
-        } else if (error.request) {
-          console.log('Request made but no response:', error.request);
-          Alert.alert('Error', 'Request made but no response from server.');
-        } else {
-          console.log('Other error:', error.message);
-          Alert.alert('Error', `Failed to submit post: ${error.message}`);
+
+        formData.append('location_address', formattedUserLocation);
+
+        try {
+            const response = await axios.post(`${config.apiUrl}/posts`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+            });
+            console.log('서버 응답:', response.data);
+
+            const isMissionCompleted = await completeMission(userData.id);
+            if (!isMissionCompleted) {
+                setMissionModalVisible(true);
+            } else {
+                console.log('이미 미션이 완료되었습니다.');
+                navigation.goBack();
+            }
+        } catch (error) {
+            if (error.response) {
+                console.log('Response error data:', error.response.data);
+                console.log('Response status:', error.response.status);
+                Alert.alert('Error', `Failed to submit post. Server returned: ${error.response.data.error}`);
+            } else if (error.request) {
+                console.log('Request made but no response:', error.request);
+                Alert.alert('Error', 'Request made but no response from server.');
+            } else {
+                console.log('Other error:', error.message);
+                Alert.alert('Error', `Failed to submit post: ${error.message}`);
+            }
+        } finally {
+            setLoading(false);
         }
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      Alert.alert('모든 필드를 채워주세요');
-      setLoading(false);
     }
-  };
+};
 
   const completeMission = async (userId) => {
     const missionIdToCheck = 4; // 미션 ID

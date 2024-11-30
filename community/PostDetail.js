@@ -401,11 +401,6 @@ export default function PostDetail({ route, navigation }) {
     setModalVisible(false);
   };
 
-  // const handleConfirm = () => {
-  //   console.log("사용자가 '네'를 선택했습니다.");
-  //   handleClose();
-  //   navigation.replace('HomeScreen', { showModal: true });
-  // };
 
   const handleConfirm = () => {
     console.log("사용자가 '네'를 선택했습니다.");
@@ -443,12 +438,6 @@ export default function PostDetail({ route, navigation }) {
       { cancelable: false }
     );
   };
-
-  const renderRightActions = (commentId) => (
-    <TouchableOpacity onPress={() => handleCommentDelete(commentId)} style={styles.deleteButton}>
-      <MaterialIcons name="delete" size={24} color="white" />
-    </TouchableOpacity>
-  );
 
   const checkIfScraped = async () => {
     try {
