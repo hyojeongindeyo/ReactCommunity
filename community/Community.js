@@ -463,13 +463,16 @@ function Community({ navigation, route }) {
 
 
       <ScrollView style={styles.content}>
-        <View style={styles.bannerContainer}>
+        <TouchableOpacity
+          style={styles.bannerContainer}
+          onPress={() => navigation.navigate('Mypage', { screen: 'HelpContent' })}
+          >
           <Image
             source={require('../assets/community_banner.png')}  // assets 폴더에서 이미지를 불러옵니다.
             style={{ width: 350 }}
             resizeMode="contain"  // "cover"나 "stretch"를 사용할 수도 있습니다.
           />
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('NearbySafety')}>
           <Text style={styles.safetyHeaderText}>
             내 주변 안전소식

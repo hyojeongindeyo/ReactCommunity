@@ -667,7 +667,7 @@ export default function Mypage({ handleLogout }) {
         name="HelpContent"
         component={HelpScreen}
         options={{
-          title: '알림 설정',
+          title: '도움말',
           headerStyle: {
             shadowOpacity: 0,
             elevation: 0,
