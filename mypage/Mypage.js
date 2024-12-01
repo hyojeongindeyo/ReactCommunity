@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, Dimensions, Linking, Image, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, Dimensions, Linking, Image, ScrollView, Switch, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import LogoutModal from './LogoutModal';
@@ -9,6 +9,7 @@ import DeleteAccountModal from './DeleteAccountModal';
 import PostDetail from '../community/PostDetail';
 import UpdatePost from '../community/UpdatePost';
 import PrivacyPolicyContent from './PrivacyPolicyContent';
+import HelpContent from './HelpContent';
 import axios from 'axios';
 import config from '../config';
 import Toast from 'react-native-toast-message';
@@ -154,7 +155,7 @@ function MainScreen({ navigation, handleLogout }) {
         <View>
           <Text style={styles.nametitle}>{nickname}님의 평안이</Text>
         </View>
-  
+
         <View style={styles.imgContainer}>
           <Image source={require('../assets/pyeong.png')} style={styles.pyeong} resizeMode='contain' />
           <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -168,7 +169,7 @@ function MainScreen({ navigation, handleLogout }) {
           handleImagePress={handleImagePress}
           missionImages={missionImages}
         />
-  
+
         <View style={styles.separator} />
         <Text style={styles.title}>내 정보</Text>
         <Text style={styles.message} onPress={() => navigation.navigate('ChangePassword')}>비밀번호 변경</Text>
@@ -178,7 +179,7 @@ function MainScreen({ navigation, handleLogout }) {
         <Text style={styles.message} onPress={() => navigation.navigate('ScrappedPosts')}>스크랩한 글</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>설정</Text>
-        <Text style={styles.message} onPress={() => navigation.navigate('NotificationSettings')}>알림 설정</Text>
+        <Text style={styles.message} onPress={() => navigation.navigate('HelpContent')}>도움말</Text>
         <Text style={styles.message} onPress={() => navigation.navigate('PrivacyPolicy')}>개인정보 처리방침</Text>
         <View style={styles.separator} />
         <Text style={styles.title}>기타</Text>
@@ -196,11 +197,11 @@ function MainScreen({ navigation, handleLogout }) {
           onDelete={handleDeleteAccountClick}
         />
       </View>
-  
+
       <StatusBar />
     </View>
   );
-}  
+}
 
 function ChangePasswordScreen({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -351,8 +352,8 @@ function MyPostsScreen({ navigation }) {
           <TouchableOpacity
             key={post.id} // 고유한 키를 사용
             style={styles.postItem}
-            onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post,   fromMyPosts: true} })}
-            >
+            onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post, fromMyPosts: true } })}
+          >
             <View style={styles.titleContainer}>
               <Text style={styles.postTitle}>{post.title}</Text>
               <Ionicons name="chatbubble-ellipses-outline" size={20} color="gray" />
@@ -443,10 +444,10 @@ function ScrappedPostsScreen({ navigation }) {
             <TouchableOpacity
               key={index}
               style={styles.postItem}
-              onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post,fromScrappedPosts: true, } })}
-              
-              
-              // onPress={() => navigation.navigate('PostDetail', { post })}
+              onPress={() => navigation.navigate('Community', { screen: 'PostDetail', params: { post, fromScrappedPosts: true, } })}
+
+
+            // onPress={() => navigation.navigate('PostDetail', { post })}
             >
               <View style={styles.titleContainer}>
                 <Text style={styles.postTitle}>{post.title}</Text>
@@ -464,22 +465,32 @@ function ScrappedPostsScreen({ navigation }) {
   );
 }
 
-function NotificationSettingsScreen() {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-
+function HelpScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.notificationContainer}>
-        <Text>푸시 알림</Text>
-        <Switch
-          trackColor={{ false: "#98A7AF", true: "#92B2AE" }}
-          thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-      </View>
-    </View>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
+      {/* 타이틀과 소개 */}
+      <Text style={styles.privacypolicytitle}>{HelpContent.title}</Text>
+      <Text style={styles.privacypolicyIntroduction}>{HelpContent.introduction}</Text>
+
+      {/* 섹션 반복 렌더링 */}
+      {HelpContent.sections.map((section, index) => (
+        <React.Fragment key={index}>
+          <Text style={styles.privacypolicysectionTitle}>{section.title}</Text>
+          {section.content.map((item, idx) => (
+            typeof item === "string" ? (
+              <Text key={idx} style={styles.privacypolicycontentText}>{item}</Text>
+            ) : (
+              <React.Fragment key={idx}>
+                <Text style={styles.subSectionTitle}>{item.title}</Text>
+                {item.content.map((subItem, subIdx) => (
+                  <Text key={subIdx} style={styles.privacypolicycontentText}>{subItem}</Text>
+                ))}
+              </React.Fragment>
+            )
+          ))}
+        </React.Fragment>
+      ))}
+    </ScrollView>
   );
 }
 
@@ -653,8 +664,8 @@ export default function Mypage({ handleLogout }) {
         }}
       />
       <Stack.Screen
-        name="NotificationSettings"
-        component={NotificationSettingsScreen}
+        name="HelpContent"
+        component={HelpScreen}
         options={{
           title: '알림 설정',
           headerStyle: {
@@ -976,4 +987,11 @@ const styles = StyleSheet.create({
     color: '#555',
     paddingHorizontal: 10,
   },
+  subSectionTitle: {
+    fontSize: 15,
+    lineHeight: 24,
+    fontWeight: "480",
+    paddingHorizontal: 10,
+  },
+
 });
