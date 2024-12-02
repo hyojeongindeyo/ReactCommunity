@@ -463,7 +463,7 @@ function Community({ navigation, route }) {
 
 
       <ScrollView style={styles.content}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.bannerContainer}
           onPress={() => navigation.navigate('Mypage', { screen: 'HelpContent' })}
           >
@@ -472,7 +472,7 @@ function Community({ navigation, route }) {
             style={{ width: 350 }}
             resizeMode="contain"  // "cover"나 "stretch"를 사용할 수도 있습니다.
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={() => navigation.navigate('NearbySafety')}>
           <Text style={styles.safetyHeaderText}>
             내 주변 안전소식
@@ -815,7 +815,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: '5%',
-    paddingVertical: '3%',
+    paddingTop: '3%',
+    paddingBottom: '2%',
+    // paddingVertical: '3%',
     backgroundColor: '#fff',
   },
   title: {
